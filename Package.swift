@@ -21,13 +21,49 @@ let package = Package(
         .package(
             url: "https://github.com/apple/swift-argument-parser",
             from: "1.5.0"
-        )
+        ),
+        .package(
+            url: "https://github.com/apple/swift-openapi-generator",
+            from: "1.7.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-openapi-runtime",
+            from: "1.7.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-openapi-urlsession",
+            from: "1.0.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-http-types",
+            from: "1.3.0"
+        ),
     ],
     targets: [
         .target(
             name: "KTalkSDK",
+            dependencies: [
+                .product(
+                    name: "OpenAPIRuntime",
+                    package: "swift-openapi-runtime"
+                ),
+                .product(
+                    name: "OpenAPIURLSession",
+                    package: "swift-openapi-urlsession"
+                ),
+                .product(
+                    name: "HTTPTypes",
+                    package: "swift-http-types"
+                ),
+            ],
             swiftSettings: [
                 .swiftLanguageMode(.v6)
+            ],
+            plugins: [
+                .plugin(
+                    name: "OpenAPIGenerator",
+                    package: "swift-openapi-generator"
+                )
             ]
         ),
         .executableTarget(

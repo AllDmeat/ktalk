@@ -29,6 +29,19 @@ are the single source of truth. It is fetched from Kontur's published documentat
 `scripts/fetch-spec.sh` — do not hand-edit the vendored spec except to remove real data
 from examples.
 
+`fetch-spec.sh` also **normalizes** the upstream document so the generator accepts it and
+the strict build stays clean. All normalizations are deterministic, so re-fetching
+unchanged content stays byte-identical:
+
+- injects the OpenAPI-required `info.version` (upstream omits it);
+- coerces/drops integer `maximum`/`minimum` bounds that are floats or exceed Int64;
+- declares path parameters referenced in a URL template but missing from `parameters`;
+- marks multipart request bodies `required` so uploads are generated;
+- strips advisory `deprecated` flags (they would trip `-warnings-as-errors` in generated code).
+
+Numeric bounds and `deprecated` are validation/advisory metadata not emitted in the
+generated Swift, so removing them does not change the client's wire behaviour.
+
 Workflow:
 
 1. Update or add a spec in `specs/` before implementing new functionality.
@@ -52,8 +65,9 @@ The SDK is layered — keep the layers separate:
 - Warnings are treated as errors **in CI** (`swift build -Xswiftc -warnings-as-errors`),
   not via `unsafeFlags` in the manifest — that would make the library unusable as a
   SwiftPM dependency. Keep hand-written code warning-clean.
-- If the generated layer ever emits a warning, scope-suppress it for the generated target
-  only and document why here.
+- If the generated layer emits a warning, prefer fixing it via a deterministic
+  normalization in `scripts/fetch-spec.sh` (as done for `deprecated`) so the whole build
+  can stay under one global `-warnings-as-errors` flag.
 - Format with `swift format --in-place --recursive Sources/ Tests/`; CI lints with
   `swift format lint --strict`.
 
