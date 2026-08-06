@@ -1,0 +1,9 @@
+.DS_Store
+.build/
+.swiftpm/
+*.xcodeproj/
+*.xcworkspace/
+.claude/
+Sources/KTalkSDK/GeneratedSources/
+.worktrees/
+DerivedData
