@@ -85,6 +85,9 @@ let package = Package(
                 "KTalkSDK",
                 "ktalk",
             ],
+            resources: [
+                .copy("Fixtures")
+            ],
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
