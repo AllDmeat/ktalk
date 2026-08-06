@@ -29,6 +29,14 @@ struct GlobalOptions: ParsableArguments {
   }
 }
 
+/// Decodes a `Decodable` value from a JSON file, for commands that take a request body.
+func decodeJSON<T: Decodable>(_ type: T.Type, fromFile path: String) throws -> T {
+  let data = try Data(contentsOf: URL(fileURLWithPath: path))
+  let decoder = JSONDecoder()
+  decoder.dateDecodingStrategy = .iso8601
+  return try decoder.decode(T.self, from: data)
+}
+
 /// Prints an `Encodable` value as pretty-printed JSON to standard output.
 func printJSON(_ value: some Encodable) throws {
   let encoder = JSONEncoder()
