@@ -2,7 +2,6 @@
   "components": {
     "schemas": {
       "SkbKontur.Talk.Api.Entities.TalkRoleInfo": {
-        "additionalProperties": false,
         "description": "Информация о роли",
         "properties": {
           "id": {
@@ -17,7 +16,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.AuditLog.Entities.AuditLogEvent": {
-        "additionalProperties": false,
         "description": "Событие журнала аудита",
         "properties": {
           "actorId": {
@@ -101,7 +99,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatMessage": {
-        "additionalProperties": false,
         "description": "Сообщение чата",
         "properties": {
           "channelId": {
@@ -180,7 +177,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatMessageList": {
-        "additionalProperties": false,
         "description": "Список сообщений чата",
         "properties": {
           "messages": {
@@ -194,7 +190,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatPollAttachment": {
-        "additionalProperties": false,
         "description": "Прикрепленный опрос к сообщению",
         "properties": {
           "created": {
@@ -259,7 +254,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatPollAttachmentOption": {
-        "additionalProperties": false,
         "description": "Вариант ответа в опросе, прикрепленном к сообщению",
         "properties": {
           "id": {
@@ -296,7 +290,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatRemoveInfo": {
-        "additionalProperties": false,
         "description": "Информация об удалении сообщения чата",
         "properties": {
           "removed": {
@@ -312,7 +305,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatReplyInfo": {
-        "additionalProperties": false,
         "description": "Информация о сообщении, на которое дан ответ",
         "properties": {
           "createdBy": {
@@ -335,7 +327,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Entities.ChatFileAttachment": {
-        "additionalProperties": false,
         "description": "Файл, прикрепленный к сообщению чата",
         "properties": {
           "contentType": {
@@ -380,7 +371,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Common.Data.Media.MediaSize": {
-        "additionalProperties": false,
         "description": "Размер",
         "properties": {
           "height": {
@@ -397,7 +387,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.ConferencesHistory.Entities.ConferenceContent": {
-        "additionalProperties": false,
         "description": "Содержимое конференции",
         "properties": {
           "id": {
@@ -429,7 +418,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkConferenceDeepFakeReport": {
-        "additionalProperties": false,
         "description": "Отчет по детекции дипфейков во время встречи",
         "properties": {
           "conferenceTitle": {
@@ -465,7 +453,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkConferenceDeepFakeReportDetection": {
-        "additionalProperties": false,
         "description": "Результат детекции дипфейков",
         "properties": {
           "detectionResult": {
@@ -495,7 +482,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkConferenceDeepFakeReportParticipant": {
-        "additionalProperties": false,
         "description": "Участник встречи",
         "properties": {
           "participantId": {
@@ -515,7 +501,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkDeepFakeDetectionDomainStatistics": {
-        "additionalProperties": false,
         "description": "Статистика по выявлению дипфейков в пространстве",
         "properties": {
           "currentDetectionsCount": {
@@ -533,7 +518,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkDeepFakeDetectionStatistic": {
-        "additionalProperties": false,
         "description": "Статистика по детекции дипфейков",
         "properties": {
           "conferences": {
@@ -548,7 +532,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkDeepFakeDetectionTasksByPredictStatistic": {
-        "additionalProperties": false,
         "description": "Статистика в разрезе результатов предсказаний по успешным задачам детекции",
         "properties": {
           "fake": {
@@ -570,7 +553,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkDeepFakeDetectionTasksByStateStatistic": {
-        "additionalProperties": false,
         "description": "Статистика в разрезе статусов задач детекции",
         "properties": {
           "finishedSuccess": {
@@ -592,7 +574,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.DeepFakeDetector.Api.Models.TalkDeepFakeDetectionTasksStatistic": {
-        "additionalProperties": false,
         "description": "Статистика по задачам детекции",
         "properties": {
           "byPredict": {
@@ -610,7 +591,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Gadget.TalkKioskGadgetInfo": {
-        "additionalProperties": false,
         "description": "Информация о гаджете киоска",
         "properties": {
           "createdDate": {
@@ -656,7 +636,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskAudioSettings": {
-        "additionalProperties": false,
         "description": "Настройки звука",
         "properties": {
           "agc": {
@@ -689,7 +668,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskAutoScreenSharingSettings": {
-        "additionalProperties": false,
         "description": "Настройки автоматической демонстрации экрана через КВЗ",
         "properties": {
           "isEnabled": {
@@ -700,7 +678,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskCheckInNewSettings": {
-        "additionalProperties": false,
         "description": "Настройки подтверждения бронирования",
         "properties": {
           "isEnabled": {
@@ -742,7 +719,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskCheckInSettings": {
-        "additionalProperties": false,
         "description": "Настройки подтверждения бронирования",
         "properties": {
           "isCheckOutEnabled": {
@@ -789,7 +765,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskCheckOutSettings": {
-        "additionalProperties": false,
         "description": "Настройки завершения бронирования",
         "properties": {
           "isEnabled": {
@@ -801,7 +776,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskConfiguration": {
-        "additionalProperties": false,
         "description": "Настройки киоска",
         "properties": {
           "audio": {
@@ -955,7 +929,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDaemon": {
-        "additionalProperties": false,
         "description": "Информация о киоске",
         "properties": {
           "cameraDevices": {
@@ -1066,7 +1039,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDaemonCreateParameters": {
-        "additionalProperties": false,
         "description": "Параметры создания киоска",
         "properties": {
           "configuration": {
@@ -1091,7 +1063,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDaemonMassUpdateParameters": {
-        "additionalProperties": false,
         "description": "Параметры обновления",
         "properties": {
           "audio": {
@@ -1209,7 +1180,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDaemonUpdateParameters": {
-        "additionalProperties": false,
         "description": "Параметры обновления киоска",
         "properties": {
           "configuration": {
@@ -1224,7 +1194,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDevice": {
-        "additionalProperties": false,
         "description": "Устройство киоска",
         "properties": {
           "deviceId": {
@@ -1239,7 +1208,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDrink": {
-        "additionalProperties": false,
         "description": "Напиток для киоска",
         "properties": {
           "description": {
@@ -1262,7 +1230,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskList": {
-        "additionalProperties": false,
         "description": "Список киосков",
         "properties": {
           "kiosks": {
@@ -1276,7 +1243,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskMassUpdateRequest": {
-        "additionalProperties": false,
         "description": "Запрос на массовое обновление киосков",
         "properties": {
           "kioskIds": {
@@ -1299,7 +1265,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskOccupancySettings": {
-        "additionalProperties": false,
         "description": "Настройки управления занятостью",
         "properties": {
           "checkIn": {
@@ -1317,7 +1282,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskScreenDevice": {
-        "additionalProperties": false,
         "description": "Экран киоска",
         "properties": {
           "deviceId": {
@@ -1339,7 +1303,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskScreensSettings": {
-        "additionalProperties": false,
         "description": "Настройки экранов киоска",
         "properties": {
           "embeddedControllerEnabled": {
@@ -1359,7 +1322,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskSupportSettings": {
-        "additionalProperties": false,
         "description": "Настройки вызова поддержки для киоска",
         "properties": {
           "description": {
@@ -1387,7 +1349,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskVideoCaptureCalibrationInfo": {
-        "additionalProperties": false,
         "description": "Информация о калибровке КВЗ на киоске",
         "properties": {
           "calibratedDevice": {
@@ -1405,7 +1366,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskVideoSettings": {
-        "additionalProperties": false,
         "description": "Настройки видео",
         "properties": {
           "autoScreenSharing": {
@@ -1448,7 +1408,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.News.TalkKioskNews": {
-        "additionalProperties": false,
         "description": "Новости киосков",
         "properties": {
           "newsList": {
@@ -1467,7 +1426,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.News.TalkKioskNewsItem": {
-        "additionalProperties": false,
         "description": "Новость",
         "properties": {
           "comment": {
@@ -1494,7 +1452,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.News.TalkKioskNewsKioskInfo": {
-        "additionalProperties": false,
         "description": "Информация о киоске в новости",
         "properties": {
           "description": {
@@ -1515,7 +1472,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Screensaver.KioskRichScreensaverDto": {
-        "additionalProperties": false,
         "description": "Данные по заставке для администратора",
         "properties": {
           "key": {
@@ -1536,7 +1492,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Screensaver.KioskScreensaverDto": {
-        "additionalProperties": false,
         "description": "Заставка",
         "properties": {
           "key": {
@@ -1552,7 +1507,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Screensaver.TalkKioskRichScreensaverResponse": {
-        "additionalProperties": false,
         "description": "Ответ со списком заставок киоска",
         "properties": {
           "items": {
@@ -1566,7 +1520,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Screensaver.TalkKioskScreensaversResponse": {
-        "additionalProperties": false,
         "description": "Ответ со списком заставок киоска",
         "properties": {
           "items": {
@@ -1580,7 +1533,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Screensaver.TalkKioskUploadScreensaver": {
-        "additionalProperties": false,
         "description": "Отображается после загрузки фона",
         "properties": {
           "error": {
@@ -1600,7 +1552,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Screensaver.TalkKioskUploadScreensaverResponse": {
-        "additionalProperties": false,
         "description": "Ответ со списком загруженных заставок киоска",
         "properties": {
           "items": {
@@ -1614,7 +1565,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskRichWallpaper": {
-        "additionalProperties": false,
         "description": "Данные по фону для администратора",
         "properties": {
           "isEnabledByDefault": {
@@ -1648,7 +1598,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskRichWallpaperResponse": {
-        "additionalProperties": false,
         "description": "Ответ со списком фонов киоска",
         "properties": {
           "items": {
@@ -1662,7 +1611,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskUploadWallpaper": {
-        "additionalProperties": false,
         "description": "Отображается после загрузки фона",
         "properties": {
           "error": {
@@ -1682,7 +1630,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskUploadWallpaperResponse": {
-        "additionalProperties": false,
         "description": "Ответ со списком загруженных фонов киоска",
         "properties": {
           "items": {
@@ -1696,7 +1643,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskWallpaper": {
-        "additionalProperties": false,
         "description": "Фон",
         "properties": {
           "key": {
@@ -1712,7 +1658,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskWallpaperSettingsRequest": {
-        "additionalProperties": false,
         "description": "Запрос на настройку фонов киоска",
         "properties": {
           "wallpapers": {
@@ -1728,7 +1673,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Wallpaper.TalkKioskWallpapersResponse": {
-        "additionalProperties": false,
         "description": "Ответ со списком фонов киоска",
         "properties": {
           "items": {
@@ -1742,7 +1686,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.SearchResult_SkbKontur.Talk.Kiosk.Api.Models.Kiosk.TalkKioskDaemon": {
-        "additionalProperties": false,
         "description": "Результат поиска",
         "properties": {
           "count": {
@@ -1765,7 +1708,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Domain.KioskConferenceStatus": {
-        "additionalProperties": false,
         "description": "Статус нахождения киоска в конференции",
         "properties": {
           "roomName": {
@@ -1803,7 +1745,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Kiosk.Domain.KioskEquipmentCheckStatus": {
-        "additionalProperties": false,
         "description": "Статус оборудования киоска",
         "properties": {
           "cameraCheckStatus": {
@@ -1824,7 +1765,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Domain.KioskMassUpdateAudioSettings": {
-        "additionalProperties": false,
         "description": "Настройки звука",
         "properties": {
           "agc": {
@@ -1854,7 +1794,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Domain.KioskMassUpdateAutoScreenSharingSettings": {
-        "additionalProperties": false,
         "description": "Настройки автоматической демонстрации экрана через КВЗ",
         "properties": {
           "isEnabled": {
@@ -1866,7 +1805,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Domain.KioskMassUpdateScreensSettings": {
-        "additionalProperties": false,
         "description": "Настройки экранов для массового обновления киосков",
         "properties": {
           "embeddedControllerEnabled": {
@@ -1883,7 +1821,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Domain.KioskMassUpdateVideoSettings": {
-        "additionalProperties": false,
         "description": "Настройки видео",
         "properties": {
           "autoScreenSharing": {
@@ -1954,7 +1891,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Kiosk.Statistics.KiosksStatistics": {
-        "additionalProperties": false,
         "description": "Статистика по киоскам",
         "properties": {
           "created": {
@@ -1977,7 +1913,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Statistics.KiosksStatisticsUnit": {
-        "additionalProperties": false,
         "description": "Статистика по одному киоску",
         "properties": {
           "conferencesCount": {
@@ -2010,7 +1945,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Notes.Api.Models.TalkNoteInfo": {
-        "additionalProperties": false,
         "description": "Информация о заметке",
         "properties": {
           "createdBy": {
@@ -2056,7 +1990,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Notes.Api.Models.TalkNoteLink": {
-        "additionalProperties": false,
         "description": "Связь заметки",
         "properties": {
           "createdDate": {
@@ -2112,7 +2045,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Platform.Users.Domain.UserGeoInfo": {
-        "additionalProperties": false,
         "description": "Географическая информация о пользователе",
         "properties": {
           "city": {
@@ -2139,7 +2071,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Polls.Api.Models.TalkPoll": {
-        "additionalProperties": false,
         "description": "Опрос",
         "properties": {
           "created": {
@@ -2200,7 +2131,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Polls.Api.Models.TalkPollOption": {
-        "additionalProperties": false,
         "description": "Вариант ответа в опросе",
         "properties": {
           "id": {
@@ -2279,7 +2209,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Rooms.Statistics.Reports.Models.ParticipantTotalDurationModel": {
-        "additionalProperties": false,
         "description": "Статистика по пользователю",
         "properties": {
           "duration": {
@@ -2312,7 +2241,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Rooms.Statistics.Reports.Models.RoomStatisticsParticipantModel": {
-        "additionalProperties": false,
         "description": "Статистика по времени входа и выхода",
         "properties": {
           "entryTime": {
@@ -2361,7 +2289,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Rooms.Statistics.Reports.Models.RoomStatisticsReportMetricsModel": {
-        "additionalProperties": false,
         "description": "Сводные метрики отчета по комнате",
         "properties": {
           "streamViewersBuildSecondsDuration": {
@@ -2378,7 +2305,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Rooms.Statistics.Reports.Models.Stream.StreamStatisticsViewerModel": {
-        "additionalProperties": false,
         "description": "Данные о зрителе трансляции",
         "properties": {
           "duration": {
@@ -2424,7 +2350,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummary": {
-        "additionalProperties": false,
         "description": "Резюме встречи",
         "properties": {
           "chunks": {
@@ -2463,7 +2388,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryChunk": {
-        "additionalProperties": false,
         "description": "Фрагмент краткого пересказа/протокола",
         "properties": {
           "id": {
@@ -2483,7 +2407,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryHiddenStatus": {
-        "additionalProperties": false,
         "description": "Статус скрытия суммаризации",
         "properties": {
           "hiddenAt": {
@@ -2508,7 +2431,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryResult": {
-        "additionalProperties": false,
         "description": "Краткий пересказ/протокол",
         "properties": {
           "status": {
@@ -2541,7 +2463,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryV2Chunk": {
-        "additionalProperties": false,
         "description": "Часть суммаризации встречи с указанием временной метки",
         "properties": {
           "hiddenStatus": {
@@ -2569,7 +2490,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryV2Result": {
-        "additionalProperties": false,
         "description": "Сумммаризация встречи",
         "properties": {
           "canChangeVisibility": {
@@ -2615,7 +2535,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.TalkCompositeSpeechCoreResult": {
-        "additionalProperties": false,
         "description": "Ответ на запрос протокола, краткого пересказа и транскрипции",
         "properties": {
           "protocolV2": {
@@ -2644,7 +2563,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscript": {
-        "additionalProperties": false,
         "description": "Транскрипция речи",
         "properties": {
           "errors": {
@@ -2681,7 +2599,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscriptChunk": {
-        "additionalProperties": false,
         "description": "Фрагмент транскрипции",
         "properties": {
           "chunkId": {
@@ -2727,7 +2644,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscriptTrack": {
-        "additionalProperties": false,
         "description": "Дорожка транскрипта",
         "properties": {
           "chunks": {
@@ -2763,7 +2679,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscriptWord": {
-        "additionalProperties": false,
         "description": "Слово из транскрипта",
         "properties": {
           "confidence": {
@@ -2790,7 +2705,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscription": {
-        "additionalProperties": false,
         "description": "Информация о транскрибации",
         "properties": {
           "status": {
@@ -2804,7 +2718,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscriptionError": {
-        "additionalProperties": false,
         "description": "Ошибка транскрипции",
         "properties": {
           "endTime": {
@@ -2834,7 +2747,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.SpeechCore.Api.Models.Transcription.TalkTranscriptionV2Result": {
-        "additionalProperties": false,
         "description": "Результат транскрипции",
         "properties": {
           "errors": {
@@ -2887,7 +2799,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkAvatarInfo": {
-        "additionalProperties": false,
         "description": "Метаинформация об изображении аватара пользователя",
         "properties": {
           "contentHash": {
@@ -2911,7 +2822,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkFaceRectangle": {
-        "additionalProperties": false,
         "description": "Прямоугольник с местоположением лица на аватаре пользователя",
         "properties": {
           "height": {
@@ -2938,7 +2848,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkUser": {
-        "additionalProperties": false,
         "description": "Сущность пользователя",
         "properties": {
           "avatarInfo": {
@@ -3065,7 +2974,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkUserBaseInfo": {
-        "additionalProperties": false,
         "description": "Сущность пользователя без персональной информации",
         "properties": {
           "avatarInfo": {
@@ -3169,7 +3077,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkUserBaseInfoRef": {
-        "additionalProperties": false,
         "description": "Ссылка на пользователя, допускает анонимных",
         "properties": {
           "anonymousId": {
@@ -3194,7 +3101,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkUserParams": {
-        "additionalProperties": false,
         "description": "Параметры редактирования профиля пользователя",
         "properties": {
           "avatarInfo": {
@@ -3294,7 +3200,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Users.Api.Models.TalkUserRef": {
-        "additionalProperties": false,
         "description": "Ссылка на пользователя, допускает анонимных",
         "properties": {
           "anonymousId": {
@@ -3319,7 +3224,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Access.PatchUsersAccessRequest": {
-        "additionalProperties": false,
         "description": "Обновленный точечный доступ",
         "properties": {
           "roleId": {
@@ -3338,7 +3242,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Access.UsersAccessResponse": {
-        "additionalProperties": false,
         "description": "Точечный доступ",
         "properties": {
           "roleId": {
@@ -3356,7 +3259,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.CalendarServerCreateModel": {
-        "additionalProperties": false,
         "description": "Модель создания календарного сервера",
         "properties": {
           "domainRules": {
@@ -3384,7 +3286,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.CalendarServerResponseModel": {
-        "additionalProperties": false,
         "description": "Календарный сервис",
         "properties": {
           "calendarServerId": {
@@ -3412,7 +3313,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.CalendarServerShortResponseModel": {
-        "additionalProperties": false,
         "description": "Краткая информация о календарном сервере",
         "properties": {
           "calendarSettingsId": {
@@ -3430,7 +3330,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.CalendarServerUpdateModel": {
-        "additionalProperties": false,
         "description": "Модель обновления календарного сервера",
         "properties": {
           "domainRules": {
@@ -3458,7 +3357,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.CreateEmailCalendarEventModel": {
-        "additionalProperties": false,
         "description": "Модель создания события календаря",
         "properties": {
           "allowAnonymous": {
@@ -3575,7 +3473,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EditEmailCalendarAttendeeModel": {
-        "additionalProperties": false,
         "description": "Модель изменения участников события календаря",
         "properties": {
           "optionExternalAttendeesEmails": {
@@ -3610,7 +3507,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EditEmailCalendarEventModel": {
-        "additionalProperties": false,
         "description": "Модель изменения события календаря",
         "properties": {
           "allowAnonymous": {
@@ -3690,7 +3586,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EmailCalendarItem": {
-        "additionalProperties": false,
         "description": "Событие календаря",
         "properties": {
           "busyType": {
@@ -3802,7 +3697,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EmailCalendarItemAttendee": {
-        "additionalProperties": false,
         "description": "Участник события календаря",
         "properties": {
           "mailbox": {
@@ -3826,7 +3720,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EmailCalendarResult": {
-        "additionalProperties": false,
         "description": "Список событий календаря",
         "properties": {
           "items": {
@@ -3840,7 +3733,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EmailExternalMeeting": {
-        "additionalProperties": false,
         "description": "Внешнее мероприятие",
         "properties": {
           "type": {
@@ -3924,7 +3816,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.Recurrence.TalkCalendarRecurrence": {
-        "additionalProperties": false,
         "description": "Шаблон ряда повторяющихся встреч",
         "properties": {
           "dayOfMonth": {
@@ -4013,7 +3904,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Calls.TalkCallee": {
-        "additionalProperties": false,
         "description": "Вызываемый абонент",
         "properties": {
           "email": {
@@ -4046,7 +3936,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calls.TalkCalleeRequest": {
-        "additionalProperties": false,
         "description": "Вызываемый пользователь \n\nДолжен быть заполнен хотя бы один из параметров: UserKey, PhoneNumber, Email",
         "properties": {
           "email": {
@@ -4076,7 +3965,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calls.TalkCancelCallParameters": {
-        "additionalProperties": false,
         "description": "Параметры отмены звонка",
         "properties": {
           "callees": {
@@ -4096,7 +3984,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calls.TalkNotifyCallParameters": {
-        "additionalProperties": false,
         "description": "Параметры оповещения о звонке",
         "properties": {
           "callees": {
@@ -4122,7 +4009,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calls.TalkNotifyCallResult": {
-        "additionalProperties": false,
         "description": "Результат отправки оповещения о звонке",
         "properties": {
           "calleeResults": {
@@ -4136,7 +4022,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calls.TalkNotifyCalleeResult": {
-        "additionalProperties": false,
         "description": "Результат уведомления вызываемого абонента",
         "properties": {
           "callee": {
@@ -4178,7 +4063,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryInfo": {
-        "additionalProperties": false,
         "description": "Выборка данных телеметрии одного клиента",
         "properties": {
           "data": {
@@ -4295,7 +4179,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryInfoV2": {
-        "additionalProperties": false,
         "description": "Выборка данных телеметрии одного клиента",
         "properties": {
           "data": {
@@ -4470,7 +4353,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryResponse": {
-        "additionalProperties": false,
         "description": "Ответ с выборкой данных телеметрии",
         "properties": {
           "nextPageToken": {
@@ -4492,7 +4374,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryResponseV2": {
-        "additionalProperties": false,
         "description": "Ответ с выборкой данных телеметрии",
         "properties": {
           "nextPageToken": {
@@ -4514,7 +4395,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceActivityReport": {
-        "additionalProperties": false,
         "description": "Отчет активности пользователей на встрече",
         "properties": {
           "conferenceEndTime": {
@@ -4563,7 +4443,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceChatReport": {
-        "additionalProperties": false,
         "description": "Отчет по сообщениям чата конференции",
         "properties": {
           "messages": {
@@ -4577,7 +4456,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceChatReportAttachment": {
-        "additionalProperties": false,
         "description": "Приложение в чате",
         "properties": {
           "downloadUrl": {
@@ -4596,7 +4474,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceChatReportMessage": {
-        "additionalProperties": false,
         "description": "Сообщение в конференции",
         "properties": {
           "attachments": {
@@ -4632,7 +4509,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceParticipantsReport": {
-        "additionalProperties": false,
         "description": "Отчет по участникам конференции",
         "properties": {
           "participants": {
@@ -4646,7 +4522,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceReportParticipant": {
-        "additionalProperties": false,
         "description": "Участник конференции",
         "properties": {
           "isGuest": {
@@ -4665,7 +4540,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceReportParticipantConnectionInfo": {
-        "additionalProperties": false,
         "description": "Информация о подключении участника конференции",
         "properties": {
           "appPlatform": {
@@ -4691,7 +4565,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkConferenceReportParticipantExtendedInfo": {
-        "additionalProperties": false,
         "description": "Расширенная информация об участнике конференции",
         "properties": {
           "connectionsInfo": {
@@ -4718,7 +4591,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.Report.TalkParticipantActivityReport": {
-        "additionalProperties": false,
         "description": "Отчет активности участника на встрече",
         "properties": {
           "cameraDuration": {
@@ -4787,7 +4659,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.TalkConference": {
-        "additionalProperties": false,
         "description": "Информация о конференции",
         "properties": {
           "artifacts": {
@@ -4852,7 +4723,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.TalkConferenceArtifacts": {
-        "additionalProperties": false,
         "description": "Артефакты конференции",
         "properties": {
           "chatChannelHasMessages": {
@@ -4894,7 +4764,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.TalkConferenceInfo": {
-        "additionalProperties": false,
         "description": "Краткая информация о конференции",
         "properties": {
           "containsDeepFakeDetections": {
@@ -4933,7 +4802,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.TalkConferenceInfos": {
-        "additionalProperties": false,
         "description": "Список конференций",
         "properties": {
           "conferences": {
@@ -4947,7 +4815,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.TalkEnrichedConference": {
-        "additionalProperties": false,
         "description": "Информация о конференции",
         "properties": {
           "artifacts": {
@@ -5007,7 +4874,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Conferences.TalkEnrichedConferenceArtifacts": {
-        "additionalProperties": false,
         "description": "Артефакты конференции",
         "properties": {
           "invitedParticipants": {
@@ -5073,7 +4939,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkApplicationAccessRestriction": {
-        "additionalProperties": false,
         "description": "Ограничение доступа приложения",
         "properties": {
           "allowedIp": {
@@ -5118,7 +4983,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkDomainApplication": {
-        "additionalProperties": false,
         "description": "API-ключ пространства",
         "properties": {
           "accessRestrictionWhitelist": {
@@ -5205,7 +5069,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkDomainApplicationAccessInfo": {
-        "additionalProperties": false,
         "description": "Информация о доступе приложения",
         "properties": {
           "expiredAt": {
@@ -5224,7 +5087,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkDomainApplicationsList": {
-        "additionalProperties": false,
         "description": "Коллекция API-ключей в пространстве",
         "properties": {
           "applications": {
@@ -5238,7 +5100,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkDomainStatistics": {
-        "additionalProperties": false,
         "description": "Статистика: активные пользователи в домене",
         "properties": {
           "created": {
@@ -5277,7 +5138,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkScope": {
-        "additionalProperties": false,
         "description": "Область доступа приложения",
         "properties": {
           "restrictionType": {
@@ -5335,7 +5195,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Features.TalkCalendarFeatureSettingsModify": {
-        "additionalProperties": false,
         "description": "Настройки интеграции",
         "properties": {
           "calDavServerType": {
@@ -5384,7 +5243,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.Access.PatchRecordAccessRequest": {
-        "additionalProperties": false,
         "description": "Обновленные доступы",
         "properties": {
           "forceUpdate": {
@@ -5408,7 +5266,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.Access.RecordsResourceAccessResponse": {
-        "additionalProperties": false,
         "description": "Доступы к ресурсу",
         "properties": {
           "linkAccess": {
@@ -5428,7 +5285,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.Access.TalkRecordLinkAccess": {
-        "additionalProperties": false,
         "description": "Доступ по ссылке",
         "properties": {
           "scope": {
@@ -5438,7 +5294,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkActiveConferenceRecording": {
-        "additionalProperties": false,
         "properties": {
           "recordingKey": {
             "description": "Ключ записи",
@@ -5451,7 +5306,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkConferenceRecording": {
-        "additionalProperties": false,
         "description": "Информация о записи конференции",
         "properties": {
           "allowAnonymousAccess": {
@@ -5565,7 +5419,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkConferenceRecordingUpdateParams": {
-        "additionalProperties": false,
         "description": "Параметры обновления записи конференции",
         "properties": {
           "allowAnonymousAccess": {
@@ -5596,7 +5449,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkDomainConferenceRecording": {
-        "additionalProperties": false,
         "description": "Информация о записи конференции",
         "properties": {
           "allowAnonymousAccess": {
@@ -5670,7 +5522,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkDomainRecordingsList": {
-        "additionalProperties": false,
         "description": "Список записей домена",
         "properties": {
           "recordings": {
@@ -5684,7 +5535,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkMediaSize": {
-        "additionalProperties": false,
         "description": "Соотношение сторон",
         "properties": {
           "height": {
@@ -5709,7 +5559,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkRecordingInfo": {
-        "additionalProperties": false,
         "properties": {
           "recordingKey": {
             "description": "Ключ записи",
@@ -5720,7 +5569,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkRecordingPreview": {
-        "additionalProperties": false,
         "description": "Превью записи",
         "properties": {
           "fileUrl": {
@@ -5742,7 +5590,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Recordings.TalkVideoQuality": {
-        "additionalProperties": false,
         "description": "Вариант качества видео",
         "properties": {
           "fileUrl": {
@@ -5770,7 +5617,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.LockRoomRequest": {
-        "additionalProperties": false,
         "description": "Запрос проверки/установки ПИН-кода",
         "properties": {
           "pinCode": {
@@ -5784,7 +5630,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.Masking.TalkMaskingSettings": {
-        "additionalProperties": false,
         "description": "Настройка маскирования пользователей\n\nМожет быть указана только для встреч с внешними участниками",
         "properties": {
           "nameMaskingMode": {
@@ -5823,7 +5668,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.RoomSipSettings": {
-        "additionalProperties": false,
         "description": "Настройки Sip подключения к комнате",
         "properties": {
           "phoneNumbers": {
@@ -5846,7 +5690,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkChatChannelRoomsSettings": {
-        "additionalProperties": false,
         "description": "Настройки приватных чат-каналов",
         "properties": {
           "allowedUsers": {
@@ -5865,7 +5708,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkChatChannelSettings": {
-        "additionalProperties": false,
         "description": "Настройки приватных чат-каналов",
         "properties": {
           "allowedUsers": {
@@ -5884,7 +5726,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkChatChannelUserRef": {
-        "additionalProperties": false,
         "description": "Пользователь с доступом к приватным чатам\n\nДолжен быть заполнен один из параметров: UserKey, AnonymousId",
         "properties": {
           "anonymousId": {
@@ -5910,7 +5751,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkLanguagePair": {
-        "additionalProperties": false,
         "description": "Языковая пара синхронного перевода",
         "properties": {
           "from": {
@@ -5932,7 +5772,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkLanguagePairUpdateModel": {
-        "additionalProperties": false,
         "description": "Модель обновления языковой пары синхронного перевода",
         "properties": {
           "from": {
@@ -5961,7 +5800,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkRoom": {
-        "additionalProperties": false,
         "description": "Описание комнаты",
         "properties": {
           "allowAnonymous": {
@@ -6110,7 +5948,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomParams": {
-        "additionalProperties": false,
         "description": "Параметры комнаты",
         "properties": {
           "allowAnonymous": {
@@ -6211,7 +6048,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomStream": {
-        "additionalProperties": false,
         "description": "Зрительный зал комнаты",
         "properties": {
           "allowAnonymous": {
@@ -6258,7 +6094,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkSessionHallInfo": {
-        "additionalProperties": false,
         "description": "Информация о сессионом зале",
         "properties": {
           "chatRoom": {
@@ -6304,7 +6139,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslation": {
-        "additionalProperties": false,
         "description": "Настройки синхронного перевода комнаты",
         "properties": {
           "enabled": {
@@ -6322,7 +6156,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslationUpdateRequest": {
-        "additionalProperties": false,
         "description": "Настройки синхронного перевода комнаты",
         "properties": {
           "enabled": {
@@ -6344,7 +6177,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkTranslator": {
-        "additionalProperties": false,
         "description": "Переводчик языковой пары синхронного перевода",
         "properties": {
           "anonymousId": {
@@ -6369,7 +6201,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Statistics.RoomStatisticsReport": {
-        "additionalProperties": false,
         "description": "Отчет по статистике комнаты",
         "properties": {
           "from": {
@@ -6419,7 +6250,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Surveys.TalkCreateOrUpdateSurveyRequest": {
-        "additionalProperties": false,
         "description": "Запрос на создание опроса",
         "properties": {
           "frequency": {
@@ -6450,7 +6280,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Surveys.TalkSurvey": {
-        "additionalProperties": false,
         "description": "Опрос",
         "properties": {
           "frequency": {
@@ -6496,7 +6325,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Surveys.TalkSurveyList": {
-        "additionalProperties": false,
         "description": "Список опросов",
         "properties": {
           "entities": {
@@ -6510,7 +6338,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Surveys.TalkSurveyPeriod": {
-        "additionalProperties": false,
         "description": "Период активности опроса",
         "properties": {
           "endDate": {
@@ -6531,7 +6358,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkAnonymous": {
-        "additionalProperties": false,
         "description": "Анонимный (не аутентифицированый) пользователь",
         "properties": {
           "anonymousId": {
@@ -6548,7 +6374,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkAuditLogResponse": {
-        "additionalProperties": false,
         "description": "Ответ с событиями журнала аудита",
         "properties": {
           "events": {
@@ -6567,7 +6392,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkConferencesOnlineStatistics": {
-        "additionalProperties": false,
         "description": "Статистика по активным конференциям",
         "properties": {
           "conferencesCount": {
@@ -6584,7 +6408,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkKiosksOnlineStatistics": {
-        "additionalProperties": false,
         "description": "Статистика по активным киоскам",
         "properties": {
           "totalKioskConferencesCount": {
@@ -6596,7 +6419,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkOnlineCounters": {
-        "additionalProperties": false,
         "description": "Онлайн-счетчики",
         "properties": {
           "conferencesCount": {
@@ -6618,7 +6440,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Web.Entities.Recordings.TalkDomainConferenceRecording": {
-        "additionalProperties": false,
         "description": "Страница результатов",
         "properties": {
           "entities": {
@@ -6642,7 +6463,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkRecordingsOnlineStatistics": {
-        "additionalProperties": false,
         "description": "Статистика идущих записей",
         "properties": {
           "totalActiveRecordings": {
@@ -6654,7 +6474,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkRecordingsStatistics": {
-        "additionalProperties": false,
         "description": "Статистика по записям",
         "properties": {
           "recordingsDurationMinutes": {
@@ -6666,7 +6485,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkStartRecordingParams": {
-        "additionalProperties": false,
         "properties": {
           "description": {
             "description": "Описание записи",
@@ -6724,7 +6542,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkStreamsOnlineStatistics": {
-        "additionalProperties": false,
         "description": "Статистика идущих трансляций",
         "properties": {
           "activeStreams": {
@@ -6741,7 +6558,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkTotalRecordingSizeStatistics": {
-        "additionalProperties": false,
         "description": "Статистика общего объема записей",
         "properties": {
           "totalRecordingsSizeMb": {
@@ -6754,7 +6570,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkUserPermissions": {
-        "additionalProperties": false,
         "description": "Права пользователя",
         "properties": {
           "disabled": {
@@ -6765,7 +6580,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkUserScanResult": {
-        "additionalProperties": false,
         "description": "Результат поиска пользователей",
         "properties": {
           "offset": {
@@ -6784,7 +6598,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.TalkUserSearchResult": {
-        "additionalProperties": false,
         "description": "Результат поиска пользователей",
         "properties": {
           "users": {
@@ -6798,7 +6611,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkChangeDefaultRoleRequest": {
-        "additionalProperties": false,
         "description": "Запрос на изменение роли по умолчанию",
         "properties": {
           "permissions": {
@@ -6821,7 +6633,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkPermission": {
-        "additionalProperties": false,
         "description": "Разрешение",
         "properties": {
           "constructorVisible": {
@@ -6845,7 +6656,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkPermissionRef": {
-        "additionalProperties": false,
         "description": "Разрешение",
         "properties": {
           "permissionId": {
@@ -6860,7 +6670,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkProductPermissions": {
-        "additionalProperties": false,
         "description": "Разрешения продукта",
         "properties": {
           "permissions": {
@@ -6882,7 +6691,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserChangeRolesRequest": {
-        "additionalProperties": false,
         "description": "Запрос на изменение ролей пользователя",
         "properties": {
           "addedRoleIds": {
@@ -6905,7 +6713,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRole": {
-        "additionalProperties": false,
         "description": "Пользовательская роль",
         "properties": {
           "description": {
@@ -6945,7 +6752,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRoleCreateRequest": {
-        "additionalProperties": false,
         "description": "Запрос на создание пользовательской роли",
         "properties": {
           "description": {
@@ -6974,7 +6780,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRoleDescription": {
-        "additionalProperties": false,
         "description": "Описание пользовательской роли",
         "properties": {
           "description": {
@@ -7004,7 +6809,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRoleInfo": {
-        "additionalProperties": false,
         "description": "Информация о пользовательской роли",
         "properties": {
           "description": {
@@ -7027,7 +6831,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRolePermission": {
-        "additionalProperties": false,
         "description": "Разрешение пользовательской роли",
         "properties": {
           "constructorVisible": {
@@ -7055,7 +6858,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRolePermissionValue": {
-        "additionalProperties": false,
         "description": "Разрешение пользовательской роли",
         "properties": {
           "disabled": {
@@ -7080,7 +6882,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRoleRef": {
-        "additionalProperties": false,
         "description": "Пользовательская роль",
         "properties": {
           "roleId": {
@@ -7095,7 +6896,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.UserRoles.TalkUserRoleUpdateRequest": {
-        "additionalProperties": false,
         "description": "Запрос на обновление пользовательской роли",
         "properties": {
           "description": {
@@ -7122,7 +6922,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Webhooks.TalkActivateWebhookRequest": {
-        "additionalProperties": false,
         "description": "Запрос на активацию вебхука",
         "properties": {
           "activationKey": {
@@ -7133,7 +6932,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Webhooks.TalkCreateWebhookRequest": {
-        "additionalProperties": false,
         "description": "Запрос на создание вебхука",
         "properties": {
           "customHeaders": {
@@ -7172,7 +6970,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Webhooks.TalkWebhook": {
-        "additionalProperties": false,
         "description": "Вебхук",
         "properties": {
           "activated": {
@@ -7215,7 +7012,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Webhooks.TalkWebhookHeader": {
-        "additionalProperties": false,
         "description": "HTTP-заголовок вебхука",
         "properties": {
           "name": {
@@ -7236,7 +7032,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Web.Services.TalkUserProfileUpdateResult": {
-        "additionalProperties": false,
         "description": "Результат обновления профиля пользователя",
         "properties": {
           "avatarUrl": {
@@ -7259,7 +7054,6 @@
         "type": "string"
       },
       "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboard": {
-        "additionalProperties": false,
         "description": "Белая доска",
         "properties": {
           "createdBy": {
@@ -7327,7 +7121,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardLinkAccess": {
-        "additionalProperties": false,
         "description": "Доступ по ссылке",
         "properties": {
           "scope": {
@@ -7337,7 +7130,6 @@
         "type": "object"
       },
       "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardsStatistics": {
-        "additionalProperties": false,
         "description": "Статистика по доскам",
         "properties": {
           "activeCount": {
@@ -10833,6 +10625,14 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
             "description": "OK"
           }
         },

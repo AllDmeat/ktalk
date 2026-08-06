@@ -12,6 +12,6 @@ struct KTalk: AsyncParsableCommand {
     commandName: "ktalk",
     abstract: "Command-line client for the Kontur.Talk API.",
     version: KTalkSDK.version,
-    subcommands: []
+    subcommands: [Recordings.self]
   )
 }

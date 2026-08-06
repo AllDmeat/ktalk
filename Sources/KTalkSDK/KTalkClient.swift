@@ -30,6 +30,7 @@ public struct KTalkClient: Sendable {
     let gate = RateLimitGate()
     self.client = Client(
       serverURL: url,
+      configuration: Configuration(dateTranscoder: LenientISO8601DateTranscoder()),
       transport: transport,
       middlewares: [
         AuthenticationMiddleware(token: token),

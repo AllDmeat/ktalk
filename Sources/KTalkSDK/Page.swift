@@ -30,6 +30,10 @@ public struct Page<Element: Sendable>: Sendable {
   }
 }
 
+extension Page: Encodable where Element: Encodable {}
+extension Page: Decodable where Element: Decodable {}
+extension Page: Equatable where Element: Equatable {}
+
 extension KTalkClient {
   /// Follows `nextPageToken` from the first page onward and returns every item.
   ///
