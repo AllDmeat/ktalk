@@ -93,6 +93,16 @@ More tags are added as each SDK section lands.
 | `recordingSummary(key:)` | Fetch a recording's summary / protocol. |
 | `downloadRecording(key:quality:)` | Download the media file as `Data`. |
 
+### Rooms
+
+| Method | Description |
+| ------ | ----------- |
+| `room(name:)` | Fetch a `Room`. |
+| `updateRoom(name:params:)` | Create or update a room. |
+| `endConference(roomName:)` | Forcibly end the conference. |
+| `setRoomLock(roomName:request:)` | Set or clear the PIN and masking. |
+| `addModerator(roomName:userRef:)` / `removeModerator(roomName:userRef:)` | Manage moderators. |
+
 ## CLI Commands
 
 More command groups are added as each CLI section lands.
@@ -106,6 +116,16 @@ More command groups are added as each CLI section lands.
 | `transcript <key>` | Print a recording's transcript. |
 | `summary <key>` | Print a recording's summary / protocol. |
 | `download <key> [--quality source] -o <path>` | Download the media file to `<path>`. |
+
+### `ktalk rooms`
+
+| Command | Description |
+| ------- | ----------- |
+| `get <name>` | Print a room as JSON. |
+| `update <name> --from-json <path>` | Create/update a room from a params file. |
+| `lock <name> --from-json <path>` | Set/clear PIN + masking from a request file. |
+| `end-conference <name>` | Forcibly end the conference. |
+| `add-moderator <name> <userRef>` / `remove-moderator <name> <userRef>` | Manage moderators. |
 
 ## Error Handling
 

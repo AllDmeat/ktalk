@@ -82,4 +82,12 @@ public struct KTalkClient: Sendable {
     default: .unexpectedResponse(statusCode: statusCode, body: body)
     }
   }
+
+  /// Maps a 404 to ``KTalkError/notFound(resource:identifier:)`` and any other status to a
+  /// generic status error. Used by facade methods that looked up a concrete resource.
+  func notFoundOrStatus(_ statusCode: Int, resource: String, identifier: String) -> KTalkError {
+    statusCode == 404
+      ? .notFound(resource: resource, identifier: identifier)
+      : statusError(statusCode: statusCode, body: nil)
+  }
 }

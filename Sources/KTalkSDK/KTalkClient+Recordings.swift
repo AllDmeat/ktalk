@@ -95,14 +95,4 @@ extension KTalkClient {
       }
     }
   }
-
-  /// Maps a 404 to ``KTalkError/notFound(resource:identifier:)`` and any other status to a
-  /// generic status error.
-  private func notFoundOrStatus(_ statusCode: Int, resource: String, identifier: String)
-    -> KTalkError
-  {
-    statusCode == 404
-      ? .notFound(resource: resource, identifier: identifier)
-      : statusError(statusCode: statusCode, body: nil)
-  }
 }
