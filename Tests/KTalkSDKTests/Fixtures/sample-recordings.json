@@ -1,0 +1,11 @@
+{
+  "entities": [
+    {
+      "key": "rec-0001",
+      "title": "Synthetic standup",
+      "createdDate": "2026-01-01T10:00:00Z"
+    }
+  ],
+  "nextPageToken": "next-0002",
+  "prevPageToken": null
+}
