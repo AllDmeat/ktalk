@@ -62,6 +62,25 @@ def normalize_int_bounds(node):
             normalize_int_bounds(child)
 
 
+def relax_additional_properties(node):
+    """Drop `additionalProperties: false` so decoding tolerates unknown fields.
+
+    The live API returns fields the published spec has not caught up with (e.g. an extra
+    `groupsCount` on user objects). With `additionalProperties: false`, the generator emits
+    strict decoders that reject those unknown keys and fail the whole response. Removing the
+    flag makes the generated types forward-compatible: unknown keys are ignored. Only the
+    boolean-`false` form is removed; schema-valued `additionalProperties` (typed maps) stay.
+    """
+    if isinstance(node, dict):
+        if node.get("additionalProperties") is False:
+            del node["additionalProperties"]
+        for child in node.values():
+            relax_additional_properties(child)
+    elif isinstance(node, list):
+        for child in node:
+            relax_additional_properties(child)
+
+
 def strip_deprecated(node):
     """Remove OpenAPI `deprecated` flags document-wide.
 
@@ -116,6 +135,31 @@ def ensure_path_parameters(doc):
                 )
 
 
+def declare_recording_download_body(doc):
+    """Declare the binary response body for the recording-download endpoint.
+
+    The published spec documents `GET /api/Recordings/{recordingKey}/file/{qualityName}`
+    with an empty 200, so the generator discards the file bytes. Declare an
+    `application/octet-stream` binary body so the generated client exposes the download.
+    """
+    path = "/api/Recordings/{recordingKey}/file/{qualityName}"
+    item = (doc.get("paths") or {}).get(path)
+    if not isinstance(item, dict):
+        return
+    operation = item.get("get")
+    if not isinstance(operation, dict):
+        return
+    responses = operation.setdefault("responses", {})
+    ok = responses.get("200")
+    if not isinstance(ok, dict):
+        ok = {"description": "OK"}
+        responses["200"] = ok
+    if not ok.get("content"):
+        ok["content"] = {
+            "application/octet-stream": {"schema": {"type": "string", "format": "binary"}}
+        }
+
+
 def require_multipart_bodies(doc):
     """Mark multipart request bodies as required.
 
@@ -141,9 +185,11 @@ with open(src, encoding="utf-8") as f:
 info = doc.setdefault("info", {})
 info.setdefault("version", "1.0.0")
 normalize_int_bounds(doc)
+relax_additional_properties(doc)
 strip_deprecated(doc)
 ensure_path_parameters(doc)
 require_multipart_bodies(doc)
+declare_recording_download_body(doc)
 
 with open(dst, "w", encoding="utf-8") as f:
     json.dump(doc, f, ensure_ascii=False, indent=2, sort_keys=True)

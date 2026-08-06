@@ -45,7 +45,10 @@ let client = try KTalkClient(
   baseURL: "https://example.ktalk.ru",
   token: ProcessInfo.processInfo.environment["KTALK_TOKEN"]!
 )
-// let recordings = try await client.listRecordings()   // WIP
+let page = try await client.listRecordings(limit: 20)
+for recording in page.items {
+  print(recording.key ?? "", recording.title ?? "")
+}
 ```
 
 ### As a CLI
@@ -55,7 +58,11 @@ export KTALK_BASE_URL="https://example.ktalk.ru"
 export KTALK_TOKEN="your-x-auth-token"
 
 ktalk --help
-# ktalk recordings list           # WIP
+ktalk recordings list --limit 20
+ktalk recordings get <recordingKey>
+ktalk recordings transcript <recordingKey>
+ktalk recordings summary <recordingKey>
+ktalk recordings download <recordingKey> --quality source -o out.mp4
 ```
 
 ## Configuration
@@ -73,11 +80,32 @@ the Kontur.Talk admin panel under **API keys**. There is no config file.
 
 ## API Reference
 
-_WIP — per-tag tables are added as each SDK section lands._
+More tags are added as each SDK section lands.
+
+### Recordings
+
+| Method | Description |
+| ------ | ----------- |
+| `listRecordings(pageToken:limit:query:)` | List recordings (one `Page<Recording>`). |
+| `collectAll { listRecordings(pageToken:) }` | Fetch every page as a flat array. |
+| `recording(key:)` | Fetch a single `Recording`. |
+| `recordingTranscript(key:)` | Fetch a recording's transcript. |
+| `recordingSummary(key:)` | Fetch a recording's summary / protocol. |
+| `downloadRecording(key:quality:)` | Download the media file as `Data`. |
 
 ## CLI Commands
 
-_WIP — command tables are added as each CLI section lands._
+More command groups are added as each CLI section lands.
+
+### `ktalk recordings`
+
+| Command | Description |
+| ------- | ----------- |
+| `list [--all] [--limit N] [--page-token T] [--query Q]` | List recordings (a page, or all with `--all`). |
+| `get <key>` | Print a recording as JSON. |
+| `transcript <key>` | Print a recording's transcript. |
+| `summary <key>` | Print a recording's summary / protocol. |
+| `download <key> [--quality source] -o <path>` | Download the media file to `<path>`. |
 
 ## Error Handling
 
