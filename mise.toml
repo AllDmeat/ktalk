@@ -1,3 +1,3 @@
 [tools]
 # Pinned so local development and CI use the same Swift toolchain.
-swift = "6.2.3"
+swift = "6.3.2"
