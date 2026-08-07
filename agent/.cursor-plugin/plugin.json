@@ -1,0 +1,21 @@
+{
+  "name": "ktalk",
+  "displayName": "ktalk",
+  "version": "1.0.0",
+  "description": "Teaches the agent when and how to reach for the ktalk CLI (recordings, rooms, meetings, reports, users, roles, webhooks, stats, surveys, kiosks, calendar servers, deepfake, API keys) — read the help first, then work from it",
+  "author": {
+    "name": "Aleksey Berezka"
+  },
+  "homepage": "https://github.com/AllDmeat/ktalk",
+  "repository": "https://github.com/AllDmeat/ktalk",
+  "keywords": [
+    "ktalk",
+    "kontur-talk",
+    "video-conferencing",
+    "recordings",
+    "cli"
+  ],
+  "category": "utilities",
+  "skills": "./skills/",
+  "rules": "./rules/"
+}
