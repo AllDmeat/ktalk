@@ -1,0 +1,37 @@
+name: Tag release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Tag spec-update merges
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # A PAT makes the pushed tag trigger the Release workflow; the default
+          # GITHUB_TOKEN cannot trigger another workflow. Without RELEASE_PAT the tag is
+          # still created, and Release can be run by re-pushing the tag.
+          token: ${{ secrets.RELEASE_PAT || github.token }}
+
+      - name: Tag if this is a spec-update merge
+        run: |
+          MSG="$(git log -1 --pretty=%s)"
+          case "$MSG" in
+            "spec-update: minor"*) LEVEL=minor ;;
+            "spec-update: major"*) LEVEL=major ;;
+            *) echo "Not a spec-update merge; nothing to tag."; exit 0 ;;
+          esac
+
+          VERSION="$(scripts/next-version.sh "$LEVEL")"
+          echo "Tagging $VERSION ($LEVEL)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$VERSION"
+          git push origin "$VERSION"

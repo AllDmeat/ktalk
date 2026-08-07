@@ -1,0 +1,111 @@
+name: Spec update
+
+on:
+  schedule:
+    # Weekly, Monday 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  spec-update:
+    name: Fetch spec and open update PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Install oasdiff
+        run: |
+          # Pinned oasdiff release; classifies OpenAPI changes as breaking or not.
+          VERSION="1.11.7"
+          curl -fsSL "https://github.com/oasdiff/oasdiff/releases/download/v${VERSION}/oasdiff_${VERSION}_linux_amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin oasdiff
+          oasdiff version
+
+      - name: Fetch latest spec
+        run: |
+          cp openapi/talk.json /tmp/old-spec.json
+          scripts/fetch-spec.sh
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git diff --quiet -- openapi/talk.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No spec changes."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Classify change with oasdiff
+        if: steps.diff.outputs.changed == 'true'
+        id: classify
+        run: |
+          # Non-zero exit => breaking changes present.
+          if oasdiff breaking /tmp/old-spec.json openapi/talk.json --fail-on ERR > /tmp/oasdiff.txt 2>&1; then
+            echo "level=minor" >> "$GITHUB_OUTPUT"
+          else
+            echo "level=major" >> "$GITHUB_OUTPUT"
+          fi
+          echo "report<<OASDIFF" >> "$GITHUB_OUTPUT"
+          cat /tmp/oasdiff.txt >> "$GITHUB_OUTPUT"
+          echo "OASDIFF" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test the regenerated client
+        if: steps.diff.outputs.changed == 'true'
+        run: swift test -Xswiftc -warnings-as-errors
+
+      - name: Open pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LEVEL: ${{ steps.classify.outputs.level }}
+          REPORT: ${{ steps.classify.outputs.report }}
+        run: |
+          BRANCH="spec-update/$(date -u +%Y%m%d%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add openapi/talk.json
+          # The tagging workflow keys off this exact title prefix.
+          TITLE="spec-update: ${LEVEL} — regenerate client from latest OpenAPI"
+          git commit -m "$TITLE"
+          git push -u origin "$BRANCH"
+
+          BODY=$(cat <<EOF
+          Automated weekly OpenAPI refresh.
+
+          **Change level (oasdiff): \`${LEVEL}\`** — merging tags a new ${LEVEL} release.
+
+          <details><summary>oasdiff report</summary>
+
+          \`\`\`
+          ${REPORT}
+          \`\`\`
+          </details>
+          EOF
+          )
+
+          if [ "$LEVEL" = "major" ]; then
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body "$BODY" --label "major" --label "breaking"
+            echo "Breaking change — left for review, not auto-merged."
+          else
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body "$BODY" --label "minor"
+            gh pr merge "$BRANCH" --auto --squash --delete-branch
+            echo "Non-breaking — auto-merge enabled (merges when checks pass)."
+          fi
