@@ -12,7 +12,7 @@ jobs:
     name: Tag spec-update merges
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # A PAT makes the pushed tag trigger the Release workflow; the default
