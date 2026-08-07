@@ -9,12 +9,12 @@ else. (A Swift SDK powers it and is available as a library too — see [Library]
 ### mise (recommended)
 
 ```sh
-mise use -g "ubi:AllDmeat/ktalk[exe=ktalk]"
+mise use github:AllDmeat/ktalk
 ktalk --help
 ```
 
-This installs the latest release binary for your platform (macOS, Linux, Windows) and keeps it
-up to date. Pin a version with `ubi:AllDmeat/ktalk[exe=ktalk]@1.2.0`.
+This installs the latest release binary for your platform (macOS, Linux, Windows) via mise's
+GitHub backend. Add `-g` for a global install; pin a version with `github:AllDmeat/ktalk@1.0.0`.
 
 ### Release binary
 
@@ -114,6 +114,43 @@ for recording in page.items { print(recording.key ?? "", recording.title ?? "") 
 Every CLI command maps to a `KTalkClient` method (`listRecordings`, `room(name:)`,
 `createWebhook`, …). Failures surface as a typed `KTalkError`. The full method list is in the
 [DocC docs](Sources/KTalkSDK/Documentation.docc) and mirrors the command groups above.
+
+## Agent skill
+
+Coding agents guess CLI invocations badly. This repository ships a skill that makes the agent read
+`ktalk --help` and `ktalk <group> <command> --help` before composing anything, and adds what the
+help cannot tell it — env-var auth, token scopes, cursor pagination, a recording's artifacts
+(transcript / summary / media), `transcript --format text`, and built-in `429` handling. One copy of
+that guidance lives in [`agent/skills/ktalk/`](agent/skills/ktalk); all three hosts read it from
+there.
+
+### Claude Code
+
+```
+/plugin marketplace add AllDmeat/ktalk
+/plugin install ktalk@ktalk
+```
+
+Then restart or run `/reload-plugins`. Update later with `/plugin marketplace update ktalk` and
+`/plugin update ktalk@ktalk`. The same commands work outside the REPL as `claude plugin …`.
+
+### Cursor
+
+Cursor 2.5+ reads plugins from a marketplace repository, and this repo is one — see
+[`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json). Add it with `/add-plugin` in
+the editor, or register the repo team-wide under Dashboard → Settings → Plugins → Team Marketplaces
+by pasting `https://github.com/AllDmeat/ktalk`. Cursor reads the skill from `agent/skills/` and the
+rules from [`agent/rules/`](agent/rules).
+
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/AllDmeat/ktalk
+```
+
+Gemini installs an extension from its own root directory and cannot install a subdirectory straight
+from GitHub, so each release ships [`agent/`](agent) as a self-contained archive asset and Gemini
+takes that. Update with `gemini extensions update ktalk`.
 
 ## Development
 

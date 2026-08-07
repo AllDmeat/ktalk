@@ -1,0 +1,52 @@
+---
+description: Read and work with Kontur.Talk (ktalk.ru video-conferencing / meetings platform) through the `ktalk` CLI — recordings, transcripts, summaries, rooms, meetings, conference reports, users, roles, webhooks, stats, surveys, kiosks, calendar servers, API keys. Apply whenever Kontur.Talk, a `<space>.ktalk.ru` URL, a recording key, or the team's Talk space comes up, and whenever the `ktalk` command is invoked. Does not apply to other conferencing tools — Zoom, Google Meet, Microsoft Teams, Webex, Jitsi — which share the meeting/recording vocabulary but are different products.
+alwaysApply: false
+---
+
+# ktalk
+
+`ktalk` is a CLI over the Kontur.Talk API. Commands are grouped by API tag; every command prints JSON.
+
+## Read the help before typing a command
+
+The groups are guessable; the subcommands and flags are not. Read the help first — it is instant and
+needs no credentials:
+
+```bash
+ktalk --help                     # every group
+ktalk <group> --help             # a group's subcommands
+ktalk <group> <command> --help   # a command's flags, before first use
+```
+
+The help outranks this file: where they disagree, the help is current and this is stale.
+
+## Go through the CLI
+
+Do not `curl` the API or hand-roll a client — the CLI handles the `X-Auth-Token` header, `429`
+back-off (add no `sleep`/retry loops), cursor pagination, and mixed date formats. Companions are `jq`
+and shell. If no command exists for the task, say so rather than improvising a raw call.
+
+## Credentials and scopes
+
+Two environment variables (no config file); `--base-url` / `--token` override per command:
+
+```bash
+export KTALK_BASE_URL="https://<space>.ktalk.ru"
+export KTALK_TOKEN="<x-auth-token>"   # admin panel → API keys; never echo it
+```
+
+Keys are scoped: a read-only key returns `Forbidden` (403) on writes. `ktalk api-keys access-info`
+shows what it allows. A rejected request fails the same way twice — report it, don't retry around it.
+
+## Keys, pagination, transcripts
+
+- List to find keys (`ktalk recordings list`, `ktalk users search --query …`); match a recording on
+  `title`/`createdDate` with `jq` rather than guessing.
+- `recordings list` is cursor-paginated (`{items, nextPageToken}`); pass `--all` to follow pages.
+- A recording's artifacts are transcript, summary, and media file; `recordings transcript … --format
+  text` renders a readable speaker dialogue. Write commands take `--from-json <path>`.
+- Don't infer a fact from a missing field — fetch the endpoint that carries it.
+
+Dates are ISO 8601. `delete` / `end-conference` / `revoke-sessions` act immediately — confirm first.
+If `ktalk` is missing, install via mise (`mise use github:AllDmeat/ktalk`) or from
+[Releases](https://github.com/AllDmeat/ktalk/releases).

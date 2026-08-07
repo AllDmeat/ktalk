@@ -1,0 +1,36 @@
+{
+  "name": "ktalk",
+  "owner": {
+    "name": "Aleksey Berezka",
+    "url": "https://github.com/AllDmeat"
+  },
+  "metadata": {
+    "description": "Agent skill for the ktalk CLI — the Kontur.Talk API from the terminal",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "ktalk",
+      "source": "./agent",
+      "description": "Teaches the agent when and how to reach for the ktalk CLI. Commands are grouped per API tag (recordings, rooms, meetings, reports, users, roles, webhooks, stats, surveys, kiosks, calendar-servers, deepfake, api-keys); the skill makes the agent read `ktalk --help` and `ktalk <group> <command> --help` first, then adds what the help does not cover: env-var auth, cursor pagination, JSON output, transcript --format text, token scopes, and built-in 429 handling.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Aleksey Berezka"
+      },
+      "homepage": "https://github.com/AllDmeat/ktalk",
+      "repository": "https://github.com/AllDmeat/ktalk",
+      "category": "productivity",
+      "keywords": [
+        "ktalk",
+        "kontur",
+        "kontur-talk",
+        "video-conferencing",
+        "recordings",
+        "transcripts",
+        "meetings",
+        "cli",
+        "swift"
+      ]
+    }
+  ]
+}

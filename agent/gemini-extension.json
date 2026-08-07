@@ -1,0 +1,5 @@
+{
+  "name": "ktalk",
+  "version": "1.0.0",
+  "description": "Drive the ktalk CLI for the Kontur.Talk API — read its --help first, then compose commands from it"
+}
