@@ -132,6 +132,31 @@ More command groups are added as each CLI section lands.
 The SDK surfaces a typed `KTalkError` (invalid URL, HTTP status errors, decoding failures,
 network errors). _Details WIP._
 
+## Development
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`AGENTS.md`](AGENTS.md). Common commands:
+
+```sh
+swift build && swift test
+swift build -Xswiftc -warnings-as-errors        # the CI gate
+swift format lint --strict --recursive Sources/ Tests/
+scripts/check-no-internal-data.sh
+scripts/fetch-spec.sh                            # refresh the vendored OpenAPI
+```
+
+The SDK is layered — generated core → `KTalkClient` facade → `ktalk` CLI — and documented with
+DocC (`Sources/KTalkSDK/Documentation.docc`). Spec normalizations live in `scripts/fetch-spec.sh`;
+see [`specs/`](specs/) and the [constitution](.specify/memory/constitution.md).
+
+### Automated updates
+
+A weekly workflow refreshes the OpenAPI document, classifies the change with
+[oasdiff](https://github.com/oasdiff/oasdiff), and opens a PR: non-breaking changes are labeled
+`minor` and auto-merged once CI is green; breaking changes are labeled `major` and left for
+review. Merging tags a release. To let the auto-tag trigger the Release workflow, add a
+`RELEASE_PAT` repository secret (a token with `contents: write`); without it the tag is still
+created and Release can be re-run.
+
 ## Requirements
 
 - Swift 6.2+
