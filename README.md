@@ -1,245 +1,143 @@
-# ktalk-sdk
+# ktalk
 
-A Swift SDK and `ktalk` command-line tool for the [Kontur.Talk](https://ktalk.ru) integrator
-HTTP API, generated from its published [OpenAPI specification](https://developer.kontur.ru/doc/talk.public.api).
+`ktalk` is a command-line tool for the [Kontur.Talk](https://ktalk.ru) API. It talks to your
+space over the integrator HTTP API and prints JSON — pipe it into `jq`, scripts, or anything
+else. (A Swift SDK powers it and is available as a library too — see [Library](#library-bonus).)
 
-- **`KTalkSDK`** — a typed Swift client (iOS 18+, macOS 15+) layered over a
-  `swift-openapi-generator` core, with authentication, retries, and typed errors.
-- **`ktalk`** — a thin command-line wrapper over the SDK that prints JSON (macOS/Linux/Windows).
+## Install
 
-> **Status: work in progress.** The package scaffold, SDK core, and per-tag commands land in
-> separate pull requests. Sections marked _WIP_ below are filled in as those land.
-
-## Installation
-
-### As a library
-
-```swift
-// Package.swift
-.package(url: "https://github.com/AllDmeat/ktalk-sdk", from: "0.1.0")
-```
-
-```swift
-.target(name: "MyApp", dependencies: [.product(name: "KTalkSDK", package: "ktalk-sdk")])
-```
-
-### CLI via mise
+### mise (recommended)
 
 ```sh
-mise use -g "github:AllDmeat/ktalk-sdk"   # once releases are published
+mise use -g "ubi:AllDmeat/ktalk[exe=ktalk]"
+ktalk --help
 ```
 
-### CLI from a release binary
+This installs the latest release binary for your platform (macOS, Linux, Windows) and keeps it
+up to date. Pin a version with `ubi:AllDmeat/ktalk[exe=ktalk]@1.2.0`.
+
+### Release binary
 
 Download the archive for your platform from
-[Releases](https://github.com/AllDmeat/ktalk-sdk/releases) and put `ktalk` on your `PATH`.
+[Releases](https://github.com/AllDmeat/ktalk/releases), extract it, and put `ktalk` on your
+`PATH`.
 
-## Quick start
+### From source
 
-### As a library
-
-```swift
-import KTalkSDK
-
-let client = try KTalkClient(
-  baseURL: "https://example.ktalk.ru",
-  token: ProcessInfo.processInfo.environment["KTALK_TOKEN"]!
-)
-let page = try await client.listRecordings(limit: 20)
-for recording in page.items {
-  print(recording.key ?? "", recording.title ?? "")
-}
+```sh
+git clone https://github.com/AllDmeat/ktalk && cd ktalk
+swift build -c release        # binary at .build/release/ktalk
 ```
 
-### As a CLI
+## Authenticate
+
+`ktalk` needs your space URL and an `X-Auth-Token` API key (created in the Kontur.Talk admin
+panel under **API keys**). Set them once in the environment:
 
 ```sh
 export KTALK_BASE_URL="https://example.ktalk.ru"
 export KTALK_TOKEN="your-x-auth-token"
-
-ktalk --help
-ktalk recordings list --limit 20
-ktalk recordings get <recordingKey>
-ktalk recordings transcript <recordingKey>
-ktalk recordings summary <recordingKey>
-ktalk recordings download <recordingKey> --quality source -o out.mp4
 ```
 
-## Configuration
+Every command also accepts `--base-url` / `--token` to override per-invocation.
 
-The SDK takes `baseURL` and `token` explicitly. The CLI reads them from the environment,
-overridable per-invocation with flags:
+## Usage
 
-| Setting  | Environment      | Flag          |
-| -------- | ---------------- | ------------- |
-| Base URL | `KTALK_BASE_URL` | `--base-url`  |
-| Token    | `KTALK_TOKEN`    | `--token`     |
+```sh
+ktalk --help                                  # list all command groups
+ktalk recordings --help                       # help for a group
 
-Authentication uses an admin-issued API key sent in the `X-Auth-Token` header. Create one in
-the Kontur.Talk admin panel under **API keys**. There is no config file.
+ktalk recordings list --limit 20              # JSON to stdout
+ktalk recordings list --all | jq '.[].key'    # follow all pages, pipe to jq
+ktalk recordings transcript <recordingKey>              # raw JSON
+ktalk recordings transcript <recordingKey> --format text  # readable speaker dialogue
+ktalk recordings summary <recordingKey>
+ktalk recordings download <recordingKey> --quality source -o meeting.mp4
 
-## API Reference
+ktalk rooms get <roomName>
+ktalk reports conferences --from 2026-01-01 --to 2026-02-01
+ktalk users search --query ivanov
+ktalk stats online
+ktalk api-keys access-info                    # what your token can do
+```
 
-More tags are added as each SDK section lands.
+Commands that send a request body take it as a JSON file with `--from-json <path>` (so you
+never wrestle dozens of flags):
 
-### Recordings
+```sh
+ktalk webhooks create --from-json hook.json
+ktalk rooms update demo --from-json room.json
+```
 
-| Method | Description |
-| ------ | ----------- |
-| `listRecordings(pageToken:limit:query:)` | List recordings (one `Page<Recording>`). |
-| `collectAll { listRecordings(pageToken:) }` | Fetch every page as a flat array. |
-| `recording(key:)` | Fetch a single `Recording`. |
-| `recordingTranscript(key:)` | Fetch a recording's transcript. |
-| `recordingSummary(key:)` | Fetch a recording's summary / protocol. |
-| `downloadRecording(key:quality:)` | Download the media file as `Data`. |
+## Commands
 
-### Rooms
+Output is always JSON. `<key>` / `<id>` / `<name>` are positional; `--from-json` points at a
+request-body file.
 
-| Method | Description |
-| ------ | ----------- |
-| `room(name:)` | Fetch a `Room`. |
-| `updateRoom(name:params:)` | Create or update a room. |
-| `endConference(roomName:)` | Forcibly end the conference. |
-| `setRoomLock(roomName:request:)` | Set or clear the PIN and masking. |
-| `addModerator(roomName:userRef:)` / `removeModerator(roomName:userRef:)` | Manage moderators. |
+| Group | Commands |
+| ----- | -------- |
+| `recordings` | `list [--all --limit --page-token --query]`, `get <key>`, `transcript <key>`, `summary <key>`, `download <key> [--quality] -o <path>` |
+| `rooms` | `get <name>`, `update <name> --from-json`, `lock <name> --from-json`, `end-conference <name>`, `add-moderator <name> <userRef>`, `remove-moderator <name> <userRef>` |
+| `meetings` | `list <email> --start [--end --take]`, `create <email> --from-json`, `edit <email> <eventId> --from-json`, `cancel <email> <eventId> [--message]`, `edit-attendees <email> <eventId> --from-json`, `recurrence <email> <eventId>` |
+| `reports` | `audit-log --start --end`, `conferences [--from --to --skip --take --room]`, `conference <key>`, `conference-enriched <key>`, `participants <key>`, `activity <key>`, `chat <key>`, `room <name> --from [--to]` |
+| `users` | `search […]`, `scan […]`, `get <key>`, `create-or-update --from-json`, `delete <key>`, `revoke-sessions <key>`, `roles <key>`, `change-roles <key> --from-json`, `set-permissions <key> --from-json` |
+| `roles` | `list`, `get <id>`, `create --from-json`, `update <id> --from-json`, `delete <id>`, `permissions`, `defaults` |
+| `webhooks` | `list`, `create --from-json`, `activate <key> --from-json`, `delete <key>` |
+| `stats` | `domain`, `registered-users`, `conferences`, `recordings`, `kiosks`, `online`, `conferences-online`, `recordings-online`, `kiosks-online`, `streams-online`, `recordings-size`, `whiteboards`, `deepfake`, `tariff` |
+| `surveys` | `list`, `get <id>`, `create --from-json`, `update <id> --from-json`, `publish <id>`, `unpublish <id>` |
+| `kiosks` | `list`, `get <id>`, `create --from-json`, `update <id> --from-json`, `delete <id>`, `search`, `gadgets`, `news`, `screensavers`, `wallpapers` |
+| `calendar-servers` | `list [--skip --take]`, `get <id>`, `add --from-json`, `update <id> --from-json`, `delete <id>` |
+| `deepfake` | `report <conferenceKey> [--timezone]`, `statistic` |
+| `api-keys` | `list`, `access-info` |
 
-### Meetings
+Note: your token's scopes decide what works — read-only keys can `list`/`get` but `403` on
+writes. Run `ktalk api-keys access-info` to see what yours allows.
 
-| Method | Description |
-| ------ | ----------- |
-| `listMeetings(email:start:end:take:)` | List meetings for a calendar. |
-| `createMeeting(email:event:)` / `editMeeting(email:eventId:event:)` | Create / edit a meeting. |
-| `cancelMeeting(email:eventId:message:)` | Cancel (delete) a meeting. |
-| `editAttendees(email:eventId:attendees:)` | Edit attendees. |
-| `recurrenceSeries(email:eventId:)` | Fetch the recurring series. |
+## Library (bonus)
 
-### Reporting
+The same functionality is available as a Swift package, `KTalkSDK` (iOS 18+, macOS 15+), if you'd
+rather call it from code than shell out.
 
-| Method | Description |
-| ------ | ----------- |
-| `auditLog(startTime:endTime:)` | Domain audit log for a window. |
-| `conferences(fromDate:toDate:skip:take:roomNames:)` | List past conferences. |
-| `conference(key:)` / `enrichedConference(key:)` | Conference metadata / enriched artifacts. |
-| `conferenceParticipants(key:)` / `conferenceActivity(key:…)` / `conferenceChat(key:…)` | Conference reports. |
-| `roomReport(roomName:from:to:)` | Room statistics report. |
+```swift
+// Package.swift
+.package(url: "https://github.com/AllDmeat/ktalk", from: "0.1.0")
+```
 
-### Users
+```swift
+import KTalkSDK
 
-| Method | Description |
-| ------ | ----------- |
-| `searchUsers(query:emails:role:…)` / `scanUsers(offset:top:…)` | Search / scan users. |
-| `user(key:)` | Fetch a `User`. |
-| `createOrUpdateUsers(_:)` | Create/update/restore users (batch). |
-| `deleteUser(key:)` / `revokeSessions(userKey:)` | Delete a user / revoke sessions. |
-| `userRoles(userKey:)` / `changeRoles(userKey:request:)` | Read / change roles. |
-| `setPermissions(userKey:permissions:)` | Block or restore an account. |
+let client = try KTalkClient(baseURL: "https://example.ktalk.ru", token: myToken)
+let page = try await client.listRecordings(limit: 20)
+for recording in page.items { print(recording.key ?? "", recording.title ?? "") }
+```
 
-### Roles
-
-| Method | Description |
-| ------ | ----------- |
-| `listRoles()` / `role(id:)` | List roles / fetch one. |
-| `createRole(_:)` / `updateRole(id:request:)` / `deleteRole(id:)` | Manage custom roles. |
-| `permissions()` / `defaultRoles()` | List permissions / default roles. |
-
-### Webhooks
-
-| Method | Description |
-| ------ | ----------- |
-| `listWebhooks()` | List active webhooks. |
-| `createWebhook(_:)` / `activateWebhook(webhookKey:request:)` / `deleteWebhook(webhookKey:)` | Manage webhooks. |
-
-### Statistics
-
-| Method | Description |
-| ------ | ----------- |
-| `domainStatistics` / `registeredUsersStatistics` / `conferenceStatistics` / `recordingsStatistics` / `kioskStatistics` | Windowed statistics. |
-| `onlineCounters` / `conferencesOnline` / `recordingsOnline` / `kiosksOnline` / `streamsOnline` | Live online counters. |
-| `totalRecordingsSize` / `whiteboardsStatistics` / `deepFakeStatistics` / `tariffExpirationDate` | Misc statistics. |
-
-### Surveys
-
-| Method | Description |
-| ------ | ----------- |
-| `listSurveys()` / `survey(id:)` | List surveys / fetch one. |
-| `createSurvey(_:)` / `updateSurvey(id:request:)` | Create / update. |
-| `publishSurvey(id:)` / `unpublishSurvey(id:)` | Publish / unpublish. |
-
-### Kiosks
-
-| Method | Description |
-| ------ | ----------- |
-| `listKiosks()` / `kiosk(id:)` / `searchKiosks()` | List / fetch / search kiosks. |
-| `createKiosk(_:)` / `updateKiosk(id:params:)` / `deleteKiosk(id:)` | Manage kiosks. |
-| `kioskGadgets()` / `kioskNews()` / `kioskScreensavers()` / `kioskWallpapers()` | Gadgets, news, assets. |
-
-### Calendar servers, DeepFake, API keys
-
-| Method | Description |
-| ------ | ----------- |
-| `calendarServers()` / `calendarServer(id:)` / `addCalendarServer` / `updateCalendarServer` / `deleteCalendarServer` | Manage calendar servers. |
-| `deepFakeReport(conferenceKey:timezone:)` / `deepFakeDetectionStatistic()` | Deepfake detection. |
-| `applications()` / `applicationAccessInfo()` | Inspect API keys. |
-
-## CLI Commands
-
-More command groups are added as each CLI section lands.
-
-### `ktalk recordings`
-
-| Command | Description |
-| ------- | ----------- |
-| `list [--all] [--limit N] [--page-token T] [--query Q]` | List recordings (a page, or all with `--all`). |
-| `get <key>` | Print a recording as JSON. |
-| `transcript <key>` | Print a recording's transcript. |
-| `summary <key>` | Print a recording's summary / protocol. |
-| `download <key> [--quality source] -o <path>` | Download the media file to `<path>`. |
-
-### `ktalk rooms`
-
-| Command | Description |
-| ------- | ----------- |
-| `get <name>` | Print a room as JSON. |
-| `update <name> --from-json <path>` | Create/update a room from a params file. |
-| `lock <name> --from-json <path>` | Set/clear PIN + masking from a request file. |
-| `end-conference <name>` | Forcibly end the conference. |
-| `add-moderator <name> <userRef>` / `remove-moderator <name> <userRef>` | Manage moderators. |
-
-## Error Handling
-
-The SDK surfaces a typed `KTalkError` (invalid URL, HTTP status errors, decoding failures,
-network errors). _Details WIP._
+Every CLI command maps to a `KTalkClient` method (`listRecordings`, `room(name:)`,
+`createWebhook`, …). Failures surface as a typed `KTalkError`. The full method list is in the
+[DocC docs](Sources/KTalkSDK/Documentation.docc) and mirrors the command groups above.
 
 ## Development
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`AGENTS.md`](AGENTS.md). Common commands:
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`AGENTS.md`](AGENTS.md).
 
 ```sh
 swift build && swift test
 swift build -Xswiftc -warnings-as-errors        # the CI gate
 swift format lint --strict --recursive Sources/ Tests/
-scripts/check-no-internal-data.sh
 scripts/fetch-spec.sh                            # refresh the vendored OpenAPI
 ```
 
-The SDK is layered — generated core → `KTalkClient` facade → `ktalk` CLI — and documented with
-DocC (`Sources/KTalkSDK/Documentation.docc`). Spec normalizations live in `scripts/fetch-spec.sh`;
-see [`specs/`](specs/) and the [constitution](.specify/memory/constitution.md).
-
-### Automated updates
-
-A weekly workflow refreshes the OpenAPI document, classifies the change with
-[oasdiff](https://github.com/oasdiff/oasdiff), and opens a PR: non-breaking changes are labeled
-`minor` and auto-merged once CI is green; breaking changes are labeled `major` and left for
-review. Merging tags a release. To let the auto-tag trigger the Release workflow, add a
-`RELEASE_PAT` repository secret (a token with `contents: write`); without it the tag is still
-created and Release can be re-run.
+The SDK is generated from the vendored OpenAPI document — a **normalized copy** of Kontur's
+published spec, not the raw upstream (see [`AGENTS.md`](AGENTS.md) for every fixup and why). A
+weekly workflow refreshes it,
+classifies changes with [oasdiff](https://github.com/oasdiff/oasdiff) (non-breaking → auto-merged
+minor release, breaking → a `major` PR for review), and cuts a release. To let the auto-tag
+trigger the Release workflow, add a `RELEASE_PAT` repository secret.
 
 ## Requirements
 
-- Swift 6.2+
-- Apple platforms: iOS 18+, macOS 15+ (library). The `ktalk` CLI also builds on Linux and
-  Windows.
+- Running the CLI: nothing — the release binary is self-contained.
+- Building / using the library: Swift 6.2+. Library platforms iOS 18+ / macOS 15+; the CLI also
+  builds on Linux and Windows.
 
 ## License
 

@@ -9,5 +9,5 @@
 /// The companion `ktalk` executable is a thin command-line wrapper over this SDK.
 public enum KTalkSDK {
   /// The SDK's semantic version, kept in sync with the latest release tag.
-  public static let version = "0.0.0"
+  public static let version = "0.0.0-dev"
 }
