@@ -29,18 +29,37 @@ are the single source of truth. It is fetched from Kontur's published documentat
 `scripts/fetch-spec.sh` — do not hand-edit the vendored spec except to remove real data
 from examples.
 
-`fetch-spec.sh` also **normalizes** the upstream document so the generator accepts it and
-the strict build stays clean. All normalizations are deterministic, so re-fetching
-unchanged content stays byte-identical:
+### The vendored spec is normalized, not raw
 
-- injects the OpenAPI-required `info.version` (upstream omits it);
-- coerces/drops integer `maximum`/`minimum` bounds that are floats or exceed Int64;
-- declares path parameters referenced in a URL template but missing from `parameters`;
-- marks multipart request bodies `required` so uploads are generated;
-- strips advisory `deprecated` flags (they would trip `-warnings-as-errors` in generated code).
+`openapi/talk.json` is **not** the raw upstream document — `fetch-spec.sh` rewrites it so the
+generator accepts it, the strict build (`-warnings-as-errors`) stays clean, and the client
+tolerates the live API. Every normalization is deterministic (re-fetching unchanged content
+stays byte-identical). The complete list of what is changed and why:
 
-Numeric bounds and `deprecated` are validation/advisory metadata not emitted in the
-generated Swift, so removing them does not change the client's wire behaviour.
+1. **`info.version` injected** — upstream omits the OpenAPI-required field, without which the
+   generator errors. Set to a constant so re-fetches stay stable.
+2. **Integer bounds fixed** — some integer `maximum`/`minimum` are floats or exceed Int64
+   (e.g. `9.22e18` on `/api/Kiosk/news`), which OpenAPIKit can't parse. Whole-number floats are
+   coerced to ints; out-of-range bounds are dropped. Bounds aren't emitted in the generated
+   Swift, so this is codegen-only.
+3. **`additionalProperties: false` relaxed** — the live API returns fields the published spec
+   hasn't caught up with (e.g. `groupsCount` on users). Strict decoders reject them and fail the
+   whole response; removing the flag makes decoding forward-compatible (unknown keys ignored).
+4. **Deprecated schema properties removed** — deprecated properties are deleted outright (and
+   pulled from `required`) so they never reach the generated model. Deprecated *operations* and
+   *parameters* are kept (a deprecated endpoint is still usable), but every residual
+   `deprecated` flag is stripped so the generator doesn't emit `@available(*, deprecated)` and
+   then reference it in its own coding code (which trips `-warnings-as-errors`).
+5. **Missing path parameters declared** — some paths reference `{param}` without listing it
+   (e.g. `qualityName` in the recording-download path); added as required string path params.
+6. **Multipart bodies marked `required`** — the generator silently skips optional multipart
+   bodies, so uploads (avatars, kiosk artwork) wouldn't generate; marking them required fixes it.
+7. **Binary download body declared** — the spec leaves `GET …/file/{qualityName}` with an empty
+   200, discarding the file bytes; an `application/octet-stream` body is declared so the download
+   is generated.
+
+None of these change the API's wire behaviour — they only fix or complete the description so
+codegen works and the client survives real responses. Keep this list in sync with the script.
 
 Workflow:
 

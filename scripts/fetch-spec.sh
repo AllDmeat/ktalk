@@ -82,22 +82,57 @@ def relax_additional_properties(node):
 
 
 def strip_deprecated(node):
-    """Remove OpenAPI `deprecated` flags document-wide.
+    """Drop deprecated members from the document, and strip any residual `deprecated` flag.
 
-    The generator marks deprecated members with `@available(*, deprecated)` and then
-    references them in its own generated coding code, which trips `-warnings-as-errors`.
-    Deprecation is advisory metadata; dropping it keeps the strict build clean without
-    changing the wire behaviour of the client. Only boolean-valued `deprecated` keys (the
-    OpenAPI flag) are removed, never a schema property that happens to be named `deprecated`.
+    Deprecated schema *properties* are removed outright (not just unmarked) so they never
+    reach the generated model — the property is deleted and pulled from any `required` list.
+
+    Deprecated *operations* and *parameters* are kept (removing an endpoint would break the
+    facades that call it, and a deprecated endpoint is still usable) — only their
+    `deprecated` flag is stripped. A whole schema *definition* can also carry
+    `deprecated: true`; it cannot be deleted without breaking the `$ref`s that point at it,
+    so its flag is stripped too. Either way no `deprecated` flag survives, which is what
+    keeps the strict build clean (the generator otherwise emits `@available(*, deprecated)`
+    and then references those members in its own coding code, tripping `-warnings-as-errors`).
+
+    `deprecated` is only acted on when it is a boolean flag, never when it is a schema
+    property literally named `deprecated`.
     """
+    _remove_deprecated_properties(node)
+    _strip_deprecated_flags(node)
+
+
+def _remove_deprecated_properties(node):
+    if isinstance(node, dict):
+        properties = node.get("properties")
+        if isinstance(properties, dict):
+            removed = [
+                name
+                for name, schema in properties.items()
+                if isinstance(schema, dict) and schema.get("deprecated") is True
+            ]
+            for name in removed:
+                del properties[name]
+            required = node.get("required")
+            if removed and isinstance(required, list):
+                node["required"] = [name for name in required if name not in removed]
+
+        for child in node.values():
+            _remove_deprecated_properties(child)
+    elif isinstance(node, list):
+        for child in node:
+            _remove_deprecated_properties(child)
+
+
+def _strip_deprecated_flags(node):
     if isinstance(node, dict):
         if isinstance(node.get("deprecated"), bool):
             del node["deprecated"]
         for child in node.values():
-            strip_deprecated(child)
+            _strip_deprecated_flags(child)
     elif isinstance(node, list):
         for child in node:
-            strip_deprecated(child)
+            _strip_deprecated_flags(child)
 
 
 def ensure_path_parameters(doc):
