@@ -65,8 +65,10 @@ Workflow:
 
 1. Update or add a spec in `specs/` before implementing new functionality.
 2. Implement strictly according to the spec.
-3. Keep the README "API Reference" and "CLI Commands" sections in sync. Any PR that
-   changes the public API surface MUST update them.
+3. Keep the README **`## Commands`** table in sync with the CLI. Any PR that adds, removes,
+   or renames a `ktalk` command or group MUST update that table in the same PR — it is the
+   canonical command list, and it must stay exhaustive. (`ktalk --help` and
+   `ktalk <group> --help` are the source of truth to check it against.)
 
 ## Architecture
 
