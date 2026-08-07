@@ -103,6 +103,16 @@ More tags are added as each SDK section lands.
 | `setRoomLock(roomName:request:)` | Set or clear the PIN and masking. |
 | `addModerator(roomName:userRef:)` / `removeModerator(roomName:userRef:)` | Manage moderators. |
 
+### Meetings
+
+| Method | Description |
+| ------ | ----------- |
+| `listMeetings(email:start:end:take:)` | List meetings for a calendar. |
+| `createMeeting(email:event:)` / `editMeeting(email:eventId:event:)` | Create / edit a meeting. |
+| `cancelMeeting(email:eventId:message:)` | Cancel (delete) a meeting. |
+| `editAttendees(email:eventId:attendees:)` | Edit attendees. |
+| `recurrenceSeries(email:eventId:)` | Fetch the recurring series. |
+
 ## CLI Commands
 
 More command groups are added as each CLI section lands.
