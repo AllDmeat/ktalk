@@ -52,6 +52,11 @@ public struct KTalkClient: Sendable {
     } catch let error as KTalkError {
       throw error
     } catch let error as ClientError {
+      // A middleware (e.g. RetryMiddleware) may throw a KTalkError that the generated client
+      // wraps in a ClientError; unwrap it so the typed error survives.
+      if let ktalkError = error.underlyingError as? KTalkError {
+        throw ktalkError
+      }
       if error.underlyingError is DecodingError {
         throw .decodingError(underlying: error)
       }

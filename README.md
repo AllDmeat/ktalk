@@ -113,6 +113,16 @@ More tags are added as each SDK section lands.
 | `editAttendees(email:eventId:attendees:)` | Edit attendees. |
 | `recurrenceSeries(email:eventId:)` | Fetch the recurring series. |
 
+### Reporting
+
+| Method | Description |
+| ------ | ----------- |
+| `auditLog(startTime:endTime:)` | Domain audit log for a window. |
+| `conferences(fromDate:toDate:skip:take:roomNames:)` | List past conferences. |
+| `conference(key:)` / `enrichedConference(key:)` | Conference metadata / enriched artifacts. |
+| `conferenceParticipants(key:)` / `conferenceActivity(key:…)` / `conferenceChat(key:…)` | Conference reports. |
+| `roomReport(roomName:from:to:)` | Room statistics report. |
+
 ## CLI Commands
 
 More command groups are added as each CLI section lands.
