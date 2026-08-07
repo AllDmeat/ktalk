@@ -103,10 +103,24 @@ jobs:
           path: artifacts
 
       - name: Package agent extension
+        # Ship agent/ as a self-contained archive (gemini-extension.json at the root) so
+        # `gemini extensions install <repo-url>` can take it — Gemini can't install a subdir.
+        #
+        # The names are load-bearing, twofold:
+        #   1. Gemini picks a release asset by trying `{platform}.{arch}.` first, then
+        #      `{platform}.`, and only falls back to a lone generic asset when the release
+        #      has exactly one. This release also ships CLI binaries, so a single generic
+        #      archive would never be chosen — Gemini would fall back to the repo source
+        #      tarball, where the manifest is under agent/ not at the root, and break. The
+        #      extension is platform-independent, so publish one identical copy per platform
+        #      prefix and let the `{platform}.` rule match on any OS.
+        #   2. The prefixes contain no `ktalk_`, so a consumer installing the CLI via mise's
+        #      github backend with `matching = "ktalk_"` never picks the agent archive by
+        #      mistake on a platform that has no CLI binary.
         run: |
-          # Ship agent/ as a self-contained archive (gemini-extension.json at the root) so
-          # `gemini extensions install <repo-url>` can take it — Gemini can't install a subdir.
-          tar -czf "${PRODUCT_NAME}_agent_${GITHUB_REF_NAME}.tar.gz" -C agent .
+          for platform in darwin linux win32; do
+            tar -czf "${platform}.${PRODUCT_NAME}.tar.gz" -C agent .
+          done
 
       - name: Release
         uses: softprops/action-gh-release@v3
@@ -114,4 +128,4 @@ jobs:
           generate_release_notes: true
           files: |
             artifacts/**/*.tar.gz
-            ${{ env.PRODUCT_NAME }}_agent_*.tar.gz
+            *.${{ env.PRODUCT_NAME }}.tar.gz
