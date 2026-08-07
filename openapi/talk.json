@@ -850,11 +850,6 @@
             "nullable": true,
             "type": "integer"
           },
-          "isFastReservationEnabled": {
-            "description": "Вкл\\выкл быстрое бронирование\n\nУбрать когда все устройства киоски перейдут на Occupancy",
-            "nullable": true,
-            "type": "boolean"
-          },
           "joinLeaveNotifications": {
             "description": "Уведомление о подключении к встрече",
             "nullable": true,
@@ -1117,11 +1112,6 @@
           },
           "ignoreMassUpdate": {
             "description": "Игнорировать массовые обновления",
-            "nullable": true,
-            "type": "boolean"
-          },
-          "isFastReservationEnabled": {
-            "description": "Вкл\\выкл быстрое бронирование\n\nУбрать когда все устройства киоски перейдут на Occupancy",
             "nullable": true,
             "type": "boolean"
           },
@@ -2951,14 +2941,6 @@
             "nullable": true,
             "type": "array"
           },
-          "roles": {
-            "description": "Роли пользователя\n\nВместо ролей должны использоваться разрешения, см. Permissions в ответе GET /api/context <br/>Для получения ролей пользователя используйте GET /api/users/{userKey}/roles",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
           "status": {
             "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Enums.TalkUserStatus"
           },
@@ -3050,14 +3032,6 @@
             "description": "Роли пользователя с описаниями из ролевой модели",
             "items": {
               "$ref": "#/components/schemas/SkbKontur.Talk.Api.Entities.TalkRoleInfo"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "roles": {
-            "description": "Роли пользователя\n\nВместо ролей должны использоваться разрешения, см. Permissions в ответе GET /api/context <br/>Для получения ролей пользователя используйте GET /api/users/{userKey}/roles",
-            "items": {
-              "type": "string"
             },
             "nullable": true,
             "type": "array"
@@ -5102,12 +5076,6 @@
       "SkbKontur.Talk.Web.Entities.Domains.TalkDomainStatistics": {
         "description": "Статистика: активные пользователи в домене",
         "properties": {
-          "created": {
-            "description": "С какого периода просмотреть статистику\n\nСмысл параметра не соответствует названию",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "endDate": {
             "description": "Окончание периода статистики",
             "format": "date-time",
@@ -5308,10 +5276,6 @@
       "SkbKontur.Talk.Web.Entities.Recordings.TalkConferenceRecording": {
         "description": "Информация о записи конференции",
         "properties": {
-          "allowAnonymousAccess": {
-            "description": "Признак доступности анонимам\n\nДля изменения доступа по ссылке используйте PATCH api/recordings/{recordingKey}/access",
-            "type": "boolean"
-          },
           "commentsCount": {
             "description": "Число комментариев",
             "format": "int32",
@@ -5421,11 +5385,6 @@
       "SkbKontur.Talk.Web.Entities.Recordings.TalkConferenceRecordingUpdateParams": {
         "description": "Параметры обновления записи конференции",
         "properties": {
-          "allowAnonymousAccess": {
-            "description": "Доступ к записи у анонимов. По умолчанию — false\n\nДля изменения доступа по ссылке используйте PATCH api/recordings/{recordingKey}/access",
-            "nullable": true,
-            "type": "boolean"
-          },
           "description": {
             "description": "Описание. Максимально допустимая длина — 4096",
             "maxLength": 4096,
@@ -5451,10 +5410,6 @@
       "SkbKontur.Talk.Web.Entities.Recordings.TalkDomainConferenceRecording": {
         "description": "Информация о записи конференции",
         "properties": {
-          "allowAnonymousAccess": {
-            "description": "Разрешен ли доступ внешних участников\n\nДля изменения доступа по ссылке используйте PATCH api/recordings/{recordingKey}/access",
-            "type": "boolean"
-          },
           "canBeRemoved": {
             "description": "Может ли элемент быть удален",
             "type": "boolean"
@@ -5950,11 +5905,6 @@
       "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomParams": {
         "description": "Параметры комнаты",
         "properties": {
-          "allowAnonymous": {
-            "description": "Используйте AnonymousAccessExpirationDate",
-            "nullable": true,
-            "type": "boolean"
-          },
           "anonymousAccessExpirationDate": {
             "description": "Разрешить подключение анонимных пользователей до даты",
             "format": "date-time",
