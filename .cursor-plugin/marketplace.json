@@ -1,0 +1,16 @@
+{
+  "name": "ktalk",
+  "owner": {
+    "name": "Aleksey Berezka"
+  },
+  "metadata": {
+    "description": "Agent skill for the ktalk CLI — the Kontur.Talk API from the terminal"
+  },
+  "plugins": [
+    {
+      "name": "ktalk",
+      "source": "agent",
+      "description": "Teaches the agent to read `ktalk --help` and `ktalk <group> <command> --help` before composing a command, and covers what the help cannot: env-var auth, cursor pagination, JSON output, transcript --format text, token scopes, and built-in 429 handling."
+    }
+  ]
+}
