@@ -15,7 +15,7 @@ struct KTalk: AsyncParsableCommand {
     subcommands: [
     subcommands: [
       Recordings.self, Rooms.self, Meetings.self, Reports.self, Users.self, RolesCommand.self,
-      Webhooks.self,
+      Webhooks.self, Stats.self,
     ]
     ]
   )
