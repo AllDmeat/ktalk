@@ -29,6 +29,21 @@ struct GlobalOptions: ParsableArguments {
   }
 }
 
+/// Parses an ISO 8601 date string (with or without fractional seconds), or a bare `yyyy-MM-dd`.
+func parseISODate(_ string: String) throws -> Date {
+  if let date = try? Date.ISO8601FormatStyle(includingFractionalSeconds: true).parse(string) {
+    return date
+  }
+  if let date = try? Date.ISO8601FormatStyle(includingFractionalSeconds: false).parse(string) {
+    return date
+  }
+  if let date = try? Date.ISO8601FormatStyle().parse("\(string)T00:00:00Z") {
+    return date
+  }
+  throw ValidationError(
+    "Invalid date '\(string)'. Use ISO 8601, e.g. 2026-01-02T00:00:00Z or 2026-01-02.")
+}
+
 /// Decodes a `Decodable` value from a JSON file, for commands that take a request body.
 func decodeJSON<T: Decodable>(_ type: T.Type, fromFile path: String) throws -> T {
   let data = try Data(contentsOf: URL(fileURLWithPath: path))
