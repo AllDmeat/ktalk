@@ -55,16 +55,32 @@ extension Recordings {
     }
   }
 
+  /// Output format for the transcript command.
+  enum TranscriptFormat: String, CaseIterable, ExpressibleByArgument {
+    case json
+    case text
+  }
+
   struct Transcript: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "transcript", abstract: "Get a recording's transcript.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
+    @Option(name: .long, help: "Output format: json (default) or text (speaker dialogue).")
+    var format: TranscriptFormat = .json
+    @Flag(name: .long, help: "Omit timestamps in text output.")
+    var noTimestamps = false
 
     func run() async throws {
       let client = try global.makeClient()
-      try printJSON(try await client.recordingTranscript(key: key))
+      let transcript = try await client.recordingTranscript(key: key)
+      switch format {
+      case .json:
+        try printJSON(transcript)
+      case .text:
+        print(transcript.dialogue(includeTimestamps: !noTimestamps))
+      }
     }
   }
 
