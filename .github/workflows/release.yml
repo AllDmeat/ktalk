@@ -100,10 +100,8 @@ jobs:
           if [ "${{ matrix.static-swift-stdlib }}" = "true" ]; then
             STATIC_FLAG="--static-swift-stdlib"
           fi
-          # Disable debug-info generation. Some Swift 6.2.x toolchains ship with
-          # assertions enabled, and their DebugInfoVerifier asserts (signal 6) while
-          # emitting debug info under -c release. A distributed CLI binary ships no
-          # dSYMs, so -gnone sidesteps the crash with no loss.
+          # Release binaries ship no dSYMs, so skip debug-info generation for
+          # smaller output (-gnone).
           BUILD_FLAGS="$STATIC_FLAG -Xswiftc -gnone"
           BIN_PATH="$(swift build -c release --product "$PRODUCT_NAME" $BUILD_FLAGS --show-bin-path)"
           swift build -c release --product "$PRODUCT_NAME" $BUILD_FLAGS
