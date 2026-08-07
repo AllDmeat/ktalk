@@ -134,6 +134,53 @@ More tags are added as each SDK section lands.
 | `userRoles(userKey:)` / `changeRoles(userKey:request:)` | Read / change roles. |
 | `setPermissions(userKey:permissions:)` | Block or restore an account. |
 
+### Roles
+
+| Method | Description |
+| ------ | ----------- |
+| `listRoles()` / `role(id:)` | List roles / fetch one. |
+| `createRole(_:)` / `updateRole(id:request:)` / `deleteRole(id:)` | Manage custom roles. |
+| `permissions()` / `defaultRoles()` | List permissions / default roles. |
+
+### Webhooks
+
+| Method | Description |
+| ------ | ----------- |
+| `listWebhooks()` | List active webhooks. |
+| `createWebhook(_:)` / `activateWebhook(webhookKey:request:)` / `deleteWebhook(webhookKey:)` | Manage webhooks. |
+
+### Statistics
+
+| Method | Description |
+| ------ | ----------- |
+| `domainStatistics` / `registeredUsersStatistics` / `conferenceStatistics` / `recordingsStatistics` / `kioskStatistics` | Windowed statistics. |
+| `onlineCounters` / `conferencesOnline` / `recordingsOnline` / `kiosksOnline` / `streamsOnline` | Live online counters. |
+| `totalRecordingsSize` / `whiteboardsStatistics` / `deepFakeStatistics` / `tariffExpirationDate` | Misc statistics. |
+
+### Surveys
+
+| Method | Description |
+| ------ | ----------- |
+| `listSurveys()` / `survey(id:)` | List surveys / fetch one. |
+| `createSurvey(_:)` / `updateSurvey(id:request:)` | Create / update. |
+| `publishSurvey(id:)` / `unpublishSurvey(id:)` | Publish / unpublish. |
+
+### Kiosks
+
+| Method | Description |
+| ------ | ----------- |
+| `listKiosks()` / `kiosk(id:)` / `searchKiosks()` | List / fetch / search kiosks. |
+| `createKiosk(_:)` / `updateKiosk(id:params:)` / `deleteKiosk(id:)` | Manage kiosks. |
+| `kioskGadgets()` / `kioskNews()` / `kioskScreensavers()` / `kioskWallpapers()` | Gadgets, news, assets. |
+
+### Calendar servers, DeepFake, API keys
+
+| Method | Description |
+| ------ | ----------- |
+| `calendarServers()` / `calendarServer(id:)` / `addCalendarServer` / `updateCalendarServer` / `deleteCalendarServer` | Manage calendar servers. |
+| `deepFakeReport(conferenceKey:timezone:)` / `deepFakeDetectionStatistic()` | Deepfake detection. |
+| `applications()` / `applicationAccessInfo()` | Inspect API keys. |
+
 ## CLI Commands
 
 More command groups are added as each CLI section lands.
