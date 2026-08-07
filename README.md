@@ -123,6 +123,17 @@ More tags are added as each SDK section lands.
 | `conferenceParticipants(key:)` / `conferenceActivity(key:…)` / `conferenceChat(key:…)` | Conference reports. |
 | `roomReport(roomName:from:to:)` | Room statistics report. |
 
+### Users
+
+| Method | Description |
+| ------ | ----------- |
+| `searchUsers(query:emails:role:…)` / `scanUsers(offset:top:…)` | Search / scan users. |
+| `user(key:)` | Fetch a `User`. |
+| `createOrUpdateUsers(_:)` | Create/update/restore users (batch). |
+| `deleteUser(key:)` / `revokeSessions(userKey:)` | Delete a user / revoke sessions. |
+| `userRoles(userKey:)` / `changeRoles(userKey:request:)` | Read / change roles. |
+| `setPermissions(userKey:permissions:)` | Block or restore an account. |
+
 ## CLI Commands
 
 More command groups are added as each CLI section lands.
