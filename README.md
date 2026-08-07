@@ -13,7 +13,7 @@ mise use github:AllDmeat/ktalk
 ktalk --help
 ```
 
-This installs the latest release binary for your platform (macOS, Linux, Windows) via mise's
+This installs the latest release binary for your platform (macOS, Linux) via mise's
 GitHub backend. Add `-g` for a global install; pin a version with `github:AllDmeat/ktalk@1.0.0`.
 
 ### Release binary
@@ -174,7 +174,7 @@ trigger the Release workflow, add a `RELEASE_PAT` repository secret.
 
 - Running the CLI: nothing — the release binary is self-contained.
 - Building / using the library: Swift 6.2+. Library platforms iOS 18+ / macOS 15+; the CLI also
-  builds on Linux and Windows.
+  builds on Linux.
 
 ## License
 
