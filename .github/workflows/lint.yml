@@ -7,18 +7,20 @@ on:
 jobs:
   swift-format:
     name: swift-format
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
       - name: Install mise
-        uses: jdx/mise-action@v2
-      - name: swift-format lint
+        uses: jdx/mise-action@v4
+
+      - name: Lint
         run: swift format lint --strict --recursive Sources/ Tests/
 
   no-internal-data:
     name: no-internal-data
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Guard against leaked internal data
         run: scripts/check-no-internal-data.sh
