@@ -1,6 +1,6 @@
 # Constitution
 
-Architectural principles for `ktalk-sdk`. These take priority over convenience.
+Architectural principles for `ktalk`. These take priority over convenience.
 
 1. **Public, clean, no internal data.** The repo is public. No real space name or captured API
    data anywhere — only `example.ktalk.ru` and synthetic fixtures. Enforced by

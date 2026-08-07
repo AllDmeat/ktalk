@@ -1,0 +1,11 @@
+{
+  "tracks": [
+    { "speaker": { "userInfo": { "firstname": "Alice" } },
+      "chunks": [
+        { "startTimeOffsetInMillis": 0, "text": "Hello." },
+        { "startTimeOffsetInMillis": 4000, "text": "How are you?" }
+      ] },
+    { "speaker": { "userInfo": { "firstname": "Bob" } },
+      "chunks": [ { "startTimeOffsetInMillis": 2000, "text": "Hi Alice." } ] }
+  ]
+}

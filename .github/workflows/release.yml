@@ -84,6 +84,15 @@ jobs:
             fi
           done
 
+      - name: Stamp version from tag
+        run: |
+          # Inject the release version (the tag name, e.g. 1.0.0) into the SDK so
+          # `ktalk --version` reports it. The committed source keeps a dev placeholder.
+          sed -i.bak "s/public static let version = \"[^\"]*\"/public static let version = \"${GITHUB_REF_NAME}\"/" \
+            Sources/KTalkSDK/KTalkSDK.swift
+          rm -f Sources/KTalkSDK/KTalkSDK.swift.bak
+          grep 'static let version' Sources/KTalkSDK/KTalkSDK.swift
+
       - name: Build release binary
         id: build
         run: |
