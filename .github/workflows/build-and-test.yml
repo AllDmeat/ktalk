@@ -56,8 +56,10 @@ jobs:
       - name: Resolve package dependencies
         run: swift package resolve
 
+      # swift-openapi-generator 1.13.1 emits unused `public import`s in generated
+      # files with no declarations, so UnusedImportAccess stays a warning.
       - name: Test (warnings as errors)
-        run: swift test -Xswiftc -warnings-as-errors
+        run: swift test -Xswiftc -warnings-as-errors -Xswiftc -Wwarning -Xswiftc UnusedImportAccess
 
       - name: Build release binary
         id: build
