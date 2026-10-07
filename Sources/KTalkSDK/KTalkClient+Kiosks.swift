@@ -338,7 +338,7 @@ extension KTalkClient {
   {
     try await call {
       let parts: [Operations.KioskUploadScreensavers.Input.Body.MultipartFormPayload] = files.map {
-        .screensaver(.init(payload: .init(body: HTTPBody($0.data)), filename: $0.filename))
+        .undocumented($0.multipartPart(name: "screensaver"))
       }
       switch try await client.kioskUploadScreensavers(.init(body: .multipartForm(.init(parts)))) {
       case .ok(let ok): return try ok.body.json
@@ -364,7 +364,7 @@ extension KTalkClient {
   {
     try await call {
       let parts: [Operations.KioskUploadWallpapers.Input.Body.MultipartFormPayload] = files.map {
-        .wallpaper(.init(payload: .init(body: HTTPBody($0.data)), filename: $0.filename))
+        .undocumented($0.multipartPart(name: "wallpaper"))
       }
       switch try await client.kioskUploadWallpapers(.init(body: .multipartForm(.init(parts)))) {
       case .ok(let ok): return try ok.body.json

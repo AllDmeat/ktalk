@@ -203,7 +203,22 @@ struct EndpointRoutingTests {
     let sent = try await String(collecting: try #require(recorded.body), upTo: .max)
     #expect(sent.contains(#"name="wallpaper""#))
     #expect(sent.contains(#"filename="wall.png""#))
+    #expect(sent.lowercased().contains("content-type: image/png"))
+    #expect(!sent.contains("application/octet-stream"))
     #expect(sent.contains("synthetic"))
+  }
+
+  /// The server rejects an avatar sent as `application/octet-stream`, so the type comes from
+  /// the file name.
+  @Test func uploadMediaTypeFollowsExtension() {
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "me.PNG") == "image/png")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "me.jpeg") == "image/jpeg")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "scan.tif") == "image/tiff")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "loop.mp4") == "video/mp4")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "noext") == "application/octet-stream")
+    #expect(
+      KTalkClient.UploadFile(filename: "a.bin", data: Data(), contentType: "image/png").contentType
+        == "image/png")
   }
 
   // MARK: - Roles, users, rooms
@@ -227,9 +242,13 @@ struct EndpointRoutingTests {
 
   @Test func avatars() async throws {
     let file = KTalkClient.UploadFile(filename: "me.png", data: Data("synthetic".utf8))
-    try await expectRoute(.post, "/api/Users/u-1/avatar", reply: "{}") {
-      _ = try await $0.uploadAvatar(userKey: "u-1", file: file)
-    }
+    let transport = replay("{}")
+    _ = try await client(transport).uploadAvatar(userKey: "u-1", file: file)
+    let recorded = try #require(transport.lastRequest)
+    #expect(recorded.request.path == "/api/Users/u-1/avatar")
+    let sent = try await String(collecting: try #require(recorded.body), upTo: .max)
+    #expect(sent.contains(#"name="avatar""#))
+    #expect(sent.lowercased().contains("content-type: image/png"))
     try await expectRoute(.delete, "/api/Users/u-1/avatar") {
       try await $0.deleteAvatar(userKey: "u-1")
     }

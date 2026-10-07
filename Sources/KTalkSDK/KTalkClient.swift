@@ -1,4 +1,5 @@
 import Foundation
+import HTTPTypes
 import OpenAPIRuntime
 import OpenAPIURLSession
 
@@ -39,15 +40,48 @@ public struct KTalkClient: Sendable {
     )
   }
 
-  /// A file to upload: its name as the server should see it and its bytes. The bytes are held
-  /// in memory, so an upload of several large files holds all of them at once.
+  /// A file to upload: its name as the server should see it, its media type and its bytes.
+  /// The bytes are held in memory, so an upload of several large files holds all of them at
+  /// once.
   public struct UploadFile: Sendable {
     public let filename: String
+    public let contentType: String
     public let data: Data
 
-    public init(filename: String, data: Data) {
+    /// - Parameter contentType: The part's media type. The server checks it — an avatar sent
+    ///   as `application/octet-stream` is rejected — so by default it comes from the file
+    ///   name's extension.
+    public init(filename: String, data: Data, contentType: String? = nil) {
       self.filename = filename
       self.data = data
+      self.contentType = contentType ?? Self.mediaType(forFilename: filename)
+    }
+
+    /// The media type for a file name's extension, `application/octet-stream` when unknown.
+    public static func mediaType(forFilename filename: String) -> String {
+      let ext = filename.split(separator: ".", omittingEmptySubsequences: false).last
+        .map { $0.lowercased() }
+      switch filename.contains(".") ? ext : nil {
+      case "png": return "image/png"
+      case "jpg", "jpeg": return "image/jpeg"
+      case "tif", "tiff": return "image/tiff"
+      case "gif": return "image/gif"
+      case "webp": return "image/webp"
+      case "bmp": return "image/bmp"
+      case "mp4": return "video/mp4"
+      case "mov": return "video/quicktime"
+      case "webm": return "video/webm"
+      default: return "application/octet-stream"
+      }
+    }
+
+    /// A multipart part named `name` that carries this file with its own media type.
+    ///
+    /// Built raw because the generated typed parts always send `application/octet-stream`.
+    func multipartPart(name: String) -> MultipartRawPart {
+      MultipartRawPart(
+        name: name, filename: filename, headerFields: [.contentType: contentType],
+        body: HTTPBody(data))
     }
   }
 

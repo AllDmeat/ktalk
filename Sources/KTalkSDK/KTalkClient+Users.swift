@@ -162,7 +162,7 @@ extension KTalkClient {
   {
     try await call {
       let parts: [Operations.UsersUploadAvatar2.Input.Body.MultipartFormPayload] = [
-        .avatar(.init(payload: .init(body: HTTPBody(file.data)), filename: file.filename))
+        .undocumented(file.multipartPart(name: "avatar"))
       ]
       switch try await client.usersUploadAvatar2(
         .init(path: .init(userKey: userKey), body: .multipartForm(.init(parts))))
