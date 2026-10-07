@@ -148,7 +148,7 @@ extension Users {
 
   struct UploadAvatar: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "upload-avatar", abstract: "Upload a user's avatar.")
+      commandName: "upload-avatar", abstract: "[personal key] Upload a user's avatar.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     @Argument(help: "Image file.") var file: String
