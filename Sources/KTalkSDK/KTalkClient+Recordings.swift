@@ -136,7 +136,8 @@ extension KTalkClient {
   /// The endpoint pages by offset and reports no total. Paging stops on an empty page rather
   /// than a short one, so a server that caps `top` below the requested size loses nothing.
   /// It also stops on a page identical to the previous one or bringing no unseen recording,
-  /// so a server that ignores `skip` cannot loop forever, with or without ids. Recordings
+  /// so a server that ignores `skip` cannot loop forever, with or without ids; 1,000 pages
+  /// is a hard stop on top. Recordings
   /// are de-duplicated by id, which absorbs one added mid-scan; one deleted mid-scan shifts
   /// the offset and the next recording can be missed — offset paging cannot tell.
   public func allAccessibleRecordings() async throws(KTalkError) -> [AccessibleRecording] {
@@ -144,7 +145,8 @@ extension KTalkClient {
     var seen = Set<String>()
     var previous: [AccessibleRecording] = []
     var skip = 0
-    while true {
+    // A hard stop for a server that never ends the list: 1,000 pages is 100,000 recordings.
+    for _ in 0..<1_000 {
       let page = try await listAccessibleRecordings(
         top: Self.accessibleRecordingsMaxPageSize, skip: skip)
       if page.isEmpty || page == previous { return all }
@@ -157,6 +159,7 @@ extension KTalkClient {
       previous = page
       skip += page.count
     }
+    return all
   }
 
   /// Fetches a recording available to a personal access token's user. The endpoint is

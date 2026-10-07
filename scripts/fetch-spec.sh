@@ -300,6 +300,17 @@ def add_support_confirmed_operations(doc):
     RECORDING_SCHEMA = {"$ref": f"#/components/schemas/{matches[0]}"}
 
     paths = doc.setdefault("paths", {})
+    # Reuse upstream's tag for recording operations rather than hard-coding its text.
+    recordings_tags = next(
+        (
+            op["tags"]
+            for path, item in paths.items()
+            if path.lower().startswith("/api/recordings/") and isinstance(item, dict)
+            for op in item.values()
+            if isinstance(op, dict) and op.get("tags") and op.get("x-ktalk-source") != "support"
+        ),
+        [],
+    )
     operations = {
         ("/api/recordings", "get"): {
             "operationId": "Recordings_GetAccessible",
@@ -371,7 +382,7 @@ def add_support_confirmed_operations(doc):
                     del paths[path]
             continue
         item = paths.setdefault(path, {})
-        item[method] = {"tags": ["Записи"], "x-ktalk-source": "support", **operation}
+        item[method] = {"tags": recordings_tags, "x-ktalk-source": "support", **operation}
 
 
 src, dst = sys.argv[1], sys.argv[2]
