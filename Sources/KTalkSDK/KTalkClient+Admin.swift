@@ -35,7 +35,9 @@ extension KTalkClient {
   {
     try await call {
       switch try await client.calendarGetCalendarServers(
-        .init(query: .init(skip: skip.map(Int32.init), take: take.map(Int32.init))))
+        .init(
+          query: .init(
+            skip: skip.map { Int32(clamping: $0) }, take: take.map { Int32(clamping: $0) })))
       {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
@@ -174,7 +176,7 @@ extension KTalkClient {
       switch try await client.deepFakeDetectorGetTaskSourceFile(
         .init(path: .init(conferenceKey: conferenceKey, taskKey: taskKey)))
       {
-      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .ok(let ok): return try await Data(collecting: ok.body.any, upTo: .max)
       case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "task", identifier: taskKey)
       }
     }
@@ -186,7 +188,7 @@ extension KTalkClient {
       switch try await client.deepFakeDetectorGetTaskSourceFiles(
         .init(path: .init(conferenceKey: conferenceKey)))
       {
-      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .ok(let ok): return try await Data(collecting: ok.body.any, upTo: .max)
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "conference", identifier: conferenceKey)
       }

@@ -72,7 +72,9 @@ extension KTalkClient {
   ) async throws(KTalkError) -> Page<Recording> {
     try await call {
       let output = try await client.domainRecordingsGetV2(
-        .init(query: .init(pageTokenString: pageToken, query: query, top: limit.map(Int32.init)))
+        .init(
+          query: .init(
+            pageTokenString: pageToken, query: query, top: limit.map { Int32(clamping: $0) }))
       )
       switch output {
       case .ok(let ok):
@@ -117,7 +119,9 @@ extension KTalkClient {
   ) async throws(KTalkError) -> [AccessibleRecording] {
     try await call {
       let output = try await client.recordingsGetAccessible(
-        .init(query: .init(top: top.map(Int32.init), skip: skip.map(Int32.init))))
+        .init(
+          query: .init(top: top.map { Int32(clamping: $0) }, skip: skip.map { Int32(clamping: $0) })
+        ))
       switch output {
       case .ok(let ok):
         return try ok.body.json.recordings ?? []
@@ -129,15 +133,22 @@ extension KTalkClient {
 
   /// Fetches every recording available to a personal access token's user.
   ///
-  /// The endpoint pages by offset and reports no total, so this requests full pages until
-  /// one comes back short.
+  /// The endpoint pages by offset and reports no total. Paging stops on an empty page rather
+  /// than a short one, so a server that caps `top` below the requested size loses nothing;
+  /// it also stops when a page brings no new recording, so a server that ignores `skip`
+  /// cannot loop forever. Recordings are de-duplicated by id, which absorbs offset drift when
+  /// a recording appears mid-scan.
   public func allAccessibleRecordings() async throws(KTalkError) -> [AccessibleRecording] {
-    let pageSize = Self.accessibleRecordingsMaxPageSize
     var all: [AccessibleRecording] = []
+    var seen = Set<String>()
+    var skip = 0
     while true {
-      let page = try await listAccessibleRecordings(top: pageSize, skip: all.count)
-      all.append(contentsOf: page)
-      if page.count < pageSize { return all }
+      let page = try await listAccessibleRecordings(
+        top: Self.accessibleRecordingsMaxPageSize, skip: skip)
+      let fresh = page.filter { recording in recording.id.map { seen.insert($0).inserted } ?? true }
+      if fresh.isEmpty { return all }
+      all.append(contentsOf: fresh)
+      skip += page.count
     }
   }
 
@@ -190,7 +201,7 @@ extension KTalkClient {
         .init(path: .init(qualityName: quality, recordingKey: key)))
       switch output {
       case .ok(let ok):
-        return try await Data(collecting: ok.body.binary, upTo: .max)
+        return try await Data(collecting: ok.body.any, upTo: .max)
       case .undocumented(let statusCode, _):
         throw notFoundOrStatus(statusCode, resource: "recording file", identifier: key)
       }
@@ -207,9 +218,10 @@ extension KTalkClient {
       switch try await client.domainRecordingsGet(
         .init(
           query: .init(
-            startFrom: startFrom, startTo: startTo, skip: skip.map(Int32.init), query: query,
-            title: title, maxParticipantCount: maxParticipantCount.map(Int32.init),
-            top: top.map(Int32.init), orderMode: orderMode)))
+            startFrom: startFrom, startTo: startTo, skip: skip.map { Int32(clamping: $0) },
+            query: query,
+            title: title, maxParticipantCount: maxParticipantCount.map { Int32(clamping: $0) },
+            top: top.map { Int32(clamping: $0) }, orderMode: orderMode)))
       {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
@@ -225,7 +237,8 @@ extension KTalkClient {
       switch try await client.domainRecordingsFindParticipants(
         .init(
           path: .init(recordingKey: key),
-          query: .init(skip: skip.map(Int32.init), top: top.map(Int32.init))))
+          query: .init(skip: skip.map { Int32(clamping: $0) }, top: top.map { Int32(clamping: $0) })
+        ))
       {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _):

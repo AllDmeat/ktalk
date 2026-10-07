@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Enforces "one API operation = one CLI command" (see AGENTS.md).
 #
-# Maps every operation the generator emitted into the client to the CLI commands that reach
-# it through the facade, and fails unless the mapping is one to one: each operation has
-# exactly one command and each command reaches exactly one operation.
+# Maps every operation the generator emitted into the client to the facade method that calls
+# it and the CLI commands that reach it, and fails unless: one facade method calls each
+# operation, each operation has exactly one command, each command reaches exactly one
+# operation, and every command is registered in its group and the group in `ktalk`.
 # Reads the generated Client.swift, so run it after `swift build`. Read-only; exits 1 and
 # lists every gap on failure.
 set -euo pipefail
@@ -29,62 +30,76 @@ def code(path):
     return re.sub(r"//[^\n]*", "", path.read_text(encoding="utf-8"))
 
 
-def blocks(text, header):
-    """Yields (name, body) for each `header` match, body running to the next match."""
-    starts = [(m.start(), m.group(1)) for m in re.finditer(header, text, re.M)]
-    for index, (start, name) in enumerate(starts):
-        end = starts[index + 1][0] if index + 1 < len(starts) else len(text)
-        yield name, text[start:end]
+def blocks(text, header, end=r"^\S"):
+    """Yields (name, body) for each `header` match. A body stops at the next header or at the
+    next line matching `end` (by default any line at column 0, e.g. a closing brace)."""
+    for match in re.finditer(header, text, re.M):
+        start = text.find("\n", match.end()) + 1 or len(text)  # search from the next line
+        stop = re.compile(rf"{header}|{end}", re.M).search(text, start)
+        yield match.group(1), text[match.start():stop.start() if stop else len(text)]
 
 
-operations = dict(
-    (name, route)
+operations = {
+    name: route
     for route, name in re.findall(
         r"/// - Remark: HTTP `([A-Z]+ [^`]+)`\.\n\s*/// - Remark: Generated from[^\n]*\n"
         r"\s*public func (\w+)\(",
         client.read_text(encoding="utf-8"),
     )
-)
-
-# Facade method -> generated operations it reaches, directly or through another facade method.
-# Methods are matched by name, so an overloaded name would make the mapping ambiguous.
-direct, calls, overloaded = {}, {}, set()
-for path in sorted((root / "Sources/KTalkSDK").glob("KTalkClient*.swift")):
-    for name, body in blocks(code(path), r"^  public func (\w+)"):
-        if name in direct:
-            overloaded.add(name)
-        direct.setdefault(name, set()).update(
-            op for op in re.findall(r"\bclient\.(\w+)\(", body) if op in operations)
-        calls.setdefault(name, set()).update(re.findall(r"\b(\w+)\(", body))
-facade = {
-    name: ops | {op for other in calls[name] if other in direct and other != name
-                 for op in direct[other]}
-    for name, ops in direct.items()
 }
 
-# CLI command -> operations it reaches. A command is a struct with a `run()`.
-commands, unregistered = {}, []
-root_groups = re.search(r"subcommands: \[(.*?)\]", code(root / "Sources/ktalk/KTalk.swift"), re.S)
+problems = []
+
+# Facade: what each public method calls, directly and through other facade methods.
+direct, calls = {}, {}
+for path in sorted((root / "Sources/KTalkSDK").glob("KTalkClient*.swift")):
+    for name, body in blocks(code(path), r"^  public func (\w+)", end=r"^\S|^  \}"):
+        if name in direct:
+            problems.append(f"facade method {name} is overloaded; give each overload its own name")
+        direct.setdefault(name, set()).update(
+            op for op in re.findall(r"\bclient\.(\w+)\(", body) if op in operations)
+        calls.setdefault(name, set()).update(
+            m for m in re.findall(r"\b(\w+)\(", body) if m != name)
+facade = {name: set(ops) for name, ops in direct.items()}
+changed = True
+while changed:  # close over facade-to-facade calls at any depth
+    changed = False
+    for name in facade:
+        reach = set().union(*(facade[m] for m in calls[name] if m in facade))
+        if not reach <= facade[name]:
+            facade[name] |= reach
+            changed = True
+
+# One facade method calls each operation; wrappers (e.g. fetch-all) build on that method.
+callers = {}
+for name, ops in direct.items():
+    for op in ops:
+        callers.setdefault(op, []).append(name)
+for op, names in sorted(callers.items()):
+    if len(names) > 1:
+        problems.append(f"{operations[op]} is called by several facade methods: {', '.join(names)}")
+
+# CLI: every command (a struct with run()) inside each group's extension.
+root_text = code(root / "Sources/ktalk/KTalk.swift")
+root_groups = re.search(r"subcommands: \[(.*?)\]", root_text, re.S).group(1)
+commands = {}
 for path in sorted((root / "Sources/ktalk").rglob("*.swift")):
     text = code(path)
-    for group, group_body in blocks(text, r"^extension (\w+) \{"):
-        for name, body in blocks(group_body, r"^  struct (\w+): AsyncParsableCommand"):
+    for group, group_body in blocks(text, r"^extension (\w+) \{", end=r"^\}"):
+        declaration = re.search(rf"^struct {group}: AsyncParsableCommand.*?^\}}", text, re.M | re.S)
+        listed = re.search(r"subcommands: \[(.*?)\]", declaration.group(0), re.S) if declaration else None
+        for name, body in blocks(group_body, r"^  struct (\w+): AsyncParsableCommand", end=r"^\}|^  \}"):
             if "func run()" not in body:
                 continue
             label = f"{path.relative_to(root)}:{group}.{name}"
-            registered = re.search(
-                rf"^struct {group}: AsyncParsableCommand.*?subcommands: \[(.*?)\]", text, re.M | re.S)
-            if (not registered or not re.search(rf"\b{name}\.self\b", registered.group(1))
-                    or not re.search(rf"\b{group}\.self\b", root_groups.group(1))):
-                unregistered.append(label)
+            if not (listed and re.search(rf"\b{name}\.self\b", listed.group(1))
+                    and re.search(rf"\b{group}\.self\b", root_groups)):
+                problems.append(f"command {label} is not registered in its group or the group in ktalk")
             commands[label] = {
                 op for method in re.findall(r"\.(\w+)\(", body) if method in facade
                 for op in facade[method]
             }
 
-problems = [f"facade method {name} is overloaded; give each overload its own name"
-            for name in sorted(overloaded)]
-problems += [f"command {label} is not registered in its group or the group in ktalk" for label in unregistered]
 for label, ops in sorted(commands.items()):
     if len(ops) != 1:
         routes = ", ".join(sorted(operations[op] for op in ops)) or "none"

@@ -34,8 +34,8 @@ extension KTalkClient {
       let output = try await client.usersGet(
         .init(
           query: .init(
-            query: query, email: emails, role: role, top: top.map(Int32.init),
-            skip: skip.map(Int32.init), includeDisabled: includeDisabled,
+            query: query, email: emails, role: role, top: top.map { Int32(clamping: $0) },
+            skip: skip.map { Int32(clamping: $0) }, includeDisabled: includeDisabled,
             includeGuests: includeGuests)))
       switch output {
       case .ok(let ok): return try ok.body.json
@@ -54,7 +54,7 @@ extension KTalkClient {
       let output = try await client.usersScan(
         .init(
           query: .init(
-            offset: offset, top: top.map(Int32.init), includeDisabled: includeDisabled,
+            offset: offset, top: top.map { Int32(clamping: $0) }, includeDisabled: includeDisabled,
             includeGuests: includeGuests, role: role)))
       switch output {
       case .ok(let ok): return try ok.body.json

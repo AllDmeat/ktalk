@@ -184,7 +184,8 @@ extension KTalkClient {
         .init(
           query: .init(
             complexSearch: complexSearch, status: status, statusValue: statusValues,
-            version: version, offset: offset.map(Int32.init), pageSize: pageSize.map(Int32.init),
+            version: version, offset: offset.map { Int32(clamping: $0) },
+            pageSize: pageSize.map { Int32(clamping: $0) },
             groupKey: groupKey)))
       {
       case .ok(let ok): return Int(try ok.body.json)

@@ -49,8 +49,8 @@ extension KTalkClient {
       let output = try await client.domainConferencesHistoryGetDomainConferences(
         .init(
           query: .init(
-            fromDate: fromDate, toDate: toDate, skip: skip.map(Int32.init),
-            take: take.map(Int32.init), roomName: roomNames)))
+            fromDate: fromDate, toDate: toDate, skip: skip.map { Int32(clamping: $0) },
+            take: take.map { Int32(clamping: $0) }, roomName: roomNames)))
       switch output {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let statusCode, _):
@@ -111,7 +111,8 @@ extension KTalkClient {
       let output = try await client.conferenceReportsGetConferenceActivityReport(
         .init(
           path: .init(conferenceKey: key),
-          query: .init(skip: skip.map(Int32.init), take: take.map(Int32.init))))
+          query: .init(
+            skip: skip.map { Int32(clamping: $0) }, take: take.map { Int32(clamping: $0) })))
       switch output {
       case .ok(let ok): return try ok.body.json
       case .notFound: throw KTalkError.notFound(resource: "conference", identifier: key)
@@ -130,7 +131,8 @@ extension KTalkClient {
       let output = try await client.conferenceReportsGetConferenceChatReport(
         .init(
           path: .init(conferenceKey: key),
-          query: .init(skip: skip.map(Int32.init), take: take.map(Int32.init))))
+          query: .init(
+            skip: skip.map { Int32(clamping: $0) }, take: take.map { Int32(clamping: $0) })))
       switch output {
       case .ok(let ok): return try ok.body.json
       case .notFound: throw KTalkError.notFound(resource: "conference", identifier: key)
@@ -163,7 +165,7 @@ extension KTalkClient {
       switch try await client.conferenceReportsGetConferenceQuestionsExcelReport(
         .init(path: .init(conferenceKey: key)))
       {
-      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .ok(let ok): return try await Data(collecting: ok.body.any, upTo: .max)
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "conference", identifier: key)
       }
@@ -176,7 +178,7 @@ extension KTalkClient {
       switch try await client.roomReportGetDomainStatisticsExcelReport(
         .init(query: .init(from: from, to: to)))
       {
-      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .ok(let ok): return try await Data(collecting: ok.body.any, upTo: .max)
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
       }
     }

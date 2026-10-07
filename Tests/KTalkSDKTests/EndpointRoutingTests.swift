@@ -125,9 +125,7 @@ struct EndpointRoutingTests {
     try await expectRoute(.get, "/api/Kiosk/groups", reply: Self.groupTree) {
       _ = try await $0.kioskGroups()
     }
-    try await expectRoute(
-      .get, "/api/Kiosk/k-1/current-calendar-event", reply: #"{"timezone":"GMT+5"}"#
-    ) {
+    try await expectRoute(.get, "/api/Kiosk/k-1/current-calendar-event", reply: "{}") {
       _ = try await $0.kioskCurrentEvent(id: "k-1")
     }
   }
@@ -262,26 +260,29 @@ struct EndpointRoutingTests {
 
   // MARK: - Files and telemetry
 
+  /// The server labels files with their real type; the client must accept any of them.
   @Test func fileDownloadsReturnBytes() async throws {
-    let octet = "application/octet-stream"
+    let xlsx = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     try await expectRoute(
-      .get, "/api/ConferenceReports/c-1/questions", reply: "xlsx", contentType: octet
+      .get, "/api/ConferenceReports/c-1/questions", reply: "xlsx", contentType: xlsx
     ) {
       let value = try await $0.conferenceQuestionsReport(key: "c-1")
       #expect(value == Data("xlsx".utf8))
     }
-    try await expectRoute(.get, "/api/RoomReport/statistics", reply: "xlsx", contentType: octet) {
+    try await expectRoute(.get, "/api/RoomReport/statistics", reply: "xlsx", contentType: xlsx) {
       let value = try await $0.attendanceReport(from: Date(timeIntervalSince1970: 0))
       #expect(value == Data("xlsx".utf8))
     }
     try await expectRoute(
-      .get, "/api/DeepFakeDetector/conference/c-1/task/t-1/file", reply: "wav", contentType: octet
+      .get, "/api/DeepFakeDetector/conference/c-1/task/t-1/file", reply: "wav",
+      contentType: "audio/wav"
     ) {
       let value = try await $0.deepFakeTaskFile(conferenceKey: "c-1", taskKey: "t-1")
       #expect(value == Data("wav".utf8))
     }
     try await expectRoute(
-      .get, "/api/DeepFakeDetector/conference/c-1/tasks/files", reply: "zip", contentType: octet
+      .get, "/api/DeepFakeDetector/conference/c-1/tasks/files", reply: "zip",
+      contentType: "application/zip"
     ) {
       let value = try await $0.deepFakeTaskFiles(conferenceKey: "c-1")
       #expect(value == Data("zip".utf8))

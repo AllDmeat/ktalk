@@ -15,7 +15,9 @@ extension KTalkClient {
     try await call {
       switch try await client.clientsTelemetryGetDomainTelemetryV1(
         .init(
-          query: .init(fromDate: from, toDate: to, take: take.map(Int32.init), pageToken: pageToken)
+          query: .init(
+            fromDate: from, toDate: to, take: take.map { Int32(clamping: $0) }, pageToken: pageToken
+          )
         ))
       {
       case .ok(let ok): return try ok.body.json
@@ -31,7 +33,9 @@ extension KTalkClient {
     try await call {
       switch try await client.clientsTelemetryGetDomainTelemetryV2(
         .init(
-          query: .init(fromDate: from, toDate: to, take: take.map(Int32.init), pageToken: pageToken)
+          query: .init(
+            fromDate: from, toDate: to, take: take.map { Int32(clamping: $0) }, pageToken: pageToken
+          )
         ))
       {
       case .ok(let ok): return try ok.body.json

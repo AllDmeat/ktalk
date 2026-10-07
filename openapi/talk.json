@@ -247,10 +247,6 @@
             "type": "integer"
           }
         },
-        "required": [
-          "id",
-          "title"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatPollAttachmentOption": {
@@ -283,10 +279,6 @@
             "type": "integer"
           }
         },
-        "required": [
-          "id",
-          "text"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Chat.Api.Models.TalkChatRemoveInfo": {
@@ -1171,10 +1163,6 @@
             "$ref": "#/components/schemas/SkbKontur.Talk.Kiosk.Api.Models.Gadget.TalkKioskGadgetType"
           }
         },
-        "required": [
-          "key",
-          "kioskId"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Gadget.TalkKioskGadgetType": {
@@ -1231,12 +1219,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "groupKey",
-          "parentKey",
-          "position",
-          "title"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Group.TalkKioskGroupTree": {
@@ -1263,12 +1245,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "groups",
-          "key",
-          "position",
-          "title"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Kiosk.Api.Models.Group.TalkKioskUpdateGroupRequest": {
@@ -2664,12 +2640,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "createdBy",
-          "createdDate",
-          "key",
-          "title"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Notes.Api.Models.TalkNoteLink": {
@@ -2869,9 +2839,6 @@
             "type": "integer"
           }
         },
-        "required": [
-          "text"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Recordings.Api.PatchRecordAccessRequest": {
@@ -2911,9 +2878,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "userAccesses"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Recordings.Api.TalkActiveConferenceRecording": {
@@ -2923,9 +2887,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "recordingKey"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Recordings.Api.TalkConferenceRecording": {
@@ -3322,10 +3283,6 @@
             "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
           }
         },
-        "required": [
-          "roleId",
-          "user"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Recordings.Domain.MediaUploadStatus": {
@@ -4805,9 +4762,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "timezone"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Calendar.EmailCalendarItemAttendee": {
@@ -5287,10 +5241,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "data",
-          "name"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryInfoV2": {
@@ -5403,10 +5353,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "data",
-          "name"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryItem_System.Boolean": {
@@ -5483,9 +5429,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "telemetry"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.ClientsTelemetry.ClientsTelemetryResponseV2": {
@@ -5504,9 +5447,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "telemetry"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkApplicationAccessRestriction": {
@@ -5539,9 +5479,6 @@
             "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Domains.TalkApplicationAccessRestrictionType"
           }
         },
-        "required": [
-          "type"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkApplicationAccessRestrictionType": {
@@ -5630,13 +5567,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "accessRestrictionWhitelist",
-          "id",
-          "name",
-          "scopes",
-          "token"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Domains.TalkDomainApplicationAccessInfo": {
@@ -6185,11 +6115,6 @@
             "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkInputPolicy"
           }
         },
-        "required": [
-          "conferenceId",
-          "roomName",
-          "stageConferenceId"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomParams": {
@@ -6562,12 +6487,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "period",
-          "url"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Surveys.TalkSurveyFrequency": {
@@ -7314,13 +7233,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "createdBy",
-          "createdDate",
-          "currentUserRole",
-          "key",
-          "title"
-        ],
         "type": "object"
       },
       "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardLinkAccess": {
@@ -8573,7 +8485,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/octet-stream": {
+              "*/*": {
                 "schema": {
                   "format": "binary",
                   "type": "string"
@@ -8758,7 +8670,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/octet-stream": {
+              "*/*": {
                 "schema": {
                   "format": "binary",
                   "type": "string"
@@ -8791,7 +8703,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/octet-stream": {
+              "*/*": {
                 "schema": {
                   "format": "binary",
                   "type": "string"
@@ -11423,7 +11335,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/octet-stream": {
+              "*/*": {
                 "schema": {
                   "format": "binary",
                   "type": "string"
@@ -11477,7 +11389,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/octet-stream": {
+              "*/*": {
                 "schema": {
                   "format": "binary",
                   "type": "string"

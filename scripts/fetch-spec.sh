@@ -193,7 +193,7 @@ def declare_binary_download_bodies(doc):
     The published spec documents these `GET`s — the recording media file, the Excel reports
     and the deepfake-detector source files — with an empty 200, so the generator discards the
     file bytes. Declare an `application/octet-stream` binary body so the generated client
-    exposes the download. A 200 that already declares content is left alone.
+    exposes the download. A 200 that already declares its own content is left alone.
     """
     for path in BINARY_DOWNLOADS:
         item = (doc.get("paths") or {}).get(path)
@@ -207,10 +207,69 @@ def declare_binary_download_bodies(doc):
         if not isinstance(ok, dict):
             ok = {"description": "OK"}
             responses["200"] = ok
-        if not ok.get("content"):
-            ok["content"] = {
-                "application/octet-stream": {"schema": {"type": "string", "format": "binary"}}
-            }
+        # `*/*`, not one concrete type: the server labels files as spreadsheets, archives or
+        # media, and the runtime rejects a response whose content type was not declared.
+        # Replaces an earlier octet-stream-only declaration too, so re-normalizing upgrades it.
+        if not ok.get("content") or ok.get("content") == OCTET_STREAM_ONLY:
+            ok["content"] = {"*/*": {"schema": {"type": "string", "format": "binary"}}}
+
+
+OCTET_STREAM_ONLY = {
+    "application/octet-stream": {"schema": {"type": "string", "format": "binary"}}
+}
+
+
+def _refs(node, found):
+    """Collects the component schema names `node` references, transitively."""
+    if isinstance(node, dict):
+        ref = node.get("$ref")
+        if isinstance(ref, str) and ref.startswith("#/components/schemas/"):
+            found.add(ref.rsplit("/", 1)[1])
+        for child in node.values():
+            _refs(child, found)
+    elif isinstance(node, list):
+        for child in node:
+            _refs(child, found)
+
+
+def _closure(doc, roots):
+    schemas = (doc.get("components") or {}).get("schemas") or {}
+    seen, pending = set(), list(roots)
+    while pending:
+        name = pending.pop()
+        if name in seen or name not in schemas:
+            continue
+        seen.add(name)
+        more = set()
+        _refs(schemas[name], more)
+        pending.extend(more - seen)
+    return seen
+
+
+def relax_response_required(doc):
+    """Drop `required` from schemas that only ever appear in responses.
+
+    The published spec tightens response schemas without the live API following (e.g.
+    `timezone` became required on calendar items). A strict decoder then fails the whole
+    response when one item lacks the field. Schemas reachable from a request body or a
+    parameter keep `required`, so what the client sends is still described exactly.
+    """
+    requests, responses = set(), set()
+    for item in (doc.get("paths") or {}).values():
+        if not isinstance(item, dict):
+            continue
+        _refs(item.get("parameters"), requests)
+        for method, operation in item.items():
+            if method not in HTTP_METHODS or not isinstance(operation, dict):
+                continue
+            _refs(operation.get("parameters"), requests)
+            _refs(operation.get("requestBody"), requests)
+            _refs(operation.get("responses"), responses)
+    schemas = (doc.get("components") or {}).get("schemas") or {}
+    for name in _closure(doc, responses) - _closure(doc, requests):
+        schema = schemas.get(name)
+        if isinstance(schema, dict):
+            schema.pop("required", None)
 
 
 def require_multipart_bodies(doc):
@@ -249,8 +308,8 @@ def add_support_confirmed_operations(doc):
     spec, but listing and fetching a recording are not. Declare them, marked with
     `x-ktalk-source: support` and a description saying they were added by hand.
 
-    Each operation is added only when the published spec lacks it, so an upstream definition
-    always wins. The response reuses the published `TalkConferenceRecording` schema, which
+    Each operation is added only while the published spec lacks it under any path casing, so
+    an upstream definition always wins; a re-normalized file drops the hand-added copy then. The response reuses the published `TalkConferenceRecording` schema, which
     matches the live payload field for field.
     """
     # Upstream moves schemas between namespaces, so find it by its short name.
@@ -312,9 +371,20 @@ def add_support_confirmed_operations(doc):
         },
     }
     for (path, method), operation in operations.items():
-        item = paths.setdefault(path, {})
-        if method in item:
+        # Upstream mixes `/api/Recordings` and `/api/recordings`; the server ignores case, so
+        # an upstream route in any casing wins over the hand-added one.
+        if any(
+            existing.lower() == path.lower()
+            and method in item
+            and item[method].get("x-ktalk-source") != "support"
+            for existing, item in paths.items()
+            if isinstance(item, dict)
+        ):
+            paths.get(path, {}).pop(method, None)
+            if path in paths and not paths[path]:
+                del paths[path]
             continue
+        item = paths.setdefault(path, {})
         item[method] = {"tags": ["Записи"], "x-ktalk-source": "support", **operation}
 
 
@@ -326,6 +396,7 @@ info = doc.setdefault("info", {})
 info.setdefault("version", "1.0.0")
 normalize_int_bounds(doc)
 relax_additional_properties(doc)
+relax_response_required(doc)
 strip_deprecated(doc)
 ensure_path_parameters(doc)
 require_multipart_bodies(doc)

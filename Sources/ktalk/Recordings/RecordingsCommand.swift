@@ -83,6 +83,12 @@ extension Recordings {
       if let top, !(1...max).contains(top) {
         throw ValidationError("--top must be between 1 and \(max).")
       }
+      if let skip, skip < 0 {
+        throw ValidationError("--skip must not be negative.")
+      }
+      if all, top != nil || skip != nil {
+        throw ValidationError("--all fetches every page itself; drop --top and --skip.")
+      }
     }
 
     func run() async throws {

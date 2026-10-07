@@ -72,7 +72,7 @@ struct RecordingsTests {
     let payload = Data("synthetic-media".utf8)
     let transport = ReplayTransport { _, _, _, _ in
       var headers = HTTPFields()
-      headers[.contentType] = "application/octet-stream"
+      headers[.contentType] = "video/mp4"
       return (HTTPResponse(status: .init(code: 200), headerFields: headers), HTTPBody(payload))
     }
     let client = try client(transport)
@@ -93,14 +93,15 @@ struct RecordingsTests {
     #expect(path.contains("skip=4"))
   }
 
-  @Test("allAccessibleRecordings pages by skip until a short page")
-  func allAccessiblePages() async throws {
-    let pageSize = KTalkClient.accessibleRecordingsMaxPageSize
-    let total = pageSize + 3
-    let transport = ReplayTransport { request, _, _, _ in
+  /// A transport that serves `total` recordings by `skip`/`top`, optionally capping the page
+  /// size or ignoring `skip`, and records each request.
+  private func pagingTransport(total: Int, cap: Int = .max, ignoreSkip: Bool = false)
+    -> ReplayTransport
+  {
+    ReplayTransport { request, _, _, _ in
       let query = URLComponents(string: request.path ?? "")?.queryItems ?? []
-      let skip = Int(query.first { $0.name == "skip" }?.value ?? "0") ?? 0
-      let top = Int(query.first { $0.name == "top" }?.value ?? "10") ?? 10
+      let skip = ignoreSkip ? 0 : Int(query.first { $0.name == "skip" }?.value ?? "0") ?? 0
+      let top = min(Int(query.first { $0.name == "top" }?.value ?? "10") ?? 10, cap)
       let ids = (skip..<min(skip + top, total)).map { #"{"id":"rec-\#($0)"}"# }
       var headers = HTTPFields()
       headers[.contentType] = "application/json"
@@ -109,27 +110,30 @@ struct RecordingsTests {
         HTTPBody(#"{"recordings":[\#(ids.joined(separator: ","))]}"#)
       )
     }
+  }
+
+  @Test("allAccessibleRecordings pages by skip until an empty page")
+  func allAccessiblePages() async throws {
+    let total = KTalkClient.accessibleRecordingsMaxPageSize + 3
+    let transport = pagingTransport(total: total)
     let recordings = try await client(transport).allAccessibleRecordings()
     #expect(recordings.count == total)
     #expect(recordings.last?.id == "rec-\(total - 1)")
-    #expect(transport.recordedRequests.count == 2)
+    #expect(transport.recordedRequests.count == 3)
   }
 
-  @Test("allAccessibleRecordings makes one extra request when the total is a multiple of the page")
-  func allAccessibleExactMultiple() async throws {
-    let pageSize = KTalkClient.accessibleRecordingsMaxPageSize
-    let transport = ReplayTransport { request, _, _, _ in
-      let skip = request.path?.contains("skip=0") == true
-      let ids = skip ? (0..<pageSize).map { #"{"id":"rec-\#($0)"}"# } : []
-      var headers = HTTPFields()
-      headers[.contentType] = "application/json"
-      return (
-        HTTPResponse(status: .init(code: 200), headerFields: headers),
-        HTTPBody(#"{"recordings":[\#(ids.joined(separator: ","))]}"#)
-      )
-    }
+  @Test("allAccessibleRecordings keeps going when the server caps the page size")
+  func allAccessibleCappedPages() async throws {
+    let recordings = try await client(pagingTransport(total: 120, cap: 50))
+      .allAccessibleRecordings()
+    #expect(recordings.count == 120)
+  }
+
+  @Test("allAccessibleRecordings stops when the server ignores skip")
+  func allAccessibleIgnoredSkip() async throws {
+    let transport = pagingTransport(total: 500, ignoreSkip: true)
     let recordings = try await client(transport).allAccessibleRecordings()
-    #expect(recordings.count == pageSize)
+    #expect(recordings.count == KTalkClient.accessibleRecordingsMaxPageSize)
     #expect(transport.recordedRequests.count == 2)
   }
 

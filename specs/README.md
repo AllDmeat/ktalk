@@ -10,6 +10,11 @@ sync with the code. See [`AGENTS.md`](../AGENTS.md) for the workflow and hard ru
   generated `types` + `client` layer. Do not hand-edit it except to remove real data from
   examples; add normalizations to the fetch script instead so they survive a refresh.
 
+## Specs
+
+- [`api-coverage.md`](api-coverage.md) — one operation per command, the two key kinds and
+  how recordings are read with a personal key.
+
 ## Layers
 
 1. **Generated** — `types` + `client` from `swift-openapi-generator` (machine output).
