@@ -25,7 +25,7 @@ extension KTalkClient {
       let output = try await client.emailCalendarGetAll(
         .init(
           path: .init(email: email),
-          query: .init(start: start, end: end, take: take.map(Int32.init))))
+          query: .init(start: start, end: end, take: take.map { Int32(clamping: $0) })))
       switch output {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let statusCode, _):

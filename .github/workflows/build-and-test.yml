@@ -59,6 +59,9 @@ jobs:
       - name: Test (warnings as errors)
         run: swift test -Xswiftc -warnings-as-errors
 
+      - name: Check every API operation has a CLI command
+        run: scripts/check-cli-coverage.sh
+
       - name: Build release binary
         id: build
         run: |

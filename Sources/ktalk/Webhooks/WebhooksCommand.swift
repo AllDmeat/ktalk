@@ -14,7 +14,7 @@ struct Webhooks: AsyncParsableCommand {
 extension Webhooks {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "List active webhooks.")
+      commandName: "list", abstract: "[space key] List active webhooks.")
     @OptionGroup var global: GlobalOptions
     func run() async throws {
       try printJSON(try await global.makeClient().listWebhooks())

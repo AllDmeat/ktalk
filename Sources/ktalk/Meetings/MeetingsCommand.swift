@@ -16,12 +16,16 @@ struct Meetings: AsyncParsableCommand {
 extension Meetings {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "List meetings for a calendar from a start date.")
+      commandName: "list", abstract: "[space key] List meetings for a calendar from a start date.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar owner email.") var email: String
     @Option(name: .long, help: "Start date (ISO 8601).") var start: String
     @Option(name: .long, help: "End date (ISO 8601).") var end: String?
     @Option(name: .long, help: "Maximum number of meetings.") var take: Int?
+    func validate() throws {
+      try checkRange(take, "--take", 1...1000)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       let result = try await client.listMeetings(
@@ -91,7 +95,8 @@ extension Meetings {
 
   struct Recurrence: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "recurrence", abstract: "Get the recurring series a meeting belongs to.")
+      commandName: "recurrence",
+      abstract: "[space key] Get the recurring series a meeting belongs to.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar owner email.") var email: String
     @Argument(help: "Event id.") var eventId: String

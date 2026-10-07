@@ -37,18 +37,25 @@ Auth is two environment variables (no config file); `--base-url` / `--token` ove
 
 ```bash
 export KTALK_BASE_URL="https://<space>.ktalk.ru"
-export KTALK_TOKEN="<x-auth-token>"   # admin panel → API keys; never echo it
+export KTALK_TOKEN="<x-auth-token>"   # never echo it
 ```
 
-Keys are scoped: a read-only key returns **`Forbidden` (403)** on writes. `ktalk api-keys
+There are two kinds of keys. A **space key** (admin panel → API keys) reads the whole space; a
+**personal key** (profile → Settings → API keys) acts with its user's rights. Each
+command's `--help` starts with the key it takes: `[personal key]` works with a personal key,
+`[space key]` gets `Forbidden` from one. With a personal key, pick a `[personal key]` command
+instead of retrying a `[space key]` one. Untagged commands change data and are unchecked.
+
+Space keys are scoped: a read-only key returns **`Forbidden` (403)** on writes. `ktalk api-keys
 access-info` shows what the current key allows — a 403 is a permissions fact, not a bug to retry
 around. Read auth failures rather than working around them; a rejected request fails the same way
 twice.
 
 ## Keys, pagination, transcripts
 
-- You start with no keys — list to find them (`ktalk recordings list`, `ktalk users search --query
-  …`), and match a specific recording on `title`/`createdDate` with `jq` rather than guessing a key.
+- You start with no keys — list to find them (`ktalk recordings list` or
+  `ktalk recordings list-accessible`, `ktalk users search --query …`), and match a specific
+  recording on `title`/`createdDate` with `jq` rather than guessing a key.
 - `recordings list` is cursor-paginated (`{items, nextPageToken}`); pass `--all` to follow every page
   or feed `nextPageToken` back via `--page-token`. Don't assume one page is everything.
 - A recording's artifacts are its **transcript**, **summary**, and **media file**. Add `--format
