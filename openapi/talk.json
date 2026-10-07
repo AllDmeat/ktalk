@@ -13809,6 +13809,9 @@
                       "type": "array"
                     }
                   },
+                  "required": [
+                    "recordings"
+                  ],
                   "type": "object"
                 }
               }

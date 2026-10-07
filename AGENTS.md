@@ -61,9 +61,10 @@ stays byte-identical). The complete list of what is changed and why:
    an undeclared content type.
 8. **Drifted response fields made optional** — the refreshed spec newly marks some response
    fields required (`timezone` on calendar items) and nobody has confirmed the live API always
-   sends them. A missing required field fails the whole response in a strict decoder, so each one is listed in `RELAXED_RESPONSE_FIELDS` and
-   dropped from `required`. The list is explicit: relaxing every response schema would make
-   non-optional properties of public SDK types optional and break consumers.
+   sends them. A missing required field fails the whole response in a strict decoder, so each
+   one is listed in `RELAXED_RESPONSE_FIELDS` and dropped from `required`. The list is
+   explicit: relaxing every response schema would make non-optional properties of public SDK
+   types optional and break consumers.
 9. **Personal-token recording operations added** — `GET /api/recordings` and
    `GET /api/Recordings/{recordingKey}` are not in the published spec. Kontur.Talk support named
    them on 2026-10-07 as the way to read recordings with a personal access token, which gets

@@ -192,8 +192,8 @@ def declare_binary_download_bodies(doc):
 
     The published spec documents these `GET`s — the recording media file, the Excel reports
     and the deepfake-detector source files — with an empty 200, so the generator discards the
-    file bytes. Declare an `application/octet-stream` binary body so the generated client
-    exposes the download. A 200 that already declares its own content is left alone.
+    file bytes. Declare a `*/*` binary body so the generated client exposes the download.
+    A 200 that already declares its own content is left alone.
     """
     for path in BINARY_DOWNLOADS:
         item = (doc.get("paths") or {}).get(path)
@@ -320,6 +320,9 @@ def add_support_confirmed_operations(doc):
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                # Required: a reply without the list is a changed
+                                # shape, not an empty result, and must fail to decode.
+                                "required": ["recordings"],
                                 "properties": {
                                     "recordings": {"type": "array", "items": RECORDING_SCHEMA}
                                 },

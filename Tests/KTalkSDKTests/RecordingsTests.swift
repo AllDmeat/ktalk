@@ -117,8 +117,22 @@ struct RecordingsTests {
   @Test("allAccessibleRecordings stops when the server ignores skip and sends no ids")
   func allAccessibleIgnoredSkipWithoutIDs() async throws {
     let transport = pagingTransport(total: 500, ignoreSkip: true, withIDs: false)
-    _ = try await client(transport).allAccessibleRecordings()
+    let recordings = try await client(transport).allAccessibleRecordings()
+    #expect(recordings.count == KTalkClient.accessibleRecordingsMaxPageSize)
+    #expect(recordings.first?.title == "rec-0")
     #expect(transport.recordedRequests.count == 1)
+  }
+
+  @Test("listAccessibleRecordings fails on a reply without the recordings list")
+  func listAccessibleRejectsChangedShape() async throws {
+    let client = try client(ReplayTransport.returning(statusCode: 200, body: #"{"items":[]}"#))
+    let error = await #expect(throws: KTalkError.self) {
+      _ = try await client.listAccessibleRecordings()
+    }
+    guard case .decodingError = error else {
+      Issue.record("expected .decodingError, got \(String(describing: error))")
+      return
+    }
   }
 
   @Test("allAccessibleRecordings pages by skip until an empty page")

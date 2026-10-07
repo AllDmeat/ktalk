@@ -124,7 +124,7 @@ extension KTalkClient {
         ))
       switch output {
       case .ok(let ok):
-        return try ok.body.json.recordings ?? []
+        return try ok.body.json.recordings
       case .undocumented(let statusCode, _):
         throw statusError(statusCode: statusCode, body: nil)
       }
@@ -135,8 +135,8 @@ extension KTalkClient {
   ///
   /// The endpoint pages by offset and reports no total. Paging stops on an empty page rather
   /// than a short one, so a server that caps `top` below the requested size loses nothing,
-  /// and it stops when a page brings no recording with an unseen id, so a server that ignores
-  /// `skip` cannot loop forever. Recordings are de-duplicated by id, which absorbs one added
+  /// and it stops after a page that brings no recording with an unseen id, so a server that
+  /// ignores `skip` cannot loop forever. Recordings without an id are kept in place. Recordings are de-duplicated by id, which absorbs one added
   /// mid-scan; one deleted mid-scan shifts the offset and the next recording can be missed —
   /// offset paging cannot tell.
   public func allAccessibleRecordings() async throws(KTalkError) -> [AccessibleRecording] {
@@ -146,11 +146,19 @@ extension KTalkClient {
     while true {
       let page = try await listAccessibleRecordings(
         top: Self.accessibleRecordingsMaxPageSize, skip: skip)
-      let unseen = page.filter { recording in recording.id.map { seen.insert($0).inserted } ?? false
+      var unseen = 0
+      for recording in page {
+        guard let id = recording.id else {
+          all.append(recording)  // no id to de-duplicate by; keep it in place
+          continue
+        }
+        if seen.insert(id).inserted {
+          all.append(recording)
+          unseen += 1
+        }
       }
       // A page without a single unseen id is the end, or a server repeating itself.
-      if unseen.isEmpty { return all }
-      all.append(contentsOf: page.filter { $0.id == nil } + unseen)
+      if unseen == 0 { return all }
       skip += page.count
     }
   }
@@ -287,7 +295,7 @@ extension KTalkClient {
       {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _):
-        throw notFoundOrStatus(s, resource: "room", identifier: roomName)
+        throw notFoundOrStatus(s, resource: "active recording in room", identifier: roomName)
       }
     }
   }
