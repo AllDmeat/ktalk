@@ -271,6 +271,12 @@ SUPPORT_NOTE = (
 )
 
 
+def same_route(a, b):
+    """Whether two path templates name one route: case-insensitive, parameter names ignored."""
+    template = lambda path: re.sub(r"\{[^}]*\}", "{}", path).lower()
+    return template(a) == template(b)
+
+
 def add_support_confirmed_operations(doc):
     """Declare personal-token recording operations missing from the published spec.
 
@@ -348,10 +354,10 @@ def add_support_confirmed_operations(doc):
         },
     }
     for (path, method), operation in operations.items():
-        # Upstream mixes `/api/Recordings` and `/api/recordings`; the server ignores case, so
-        # an upstream route in any casing wins over the hand-added one.
+        # Upstream mixes `/api/Recordings` and `/api/recordings` and names parameters freely;
+        # the server ignores case, so an upstream route in any spelling wins.
         if any(
-            existing.lower() == path.lower()
+            same_route(existing, path)
             and method in item
             and item[method].get("x-ktalk-source") != "support"
             for existing, item in paths.items()

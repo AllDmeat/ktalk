@@ -85,20 +85,30 @@ root_groups = re.search(r"subcommands: \[(.*?)\]", root_text, re.S).group(1)
 commands = {}
 for path in sorted((root / "Sources/ktalk").rglob("*.swift")):
     text = code(path)
+    found = 0
     for group, group_body in blocks(text, r"^extension (\w+) \{", end=r"^\}"):
         declaration = re.search(rf"^struct {group}: AsyncParsableCommand.*?^\}}", text, re.M | re.S)
-        listed = re.search(r"subcommands: \[(.*?)\]", declaration.group(0), re.S) if declaration else None
+        listed = declaration and re.search(r"subcommands: \[(.*?)\]", declaration.group(0), re.S)
         for name, body in blocks(group_body, r"^  struct (\w+): AsyncParsableCommand", end=r"^\}|^  \}"):
             if "func run()" not in body:
                 continue
             label = f"{path.relative_to(root)}:{group}.{name}"
+            found += 1
             if not (listed and re.search(rf"\b{name}\.self\b", listed.group(1))
                     and re.search(rf"\b{group}\.self\b", root_groups)):
-                problems.append(f"command {label} is not registered in its group or the group in ktalk")
+                problems.append(
+                    f"command {label} is not registered in its group or the group in ktalk")
             commands[label] = {
                 op for method in re.findall(r"\.(\w+)\(", body) if method in facade
                 for op in facade[method]
             }
+    # Commands must live in `extension <Group> {}` blocks, the only place this script reads.
+    declared = len(re.findall(
+        r"struct \w+: AsyncParsableCommand\b(?:(?!\nstruct |\n  struct ).)*?func run\(\)",
+        text, re.S))
+    if declared != found:
+        problems.append(
+            f"{path.relative_to(root)}: {declared - found} command(s) declared outside an extension")
 
 for label, ops in sorted(commands.items()):
     if len(ops) != 1:

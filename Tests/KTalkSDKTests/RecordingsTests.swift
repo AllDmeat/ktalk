@@ -120,7 +120,15 @@ struct RecordingsTests {
     let recordings = try await client(transport).allAccessibleRecordings()
     #expect(recordings.count == KTalkClient.accessibleRecordingsMaxPageSize)
     #expect(recordings.first?.title == "rec-0")
-    #expect(transport.recordedRequests.count == 1)
+    #expect(transport.recordedRequests.count == 2)
+  }
+
+  @Test("allAccessibleRecordings reads every page of recordings without ids")
+  func allAccessibleWithoutIDs() async throws {
+    let recordings = try await client(pagingTransport(total: 250, withIDs: false))
+      .allAccessibleRecordings()
+    #expect(recordings.count == 250)
+    #expect(recordings.last?.title == "rec-249")
   }
 
   @Test("listAccessibleRecordings fails on a reply without the recordings list")
@@ -167,6 +175,20 @@ struct RecordingsTests {
     #expect(recording.id == "rec-1")
     #expect(recording.title == "Synthetic standup")
     #expect(transport.lastRequest?.request.path == "/api/Recordings/rec-1")
+  }
+
+  @Test("activeRecording maps 404 to a missing active recording, not a missing room")
+  func activeRecordingNotFound() async throws {
+    let error = await #expect(throws: KTalkError.self) {
+      _ = try await client(ReplayTransport.returning(statusCode: 404)).activeRecording(
+        roomName: "demo")
+    }
+    guard case .notFound(let resource, let identifier) = error else {
+      Issue.record("expected .notFound, got \(String(describing: error))")
+      return
+    }
+    #expect(resource == "active recording in room")
+    #expect(identifier == "demo")
   }
 
   @Test("accessibleRecording(key:) maps 404 to notFound")

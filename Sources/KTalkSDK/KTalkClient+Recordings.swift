@@ -134,31 +134,27 @@ extension KTalkClient {
   /// Fetches every recording available to a personal access token's user.
   ///
   /// The endpoint pages by offset and reports no total. Paging stops on an empty page rather
-  /// than a short one, so a server that caps `top` below the requested size loses nothing,
-  /// and it stops after a page that brings no recording with an unseen id, so a server that
-  /// ignores `skip` cannot loop forever. Recordings without an id are kept in place. Recordings are de-duplicated by id, which absorbs one added
-  /// mid-scan; one deleted mid-scan shifts the offset and the next recording can be missed —
-  /// offset paging cannot tell.
+  /// than a short one, so a server that caps `top` below the requested size loses nothing.
+  /// It also stops on a page identical to the previous one or bringing no unseen recording,
+  /// so a server that ignores `skip` cannot loop forever, with or without ids. Recordings
+  /// are de-duplicated by id, which absorbs one added mid-scan; one deleted mid-scan shifts
+  /// the offset and the next recording can be missed — offset paging cannot tell.
   public func allAccessibleRecordings() async throws(KTalkError) -> [AccessibleRecording] {
     var all: [AccessibleRecording] = []
     var seen = Set<String>()
+    var previous: [AccessibleRecording] = []
     var skip = 0
     while true {
       let page = try await listAccessibleRecordings(
         top: Self.accessibleRecordingsMaxPageSize, skip: skip)
-      var unseen = 0
-      for recording in page {
-        guard let id = recording.id else {
-          all.append(recording)  // no id to de-duplicate by; keep it in place
-          continue
-        }
-        if seen.insert(id).inserted {
-          all.append(recording)
-          unseen += 1
-        }
+      if page.isEmpty || page == previous { return all }
+      var progressed = false
+      for recording in page where recording.id.map({ seen.insert($0).inserted }) ?? true {
+        all.append(recording)
+        progressed = true
       }
-      // A page without a single unseen id is the end, or a server repeating itself.
-      if unseen == 0 { return all }
+      if !progressed { return all }
+      previous = page
       skip += page.count
     }
   }
