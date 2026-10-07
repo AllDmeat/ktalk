@@ -9,7 +9,7 @@ struct Reports: AsyncParsableCommand {
     abstract: "Audit log, conference history, and reports.",
     subcommands: [
       AuditLogCommand.self, Conferences.self, Conference.self, ConferenceEnriched.self,
-      Participants.self, Activity.self, Chat.self, Room.self,
+      Participants.self, Activity.self, Chat.self, Room.self, Questions.self, Attendance.self,
     ]
   )
 }
@@ -17,7 +17,7 @@ struct Reports: AsyncParsableCommand {
 extension Reports {
   struct AuditLogCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "audit-log", abstract: "Fetch the audit log for a time window.")
+      commandName: "audit-log", abstract: "[space key] Fetch the audit log for a time window.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Start time (ISO 8601).") var start: String
     @Option(name: .long, help: "End time (ISO 8601).") var end: String
@@ -31,7 +31,7 @@ extension Reports {
 
   struct Conferences: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "conferences", abstract: "List past conferences.")
+      commandName: "conferences", abstract: "[space key] List past conferences.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "From date (ISO 8601).") var from: String?
     @Option(name: .long, help: "To date (ISO 8601).") var to: String?
@@ -49,7 +49,7 @@ extension Reports {
 
   struct Conference: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "conference", abstract: "Get a past conference's metadata.")
+      commandName: "conference", abstract: "[space key] Get a past conference's metadata.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Conference key.") var key: String
     func run() async throws {
@@ -60,7 +60,8 @@ extension Reports {
 
   struct ConferenceEnriched: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "conference-enriched", abstract: "Get a conference's enriched artifacts.")
+      commandName: "conference-enriched",
+      abstract: "[space key] Get a conference's enriched artifacts.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Conference key.") var key: String
     func run() async throws {
@@ -71,7 +72,7 @@ extension Reports {
 
   struct Participants: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "participants", abstract: "Get a conference's participants report.")
+      commandName: "participants", abstract: "[space key] Get a conference's participants report.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Conference key.") var key: String
     func run() async throws {
@@ -82,7 +83,7 @@ extension Reports {
 
   struct Activity: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "activity", abstract: "Get a conference's activity report.")
+      commandName: "activity", abstract: "[space key] Get a conference's activity report.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Conference key.") var key: String
     @Option(name: .long, help: "Skip N.") var skip: Int?
@@ -95,7 +96,7 @@ extension Reports {
 
   struct Chat: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "chat", abstract: "Get a conference's chat report.")
+      commandName: "chat", abstract: "[space key] Get a conference's chat report.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Conference key.") var key: String
     @Option(name: .long, help: "Skip N.") var skip: Int?
@@ -108,7 +109,7 @@ extension Reports {
 
   struct Room: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "room", abstract: "Get a room statistics report.")
+      commandName: "room", abstract: "[space key] Get a room statistics report.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Room name.") var name: String
     @Option(name: .long, help: "From date (ISO 8601).") var from: String
@@ -118,6 +119,34 @@ extension Reports {
       try printJSON(
         try await client.roomReport(
           roomName: name, from: try parseISODate(from), to: try to.map(parseISODate)))
+    }
+  }
+
+  struct Questions: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "questions",
+      abstract: "[space key] Download the questions from a conference's chat as an Excel file.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Conference key.") var key: String
+    @Option(name: [.customShort("o"), .long], help: "Output file path.") var output: String
+    func run() async throws {
+      try saveDownload(
+        try await global.makeClient().conferenceQuestionsReport(key: key), to: output)
+    }
+  }
+
+  struct Attendance: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "attendance",
+      abstract: "[space key] Download the space attendance report for a period as an Excel file.")
+    @OptionGroup var global: GlobalOptions
+    @Option(name: .long, help: "Period start (ISO 8601).") var from: String
+    @Option(name: .long, help: "Period end (ISO 8601).") var to: String?
+    @Option(name: [.customShort("o"), .long], help: "Output file path.") var output: String
+    func run() async throws {
+      let data = try await global.makeClient().attendanceReport(
+        from: try parseISODate(from), to: try to.map(parseISODate))
+      try saveDownload(data, to: output)
     }
   }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import OpenAPIRuntime
 
 extension KTalkClient {
   /// A calendar server.
@@ -38,7 +39,9 @@ extension KTalkClient {
       {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
-      default: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .forbidden: throw KTalkError.forbidden
+      case .notFound: throw KTalkError.unexpectedResponse(statusCode: 404, body: nil)
       }
     }
   }
@@ -52,7 +55,9 @@ extension KTalkClient {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "calendar server", identifier: id)
-      default: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .forbidden: throw KTalkError.forbidden
+      case .notFound: throw KTalkError.notFound(resource: "calendar server", identifier: id)
       }
     }
   }
@@ -65,7 +70,11 @@ extension KTalkClient {
       switch try await client.calendarAddCalendarServer(.init(body: .json(model))) {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
-      default: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .forbidden: throw KTalkError.forbidden
+      case .notFound: throw KTalkError.unexpectedResponse(statusCode: 404, body: nil)
+      case .requestTimeout: throw KTalkError.unexpectedResponse(statusCode: 408, body: nil)
+      case .conflict: throw KTalkError.unexpectedResponse(statusCode: 409, body: nil)
       }
     }
   }
@@ -80,7 +89,11 @@ extension KTalkClient {
       case .ok: return
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "calendar server", identifier: id)
-      default: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .forbidden: throw KTalkError.forbidden
+      case .notFound: throw KTalkError.notFound(resource: "calendar server", identifier: id)
+      case .requestTimeout: throw KTalkError.unexpectedResponse(statusCode: 408, body: nil)
+      case .conflict: throw KTalkError.unexpectedResponse(statusCode: 409, body: nil)
       }
     }
   }
@@ -94,7 +107,10 @@ extension KTalkClient {
       case .ok: return
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "calendar server", identifier: id)
-      default: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
+      case .forbidden: throw KTalkError.forbidden
+      case .notFound: throw KTalkError.notFound(resource: "calendar server", identifier: id)
+      case .requestTimeout: throw KTalkError.unexpectedResponse(statusCode: 408, body: nil)
       }
     }
   }
@@ -144,6 +160,35 @@ extension KTalkClient {
       switch try await client.domainApplicationGetApplicationAccessInfo(.init()) {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  // MARK: - Deepfake source files
+
+  /// Downloads the reference file of one deepfake-detection task.
+  public func deepFakeTaskFile(conferenceKey: String, taskKey: String) async throws(KTalkError)
+    -> Data
+  {
+    try await call {
+      switch try await client.deepFakeDetectorGetTaskSourceFile(
+        .init(path: .init(conferenceKey: conferenceKey, taskKey: taskKey)))
+      {
+      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "task", identifier: taskKey)
+      }
+    }
+  }
+
+  /// Downloads an archive of every deepfake-detection reference file of a conference.
+  public func deepFakeTaskFiles(conferenceKey: String) async throws(KTalkError) -> Data {
+    try await call {
+      switch try await client.deepFakeDetectorGetTaskSourceFiles(
+        .init(path: .init(conferenceKey: conferenceKey)))
+      {
+      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .undocumented(let s, _):
+        throw notFoundOrStatus(s, resource: "conference", identifier: conferenceKey)
       }
     }
   }

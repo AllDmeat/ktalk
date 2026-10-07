@@ -9,6 +9,12 @@ extension KTalkClient {
   /// A role description returned by create/update.
   public typealias RoleDescription =
     Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkUserRoleDescription
+  /// A built-in role kind that every user of that kind gets by default.
+  public typealias DefaultRoleType =
+    Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkDefaultRoleType
+  /// A request to change a default role.
+  public typealias ChangeDefaultRoleRequest =
+    Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkChangeDefaultRoleRequest
   /// A request to create a role.
   public typealias RoleCreateRequest =
     Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkUserRoleCreateRequest
@@ -102,6 +108,53 @@ extension KTalkClient {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let statusCode, _):
         throw statusError(statusCode: statusCode, body: nil)
+      }
+    }
+  }
+
+  /// Fetches the role every registered user gets by default.
+  public func defaultRole() async throws(KTalkError) -> RoleDescription {
+    try await call {
+      switch try await client.userRolesGetDefaultRole(.init()) {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Changes the role every registered user gets by default.
+  public func changeDefaultRole(_ request: ChangeDefaultRoleRequest) async throws(KTalkError)
+    -> RoleDescription
+  {
+    try await call {
+      switch try await client.userRolesChangeDefaultRole(.init(body: .json(request))) {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Fetches the default role of one kind: user, anonymous user or guest.
+  public func defaultRoleByType(_ type: DefaultRoleType) async throws(KTalkError) -> RoleDescription
+  {
+    try await call {
+      switch try await client.userRolesGetDefaultRole2(.init(path: .init(defaultRoleType: type))) {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Changes the default role of one kind: user, anonymous user or guest.
+  public func changeDefaultRoleByType(_ type: DefaultRoleType, request: ChangeDefaultRoleRequest)
+    async throws(KTalkError) -> RoleDescription
+  {
+    try await call {
+      switch try await client.userRolesChangeDefaultRole2(
+        .init(path: .init(defaultRoleType: type), body: .json(request)))
+      {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
       }
     }
   }

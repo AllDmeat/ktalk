@@ -5,24 +5,24 @@ extension KTalkClient {
   public typealias AuditLog = Components.Schemas.SkbKontur_Talk_Web_Entities_TalkAuditLogResponse
   /// A list of past conferences in the space.
   public typealias ConferenceHistory =
-    Components.Schemas.SkbKontur_Talk_Web_Entities_Conferences_TalkConferenceInfos
+    Components.Schemas.SkbKontur_Talk_ConferencesHistory_Api_Models_TalkConferenceInfos
   /// Metadata about a past conference.
   public typealias Conference =
-    Components.Schemas.SkbKontur_Talk_Web_Entities_Conferences_TalkConference
+    Components.Schemas.SkbKontur_Talk_ConferencesHistory_Api_Models_TalkConference
   /// Enriched artifacts of a past conference.
   public typealias EnrichedConference =
-    Components.Schemas.SkbKontur_Talk_Web_Entities_Conferences_TalkEnrichedConference
+    Components.Schemas.SkbKontur_Talk_ConferencesHistory_Api_Models_TalkEnrichedConference
   /// A conference's participants report.
   public typealias ParticipantsReport =
     Components.Schemas
-    .SkbKontur_Talk_Web_Entities_Conferences_Report_TalkConferenceParticipantsReport
+    .SkbKontur_Talk_ConferencesHistory_Api_Models_Report_TalkConferenceParticipantsReport
   /// A conference's activity report.
   public typealias ActivityReport =
     Components.Schemas
-    .SkbKontur_Talk_Web_Entities_Conferences_Report_TalkConferenceActivityReport
+    .SkbKontur_Talk_ConferencesHistory_Api_Models_Report_TalkConferenceActivityReport
   /// A conference's chat report.
   public typealias ChatReport =
-    Components.Schemas.SkbKontur_Talk_Web_Entities_Conferences_Report_TalkConferenceChatReport
+    Components.Schemas.SkbKontur_Talk_ConferencesHistory_Api_Models_Report_TalkConferenceChatReport
   /// A room statistics report.
   public typealias RoomReport =
     Components.Schemas.SkbKontur_Talk_Web_Entities_Statistics_RoomStatisticsReport
@@ -153,6 +153,31 @@ extension KTalkClient {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let statusCode, _):
         throw notFoundOrStatus(statusCode, resource: "room", identifier: roomName)
+      }
+    }
+  }
+
+  /// Downloads the questions asked in a conference's chat as an Excel file.
+  public func conferenceQuestionsReport(key: String) async throws(KTalkError) -> Data {
+    try await call {
+      switch try await client.conferenceReportsGetConferenceQuestionsExcelReport(
+        .init(path: .init(conferenceKey: key)))
+      {
+      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .undocumented(let s, _):
+        throw notFoundOrStatus(s, resource: "conference", identifier: key)
+      }
+    }
+  }
+
+  /// Downloads the space attendance report for a period as an Excel file.
+  public func attendanceReport(from: Date, to: Date? = nil) async throws(KTalkError) -> Data {
+    try await call {
+      switch try await client.roomReportGetDomainStatisticsExcelReport(
+        .init(query: .init(from: from, to: to)))
+      {
+      case .ok(let ok): return try await Data(collecting: ok.body.binary, upTo: .max)
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
       }
     }
   }

@@ -54,12 +54,22 @@ stays byte-identical). The complete list of what is changed and why:
    (e.g. `qualityName` in the recording-download path); added as required string path params.
 6. **Multipart bodies marked `required`** — the generator silently skips optional multipart
    bodies, so uploads (avatars, kiosk artwork) wouldn't generate; marking them required fixes it.
-7. **Binary download body declared** — the spec leaves `GET …/file/{qualityName}` with an empty
-   200, discarding the file bytes; an `application/octet-stream` body is declared so the download
-   is generated.
+7. **Binary download bodies declared** — the spec leaves the endpoints that return a file
+   (`GET …/file/{qualityName}`, the Excel reports, the deepfake-detector source files) with an
+   empty 200, discarding the bytes; an `application/octet-stream` body is declared so the
+   download is generated.
+8. **Personal-token recording operations added** — `GET /api/recordings` and
+   `GET /api/Recordings/{recordingKey}` are not in the published spec. Kontur.Talk support named
+   them on 2026-10-07 as the way to read recordings with a personal access token, which gets 403
+   on `/api/Domain/...`. They are tagged `x-ktalk-source: support` and added only while upstream
+   lacks them, so an upstream definition wins. The response schema is found by its short name,
+   `*.TalkConferenceRecording`, because upstream moves schemas between namespaces.
 
 None of these change the API's wire behaviour — they only fix or complete the description so
 codegen works and the client survives real responses. Keep this list in sync with the script.
+
+To apply a new normalization without pulling upstream changes, re-normalize the vendored file:
+`SPEC_SOURCE=openapi/talk.json scripts/fetch-spec.sh`.
 
 Workflow:
 
@@ -69,6 +79,23 @@ Workflow:
    or renames a `ktalk` command or group MUST update that table in the same PR — it is the
    canonical command list, and it must stay exhaustive. (`ktalk --help` and
    `ktalk <group> --help` are the source of truth to check it against.)
+
+## One API Operation = One CLI Command (hard rule)
+
+Every operation in `openapi/talk.json` gets exactly one facade method and exactly one `ktalk`
+command, and every command calls exactly one operation. No operation is left without a
+command, and no command hides several operations behind a flag — a `v2` endpoint, a "by type"
+variant or a personal-key twin is its own command.
+
+When the spec gains an operation, the same PR adds its facade method, its command, a
+hermetic test and a README **`## Commands`** row. `scripts/check-cli-coverage.sh` enforces
+this in CI: it maps every generated operation through the facade to the commands that reach
+it and fails unless the mapping is one to one and every command is registered. Facade method
+names must be unique — overloads would make the mapping ambiguous.
+
+Each command's abstract starts with the key it takes, as checked against a live space:
+`[personal key]` — works with a personal access token; `[space key]` — a personal access
+token gets 403. Commands that change data stay untagged until someone checks them.
 
 ## Architecture
 

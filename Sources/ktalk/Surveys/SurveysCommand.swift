@@ -14,14 +14,14 @@ struct Surveys: AsyncParsableCommand {
 extension Surveys {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "List surveys.")
+      commandName: "list", abstract: "[space key] List surveys.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().listSurveys()) }
   }
 
   struct Get: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "get", abstract: "Get a survey by id.")
+      commandName: "get", abstract: "[space key] Get a survey by id.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Survey id.") var id: String
     func run() async throws { try printJSON(try await global.makeClient().survey(id: id)) }

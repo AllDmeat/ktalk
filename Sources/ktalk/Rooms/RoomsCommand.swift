@@ -9,7 +9,7 @@ struct Rooms: AsyncParsableCommand {
     abstract: "Inspect and manage rooms.",
     subcommands: [
       Get.self, Update.self, Lock.self, EndConference.self, AddModerator.self,
-      RemoveModerator.self,
+      RemoveModerator.self, SetAnonymousAccess.self, NotifyCall.self, CancelCall.self,
     ]
   )
 }
@@ -17,7 +17,7 @@ struct Rooms: AsyncParsableCommand {
 extension Rooms {
   struct Get: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "get", abstract: "Get a room by name.")
+      commandName: "get", abstract: "[personal key] Get a room by name.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Room name.") var name: String
     func run() async throws {
@@ -93,5 +93,44 @@ extension Rooms {
   private struct Ack: Encodable {
     let room: String
     let action: String
+  }
+
+  struct SetAnonymousAccess: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "set-anonymous-access",
+      abstract: "Change whether external participants can join a room, from a JSON file.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Room name.") var name: String
+    @Option(name: .long, help: "Path to a JSON AnonymousAccessRequest file.") var fromJSON: String
+    func run() async throws {
+      let request = try decodeJSON(KTalkClient.AnonymousAccessRequest.self, fromFile: fromJSON)
+      try printJSON(
+        try await global.makeClient().setAnonymousAccess(roomName: name, request: request))
+    }
+  }
+
+  struct NotifyCall: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "notify-call", abstract: "Notify users of a call from a room, from a JSON file.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Room name.") var name: String
+    @Option(name: .long, help: "Path to a JSON NotifyCallParams file.") var fromJSON: String
+    func run() async throws {
+      let params = try decodeJSON(KTalkClient.NotifyCallParams.self, fromFile: fromJSON)
+      try printJSON(try await global.makeClient().notifyCall(roomName: name, params: params))
+    }
+  }
+
+  struct CancelCall: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "cancel-call", abstract: "Cancel a call from a room, from a JSON file.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Room name.") var name: String
+    @Option(name: .long, help: "Path to a JSON CancelCallParams file.") var fromJSON: String
+    func run() async throws {
+      let params = try decodeJSON(KTalkClient.CancelCallParams.self, fromFile: fromJSON)
+      try await global.makeClient().cancelCall(roomName: name, params: params)
+      try printJSON(["room": name, "action": "cancel-call"])
+    }
   }
 }

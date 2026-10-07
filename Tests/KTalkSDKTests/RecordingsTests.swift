@@ -79,4 +79,79 @@ struct RecordingsTests {
     let data = try await client.downloadRecording(key: "rec-1", quality: "source")
     #expect(data == payload)
   }
+
+  @Test("listAccessibleRecordings decodes the recordings array and sends top/skip")
+  func listAccessibleDecodes() async throws {
+    let transport = try ReplayTransport.fixture(named: "accessible-recordings-list")
+    let client = try client(transport)
+    let recordings = try await client.listAccessibleRecordings(top: 2, skip: 4)
+    #expect(recordings.map(\.id) == ["rec-2", "rec-1"])
+    #expect(recordings.first?.title == "Synthetic retro")
+    let path = transport.lastRequest?.request.path ?? ""
+    #expect(path.hasPrefix("/api/recordings?"))
+    #expect(path.contains("top=2"))
+    #expect(path.contains("skip=4"))
+  }
+
+  @Test("allAccessibleRecordings pages by skip until a short page")
+  func allAccessiblePages() async throws {
+    let pageSize = KTalkClient.accessibleRecordingsMaxPageSize
+    let total = pageSize + 3
+    let transport = ReplayTransport { request, _, _, _ in
+      let query = URLComponents(string: request.path ?? "")?.queryItems ?? []
+      let skip = Int(query.first { $0.name == "skip" }?.value ?? "0") ?? 0
+      let top = Int(query.first { $0.name == "top" }?.value ?? "10") ?? 10
+      let ids = (skip..<min(skip + top, total)).map { #"{"id":"rec-\#($0)"}"# }
+      var headers = HTTPFields()
+      headers[.contentType] = "application/json"
+      return (
+        HTTPResponse(status: .init(code: 200), headerFields: headers),
+        HTTPBody(#"{"recordings":[\#(ids.joined(separator: ","))]}"#)
+      )
+    }
+    let recordings = try await client(transport).allAccessibleRecordings()
+    #expect(recordings.count == total)
+    #expect(recordings.last?.id == "rec-\(total - 1)")
+    #expect(transport.recordedRequests.count == 2)
+  }
+
+  @Test("allAccessibleRecordings makes one extra request when the total is a multiple of the page")
+  func allAccessibleExactMultiple() async throws {
+    let pageSize = KTalkClient.accessibleRecordingsMaxPageSize
+    let transport = ReplayTransport { request, _, _, _ in
+      let skip = request.path?.contains("skip=0") == true
+      let ids = skip ? (0..<pageSize).map { #"{"id":"rec-\#($0)"}"# } : []
+      var headers = HTTPFields()
+      headers[.contentType] = "application/json"
+      return (
+        HTTPResponse(status: .init(code: 200), headerFields: headers),
+        HTTPBody(#"{"recordings":[\#(ids.joined(separator: ","))]}"#)
+      )
+    }
+    let recordings = try await client(transport).allAccessibleRecordings()
+    #expect(recordings.count == pageSize)
+    #expect(transport.recordedRequests.count == 2)
+  }
+
+  @Test("accessibleRecording(key:) decodes from /api/Recordings/{key}")
+  func getAccessibleDecodes() async throws {
+    let transport = try ReplayTransport.fixture(named: "accessible-recording")
+    let recording = try await client(transport).accessibleRecording(key: "rec-1")
+    #expect(recording.id == "rec-1")
+    #expect(recording.title == "Synthetic standup")
+    #expect(transport.lastRequest?.request.path == "/api/Recordings/rec-1")
+  }
+
+  @Test("accessibleRecording(key:) maps 404 to notFound")
+  func getAccessibleMapsNotFound() async throws {
+    let error = await #expect(throws: KTalkError.self) {
+      _ = try await client(ReplayTransport.returning(statusCode: 404)).accessibleRecording(
+        key: "missing")
+    }
+    guard case .notFound(let resource, _) = error else {
+      Issue.record("expected .notFound, got \(String(describing: error))")
+      return
+    }
+    #expect(resource == "recording")
+  }
 }

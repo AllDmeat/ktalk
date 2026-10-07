@@ -14,8 +14,16 @@ mkdir -p "$(dirname "$OUT")"
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
-echo "Fetching $SPEC_URL"
-curl -fsSL "$SPEC_URL" -o "$tmp"
+# SPEC_SOURCE=<file> re-normalizes a local document instead of fetching — e.g. the vendored
+# spec itself, to apply a new normalization without pulling upstream changes. Every
+# normalization is idempotent, so re-running it over an already normalized file is safe.
+if [[ -n "${SPEC_SOURCE:-}" ]]; then
+  echo "Normalizing $SPEC_SOURCE"
+  cp "$SPEC_SOURCE" "$tmp"
+else
+  echo "Fetching $SPEC_URL"
+  curl -fsSL "$SPEC_URL" -o "$tmp"
+fi
 
 # Normalize and pretty-print for a stable, diff-friendly checked-in file.
 # The published document omits the OpenAPI-required `info.version`; inject a stable
@@ -170,29 +178,39 @@ def ensure_path_parameters(doc):
                 )
 
 
-def declare_recording_download_body(doc):
-    """Declare the binary response body for the recording-download endpoint.
+BINARY_DOWNLOADS = (
+    "/api/Recordings/{recordingKey}/file/{qualityName}",
+    "/api/ConferenceReports/{conferenceKey}/questions",
+    "/api/RoomReport/statistics",
+    "/api/DeepFakeDetector/conference/{conferenceKey}/task/{taskKey}/file",
+    "/api/DeepFakeDetector/conference/{conferenceKey}/tasks/files",
+)
 
-    The published spec documents `GET /api/Recordings/{recordingKey}/file/{qualityName}`
-    with an empty 200, so the generator discards the file bytes. Declare an
-    `application/octet-stream` binary body so the generated client exposes the download.
+
+def declare_binary_download_bodies(doc):
+    """Declare the binary response body for endpoints that return a file.
+
+    The published spec documents these `GET`s — the recording media file, the Excel reports
+    and the deepfake-detector source files — with an empty 200, so the generator discards the
+    file bytes. Declare an `application/octet-stream` binary body so the generated client
+    exposes the download. A 200 that already declares content is left alone.
     """
-    path = "/api/Recordings/{recordingKey}/file/{qualityName}"
-    item = (doc.get("paths") or {}).get(path)
-    if not isinstance(item, dict):
-        return
-    operation = item.get("get")
-    if not isinstance(operation, dict):
-        return
-    responses = operation.setdefault("responses", {})
-    ok = responses.get("200")
-    if not isinstance(ok, dict):
-        ok = {"description": "OK"}
-        responses["200"] = ok
-    if not ok.get("content"):
-        ok["content"] = {
-            "application/octet-stream": {"schema": {"type": "string", "format": "binary"}}
-        }
+    for path in BINARY_DOWNLOADS:
+        item = (doc.get("paths") or {}).get(path)
+        if not isinstance(item, dict):
+            continue
+        operation = item.get("get")
+        if not isinstance(operation, dict):
+            continue
+        responses = operation.setdefault("responses", {})
+        ok = responses.get("200")
+        if not isinstance(ok, dict):
+            ok = {"description": "OK"}
+            responses["200"] = ok
+        if not ok.get("content"):
+            ok["content"] = {
+                "application/octet-stream": {"schema": {"type": "string", "format": "binary"}}
+            }
 
 
 def require_multipart_bodies(doc):
@@ -213,6 +231,93 @@ def require_multipart_bodies(doc):
                 body["required"] = True
 
 
+SUPPORT_NOTE = (
+    "Added by ktalk's scripts/fetch-spec.sh: this operation is NOT in the published "
+    "Kontur.Talk spec. It was described by Kontur.Talk support on 2026-10-07 as the way "
+    "to read recordings with a personal access token (Profile → Settings → API keys), "
+    "and verified against the live API."
+)
+
+
+def add_support_confirmed_operations(doc):
+    """Declare personal-token recording operations missing from the published spec.
+
+    Kontur.Talk has two kinds of keys. A space key (admin panel → API keys) works with
+    `/api/Domain/...` and sees every recording in the space. A personal access token
+    (profile → Settings → API keys) gets 403 there and acts with its user's rights. Support
+    named the endpoints a personal token can use; transcript and summary are already in the
+    spec, but listing and fetching a recording are not. Declare them, marked with
+    `x-ktalk-source: support` and a description saying they were added by hand.
+
+    Each operation is added only when the published spec lacks it, so an upstream definition
+    always wins. The response reuses the published `TalkConferenceRecording` schema, which
+    matches the live payload field for field.
+    """
+    # Upstream moves schemas between namespaces, so find it by its short name.
+    schemas = (doc.get("components") or {}).get("schemas") or {}
+    matches = [name for name in schemas if name.endswith(".TalkConferenceRecording")]
+    if len(matches) != 1:
+        sys.exit(f"expected one *.TalkConferenceRecording schema, found {matches}")
+    RECORDING_SCHEMA = {"$ref": f"#/components/schemas/{matches[0]}"}
+
+    paths = doc.setdefault("paths", {})
+    operations = {
+        ("/api/recordings", "get"): {
+            "operationId": "Recordings_GetAccessible",
+            "summary": "List recordings available to the token's user (personal token)",
+            "description": SUPPORT_NOTE
+            + " Newest first. Page with `top` (1-100, default 10) and `skip`; a page"
+            " shorter than `top` is the last one.",
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "schema": {"type": "integer", "format": "int32", "minimum": 1, "maximum": 100},
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "schema": {"type": "integer", "format": "int32", "minimum": 0},
+                },
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "recordings": {"type": "array", "items": RECORDING_SCHEMA}
+                                },
+                            }
+                        }
+                    },
+                }
+            },
+        },
+        ("/api/Recordings/{recordingKey}", "get"): {
+            "operationId": "Recordings_GetRecording",
+            "summary": "Get a recording available to the token's user (personal token)",
+            "description": SUPPORT_NOTE,
+            "parameters": [
+                {"name": "recordingKey", "in": "path", "required": True, "schema": {"type": "string"}}
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "content": {"application/json": {"schema": RECORDING_SCHEMA}},
+                }
+            },
+        },
+    }
+    for (path, method), operation in operations.items():
+        item = paths.setdefault(path, {})
+        if method in item:
+            continue
+        item[method] = {"tags": ["Записи"], "x-ktalk-source": "support", **operation}
+
+
 src, dst = sys.argv[1], sys.argv[2]
 with open(src, encoding="utf-8") as f:
     doc = json.load(f)
@@ -224,7 +329,8 @@ relax_additional_properties(doc)
 strip_deprecated(doc)
 ensure_path_parameters(doc)
 require_multipart_bodies(doc)
-declare_recording_download_body(doc)
+declare_binary_download_bodies(doc)
+add_support_confirmed_operations(doc)
 
 with open(dst, "w", encoding="utf-8") as f:
     json.dump(doc, f, ensure_ascii=False, indent=2, sort_keys=True)

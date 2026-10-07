@@ -60,3 +60,28 @@ func printJSON(_ value: some Encodable) throws {
   let data = try encoder.encode(value)
   print(String(decoding: data, as: UTF8.self))
 }
+
+/// Parses one of an API enum's raw values, listing the accepted values on a typo.
+func parseChoice<E: RawRepresentable & CaseIterable>(_ value: String, as _: E.Type) throws -> E
+where E.RawValue == String {
+  if let choice = E(rawValue: value) { return choice }
+  let accepted = E.allCases.map(\.rawValue).joined(separator: ", ")
+  throw ValidationError("Invalid value '\(value)'. Use one of: \(accepted).")
+}
+
+/// Reads a local file for upload, keeping its name.
+func uploadFile(atPath path: String) throws -> KTalkClient.UploadFile {
+  let url = URL(fileURLWithPath: path)
+  return KTalkClient.UploadFile(filename: url.lastPathComponent, data: try Data(contentsOf: url))
+}
+
+/// Writes downloaded bytes to `path` and prints where they went.
+func saveDownload(_ data: Data, to path: String) throws {
+  try data.write(to: URL(fileURLWithPath: path))
+  try printJSON(SavedFile(path: path, bytes: data.count))
+}
+
+private struct SavedFile: Encodable {
+  let path: String
+  let bytes: Int
+}

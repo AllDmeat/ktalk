@@ -27,7 +27,7 @@ struct StatsWindow: ParsableArguments {
 extension Stats {
   struct Domain: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "domain", abstract: "Active-user statistics for a window.")
+      commandName: "domain", abstract: "[space key] Active-user statistics for a window.")
     @OptionGroup var global: GlobalOptions
     @OptionGroup var window: StatsWindow
     func run() async throws {
@@ -38,7 +38,7 @@ extension Stats {
 
   struct RegisteredUsers: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "registered-users", abstract: "Registered-user statistics.")
+      commandName: "registered-users", abstract: "[space key] Registered-user statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws {
       try printJSON(try await global.makeClient().registeredUsersStatistics())
@@ -47,7 +47,7 @@ extension Stats {
 
   struct Conferences: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "conferences", abstract: "Conference statistics for a window.")
+      commandName: "conferences", abstract: "[space key] Conference statistics for a window.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "From date (ISO 8601).") var from: String?
     @Option(name: .long, help: "To date (ISO 8601).") var to: String?
@@ -60,7 +60,7 @@ extension Stats {
 
   struct Recordings: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "recordings", abstract: "Recording statistics for a window.")
+      commandName: "recordings", abstract: "[space key] Recording statistics for a window.")
     @OptionGroup var global: GlobalOptions
     @OptionGroup var window: StatsWindow
     func run() async throws {
@@ -71,7 +71,7 @@ extension Stats {
 
   struct Kiosks: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "kiosks", abstract: "Kiosk statistics for a window.")
+      commandName: "kiosks", abstract: "[space key] Kiosk statistics for a window.")
     @OptionGroup var global: GlobalOptions
     @OptionGroup var window: StatsWindow
     func run() async throws {
@@ -82,63 +82,63 @@ extension Stats {
 
   struct Online: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "online", abstract: "Live online counters.")
+      commandName: "online", abstract: "[space key] Live online counters.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().onlineCounters()) }
   }
 
   struct ConferencesOnline: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "conferences-online", abstract: "Online conference statistics.")
+      commandName: "conferences-online", abstract: "[space key] Online conference statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().conferencesOnline()) }
   }
 
   struct RecordingsOnline: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "recordings-online", abstract: "Online recording statistics.")
+      commandName: "recordings-online", abstract: "[space key] Online recording statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().recordingsOnline()) }
   }
 
   struct KiosksOnline: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "kiosks-online", abstract: "Online kiosk statistics.")
+      commandName: "kiosks-online", abstract: "[space key] Online kiosk statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().kiosksOnline()) }
   }
 
   struct StreamsOnline: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "streams-online", abstract: "Online stream statistics.")
+      commandName: "streams-online", abstract: "[space key] Online stream statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().streamsOnline()) }
   }
 
   struct TotalRecordingsSize: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "recordings-size", abstract: "Total recording-size statistics.")
+      commandName: "recordings-size", abstract: "[space key] Total recording-size statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().totalRecordingsSize()) }
   }
 
   struct Whiteboards: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "whiteboards", abstract: "Whiteboard statistics.")
+      commandName: "whiteboards", abstract: "[space key] Whiteboard statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().whiteboardsStatistics()) }
   }
 
   struct DeepFake: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "deepfake", abstract: "Deepfake-detection statistics.")
+      commandName: "deepfake", abstract: "[space key] Deepfake-detection statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().deepFakeStatistics()) }
   }
 
   struct Tariff: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "tariff", abstract: "Tariff expiration date.")
+      commandName: "tariff", abstract: "[space key] Tariff expiration date.")
     @OptionGroup var global: GlobalOptions
     func run() async throws {
       let date = try await global.makeClient().tariffExpirationDate()

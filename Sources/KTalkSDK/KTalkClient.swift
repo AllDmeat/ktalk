@@ -39,6 +39,17 @@ public struct KTalkClient: Sendable {
     )
   }
 
+  /// A file to upload: its name as the server should see it and its bytes.
+  public struct UploadFile: Sendable {
+    public let filename: String
+    public let data: Data
+
+    public init(filename: String, data: Data) {
+      self.filename = filename
+      self.data = data
+    }
+  }
+
   // MARK: - Error mapping helpers
 
   /// Runs an operation, translating any non-``KTalkError`` failure into a ``KTalkError``.

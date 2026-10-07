@@ -9,7 +9,8 @@ struct Users: AsyncParsableCommand {
     abstract: "Search and manage users.",
     subcommands: [
       Search.self, Scan.self, Get.self, CreateOrUpdate.self, Delete.self, RevokeSessions.self,
-      Roles.self, ChangeRoles.self, SetPermissions.self,
+      Roles.self, ChangeRoles.self, SetPermissions.self, UploadAvatar.self, DeleteAvatar.self,
+      SyncAvatar.self,
     ]
   )
 }
@@ -17,7 +18,7 @@ struct Users: AsyncParsableCommand {
 extension Users {
   struct Search: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "search", abstract: "Search users.")
+      commandName: "search", abstract: "[personal key] Search users.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Free-text query.") var query: String?
     @Option(name: .long, help: "Filter by email (repeatable).") var email: [String] = []
@@ -38,7 +39,7 @@ extension Users {
 
   struct Scan: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "scan", abstract: "Scan all users.")
+      commandName: "scan", abstract: "[personal key] Scan all users.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Offset cursor.") var offset: String?
     @Option(name: .long, help: "Take N.") var top: Int?
@@ -56,7 +57,7 @@ extension Users {
 
   struct Get: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "get", abstract: "Get a user by key.")
+      commandName: "get", abstract: "[personal key] Get a user by key.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
@@ -104,7 +105,7 @@ extension Users {
 
   struct Roles: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "roles", abstract: "Get a user's roles.")
+      commandName: "roles", abstract: "[space key] Get a user's roles.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
@@ -143,5 +144,39 @@ extension Users {
   private struct Ack: Encodable {
     let userKey: String
     let action: String
+  }
+
+  struct UploadAvatar: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "upload-avatar", abstract: "Upload a user's avatar.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "User key.") var key: String
+    @Argument(help: "Image file.") var file: String
+    func run() async throws {
+      let upload = try uploadFile(atPath: file)
+      try printJSON(try await global.makeClient().uploadAvatar(userKey: key, file: upload))
+    }
+  }
+
+  struct DeleteAvatar: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "delete-avatar", abstract: "Delete a user's avatar.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "User key.") var key: String
+    func run() async throws {
+      try await global.makeClient().deleteAvatar(userKey: key)
+      try printJSON(["user": key, "action": "delete-avatar"])
+    }
+  }
+
+  struct SyncAvatar: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "sync-avatar", abstract: "Re-sync a user's avatar from the identity provider.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "User key.") var key: String
+    func run() async throws {
+      try await global.makeClient().syncAvatar(userKey: key)
+      try printJSON(["user": key, "action": "sync-avatar"])
+    }
   }
 }

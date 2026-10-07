@@ -24,4 +24,6 @@ sync with the code. See [`AGENTS.md`](../AGENTS.md) for the workflow and hard ru
    methods that map `.ok` / `.undocumented` to typed results and ``KTalkError``.
 3. Add `Sources/ktalk/<Tag>/…Command.swift` and register the group in `KTalk.swift`.
 4. Add hermetic tests using `ReplayTransport` + synthetic fixtures.
-5. Update the README "API Reference" and "CLI Commands" tables.
+5. Update the README **`## Commands`** table.
+6. Run `scripts/check-cli-coverage.sh` after `swift build`: every operation needs exactly one
+   command (see [`AGENTS.md`](../AGENTS.md)).

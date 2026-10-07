@@ -14,7 +14,7 @@ struct CalendarServers: AsyncParsableCommand {
 extension CalendarServers {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "List calendar servers.")
+      commandName: "list", abstract: "[space key] List calendar servers.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Skip N.") var skip: Int?
     @Option(name: .long, help: "Take N.") var take: Int?
@@ -25,7 +25,7 @@ extension CalendarServers {
 
   struct Get: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "get", abstract: "Get a calendar server by id.")
+      commandName: "get", abstract: "[space key] Get a calendar server by id.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar server id.") var id: String
     func run() async throws { try printJSON(try await global.makeClient().calendarServer(id: id)) }
@@ -72,14 +72,14 @@ struct DeepFake: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "deepfake",
     abstract: "Deepfake-detection reports and statistics.",
-    subcommands: [Report.self, Statistic.self]
+    subcommands: [Report.self, Statistic.self, TaskFile.self, TaskFiles.self]
   )
 }
 
 extension DeepFake {
   struct Report: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "report", abstract: "Get the deepfake report for a conference.")
+      commandName: "report", abstract: "[space key] Get the deepfake report for a conference.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Conference key.") var conferenceKey: String
     @Option(name: .long, help: "Timezone.") var timezone: String?
@@ -92,10 +92,37 @@ extension DeepFake {
 
   struct Statistic: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "statistic", abstract: "Get deepfake-detection statistics.")
+      commandName: "statistic", abstract: "[space key] Get deepfake-detection statistics.")
     @OptionGroup var global: GlobalOptions
     func run() async throws {
       try printJSON(try await global.makeClient().deepFakeDetectionStatistic())
+    }
+  }
+  struct TaskFile: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "task-file",
+      abstract: "[space key] Download the reference file of a detection task.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Conference key.") var conferenceKey: String
+    @Argument(help: "Task key.") var taskKey: String
+    @Option(name: [.customShort("o"), .long], help: "Output file path.") var output: String
+    func run() async throws {
+      let data = try await global.makeClient().deepFakeTaskFile(
+        conferenceKey: conferenceKey, taskKey: taskKey)
+      try saveDownload(data, to: output)
+    }
+  }
+
+  struct TaskFiles: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "task-files",
+      abstract: "[space key] Download an archive of a conference's detection reference files.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Conference key.") var conferenceKey: String
+    @Option(name: [.customShort("o"), .long], help: "Output file path.") var output: String
+    func run() async throws {
+      try saveDownload(
+        try await global.makeClient().deepFakeTaskFiles(conferenceKey: conferenceKey), to: output)
     }
   }
 }
@@ -112,14 +139,14 @@ struct ApiKeys: AsyncParsableCommand {
 extension ApiKeys {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "List registered applications (API keys).")
+      commandName: "list", abstract: "[space key] List registered applications (API keys).")
     @OptionGroup var global: GlobalOptions
     func run() async throws { try printJSON(try await global.makeClient().applications()) }
   }
 
   struct AccessInfo: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "access-info", abstract: "Show the current key's access info.")
+      commandName: "access-info", abstract: "[space key] Show the current key's access info.")
     @OptionGroup var global: GlobalOptions
     func run() async throws {
       try printJSON(try await global.makeClient().applicationAccessInfo())

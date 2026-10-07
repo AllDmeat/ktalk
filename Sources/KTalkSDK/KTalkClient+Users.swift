@@ -1,4 +1,5 @@
 import Foundation
+import OpenAPIRuntime
 
 extension KTalkClient {
   /// The result of searching users.
@@ -14,6 +15,9 @@ extension KTalkClient {
   /// A reference to a role assigned to a user.
   public typealias UserRoleRef =
     Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkUserRoleRef
+  /// The result of uploading a user's avatar.
+  public typealias AvatarUploadResult =
+    Components.Schemas.SkbKontur_Talk_Web_Services_TalkUserProfileUpdateResult
   /// A request to change a user's roles.
   public typealias ChangeRolesRequest =
     Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkUserChangeRolesRequest
@@ -148,6 +152,43 @@ extension KTalkClient {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let statusCode, _):
         throw notFoundOrStatus(statusCode, resource: "user", identifier: userKey)
+      }
+    }
+  }
+
+  /// Uploads a user's avatar.
+  public func uploadAvatar(userKey: String, file: UploadFile) async throws(KTalkError)
+    -> AvatarUploadResult
+  {
+    try await call {
+      let parts: [Operations.UsersUploadAvatar2.Input.Body.MultipartFormPayload] = [
+        .avatar(.init(payload: .init(body: HTTPBody(file.data)), filename: file.filename))
+      ]
+      switch try await client.usersUploadAvatar2(
+        .init(path: .init(userKey: userKey), body: .multipartForm(.init(parts))))
+      {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
+      }
+    }
+  }
+
+  /// Deletes a user's avatar.
+  public func deleteAvatar(userKey: String) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersDeleteAvatar2(.init(path: .init(userKey: userKey))) {
+      case .ok: return
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
+      }
+    }
+  }
+
+  /// Re-syncs a user's avatar from the identity provider.
+  public func syncAvatar(userKey: String) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersSyncAvatar(.init(path: .init(userKey: userKey))) {
+      case .ok: return
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
       }
     }
   }
