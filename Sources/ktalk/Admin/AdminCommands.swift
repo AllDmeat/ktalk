@@ -20,7 +20,7 @@ extension CalendarServers {
     @Option(name: .long, help: "Take N.") var take: Int?
     func validate() throws {
       try checkRange(skip, "--skip", 0...int32Max)
-      try checkRange(take, "--take", 1...int32Max)
+      try checkRange(take, "--take", 0...int32Max)
     }
 
     func run() async throws {

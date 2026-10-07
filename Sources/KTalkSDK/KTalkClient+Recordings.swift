@@ -156,9 +156,14 @@ extension KTalkClient {
       // Without ids, only a byte-for-byte repeat can show a server ignoring `skip`; with ids,
       // the stall counter below decides, since 100 recordings added mid-scan can make a page
       // repeat the previous one legitimately.
-      if page == previous, page.allSatisfy({ $0.id == nil }) { return all }
+      // Comparing whole pages is only needed when some recordings lack an id.
+      let hasIDless = page.contains { $0.id == nil }
+      let repeated = hasIDless && page == previous
+      if repeated, page.allSatisfy({ $0.id == nil }) { return all }
       var progressed = false
-      for recording in page where recording.id.map({ seen.insert($0).inserted }) ?? true {
+      // An id-less recording counts as new only on a page that differs from the previous one,
+      // so a mixed page repeated by a server ignoring `skip` still stalls.
+      for recording in page where recording.id.map({ seen.insert($0).inserted }) ?? !repeated {
         all.append(recording)
         progressed = true
       }

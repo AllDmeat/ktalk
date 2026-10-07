@@ -183,6 +183,21 @@ struct RecordingsTests {
     #expect(transport.recordedRequests.count == 4)  // one page, then three stalled ones
   }
 
+  @Test("allAccessibleRecordings stops on repeated mixed pages when the server ignores skip")
+  func allAccessibleIgnoredSkipMixedIDs() async throws {
+    let transport = ReplayTransport { _, _, _, _ in
+      var headers = HTTPFields()
+      headers[.contentType] = "application/json"
+      return (
+        HTTPResponse(status: .init(code: 200), headerFields: headers),
+        HTTPBody(#"{"recordings":[{"id":"rec-1"},{"title":"no id"}]}"#)
+      )
+    }
+    let recordings = try await client(transport).allAccessibleRecordings()
+    #expect(recordings.count == 2)
+    #expect(transport.recordedRequests.count == 4)  // one page, then three stalled repeats
+  }
+
   @Test("allAccessibleRecordings survives 100 recordings added mid-scan")
   func allAccessibleShiftedPage() async throws {
     // After the first page, 100 new recordings appear at the top: the second request returns

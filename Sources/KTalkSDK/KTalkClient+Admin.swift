@@ -41,9 +41,9 @@ extension KTalkClient {
       {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
-      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
-      case .forbidden: throw KTalkError.forbidden
-      case .notFound: throw KTalkError.unexpectedResponse(statusCode: 404, body: nil)
+      case .badRequest: throw statusError(statusCode: 400, body: nil)
+      case .forbidden: throw statusError(statusCode: 403, body: nil)
+      case .notFound: throw statusError(statusCode: 404, body: nil)
       }
     }
   }
@@ -57,9 +57,9 @@ extension KTalkClient {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "calendar server", identifier: id)
-      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
-      case .forbidden: throw KTalkError.forbidden
-      case .notFound: throw KTalkError.notFound(resource: "calendar server", identifier: id)
+      case .badRequest: throw statusError(statusCode: 400, body: nil)
+      case .forbidden: throw statusError(statusCode: 403, body: nil)
+      case .notFound: throw notFoundOrStatus(404, resource: "calendar server", identifier: id)
       }
     }
   }
@@ -72,11 +72,11 @@ extension KTalkClient {
       switch try await client.calendarAddCalendarServer(.init(body: .json(model))) {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
-      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
-      case .forbidden: throw KTalkError.forbidden
-      case .notFound: throw KTalkError.unexpectedResponse(statusCode: 404, body: nil)
-      case .requestTimeout: throw KTalkError.unexpectedResponse(statusCode: 408, body: nil)
-      case .conflict: throw KTalkError.unexpectedResponse(statusCode: 409, body: nil)
+      case .badRequest: throw statusError(statusCode: 400, body: nil)
+      case .forbidden: throw statusError(statusCode: 403, body: nil)
+      case .notFound: throw statusError(statusCode: 404, body: nil)
+      case .requestTimeout: throw statusError(statusCode: 408, body: nil)
+      case .conflict: throw statusError(statusCode: 409, body: nil)
       }
     }
   }
@@ -91,11 +91,11 @@ extension KTalkClient {
       case .ok: return
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "calendar server", identifier: id)
-      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
-      case .forbidden: throw KTalkError.forbidden
-      case .notFound: throw KTalkError.notFound(resource: "calendar server", identifier: id)
-      case .requestTimeout: throw KTalkError.unexpectedResponse(statusCode: 408, body: nil)
-      case .conflict: throw KTalkError.unexpectedResponse(statusCode: 409, body: nil)
+      case .badRequest: throw statusError(statusCode: 400, body: nil)
+      case .forbidden: throw statusError(statusCode: 403, body: nil)
+      case .notFound: throw notFoundOrStatus(404, resource: "calendar server", identifier: id)
+      case .requestTimeout: throw statusError(statusCode: 408, body: nil)
+      case .conflict: throw statusError(statusCode: 409, body: nil)
       }
     }
   }
@@ -109,10 +109,10 @@ extension KTalkClient {
       case .ok: return
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "calendar server", identifier: id)
-      case .badRequest: throw KTalkError.unexpectedResponse(statusCode: 400, body: nil)
-      case .forbidden: throw KTalkError.forbidden
-      case .notFound: throw KTalkError.notFound(resource: "calendar server", identifier: id)
-      case .requestTimeout: throw KTalkError.unexpectedResponse(statusCode: 408, body: nil)
+      case .badRequest: throw statusError(statusCode: 400, body: nil)
+      case .forbidden: throw statusError(statusCode: 403, body: nil)
+      case .notFound: throw notFoundOrStatus(404, resource: "calendar server", identifier: id)
+      case .requestTimeout: throw statusError(statusCode: 408, body: nil)
       }
     }
   }

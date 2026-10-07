@@ -117,7 +117,7 @@ extension Kiosks {
     @Option(name: .long, help: "Kiosk group key.") var group: String?
     func validate() throws {
       try checkRange(offset, "--offset", 0...int32Max)
-      try checkRange(pageSize, "--page-size", 1...int32Max)
+      try checkRange(pageSize, "--page-size", 0...int32Max)
     }
 
     func run() async throws {
