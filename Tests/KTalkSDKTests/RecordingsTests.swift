@@ -131,6 +131,20 @@ struct RecordingsTests {
     #expect(recordings.last?.title == "rec-249")
   }
 
+  @Test("allAccessibleRecordings throws when the list never ends")
+  func allAccessibleEndlessList() async throws {
+    // Every page is new: 100 fresh ids per request, forever.
+    let transport = pagingTransport(total: .max)
+    let error = await #expect(throws: KTalkError.self) {
+      _ = try await client(transport).allAccessibleRecordings()
+    }
+    guard case .unexpectedResponse = error else {
+      Issue.record("expected .unexpectedResponse, got \(String(describing: error))")
+      return
+    }
+    #expect(transport.recordedRequests.count == 1_000)
+  }
+
   @Test("listAccessibleRecordings fails on a reply without the recordings list")
   func listAccessibleRejectsChangedShape() async throws {
     let client = try client(ReplayTransport.returning(statusCode: 200, body: #"{"items":[]}"#))

@@ -309,8 +309,10 @@ def add_support_confirmed_operations(doc):
             for op in item.values()
             if isinstance(op, dict) and op.get("tags") and op.get("x-ktalk-source") != "support"
         ),
-        [],
+        None,
     )
+    if recordings_tags is None:
+        sys.exit("expected a tagged upstream /api/recordings/... operation to copy the tag from")
     operations = {
         ("/api/recordings", "get"): {
             "operationId": "Recordings_GetAccessible",

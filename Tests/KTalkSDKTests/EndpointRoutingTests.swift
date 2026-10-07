@@ -215,6 +215,14 @@ struct EndpointRoutingTests {
     #expect(KTalkClient.UploadFile.mediaType(forFilename: "me.jpeg") == "image/jpeg")
     #expect(KTalkClient.UploadFile.mediaType(forFilename: "scan.tif") == "image/tiff")
     #expect(KTalkClient.UploadFile.mediaType(forFilename: "loop.mp4") == "video/mp4")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "photo.jpg") == "image/jpeg")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "anim.gif") == "image/gif")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "pic.webp") == "image/webp")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "clip.mov") == "video/quicktime")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "a.tar.png") == "image/png")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: ".png") == "image/png")
+    #expect(
+      KTalkClient.UploadFile.mediaType(forFilename: "trailing.") == "application/octet-stream")
     #expect(KTalkClient.UploadFile.mediaType(forFilename: "noext") == "application/octet-stream")
     #expect(
       KTalkClient.UploadFile(filename: "a.bin", data: Data(), contentType: "image/png").contentType
@@ -248,6 +256,7 @@ struct EndpointRoutingTests {
     #expect(recorded.request.path == "/api/Users/u-1/avatar")
     let sent = try await String(collecting: try #require(recorded.body), upTo: .max)
     #expect(sent.contains(#"name="avatar""#))
+    #expect(sent.contains(#"filename="me.png""#))
     #expect(sent.lowercased().contains("content-type: image/png"))
     try await expectRoute(.delete, "/api/Users/u-1/avatar") {
       try await $0.deleteAvatar(userKey: "u-1")
