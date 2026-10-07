@@ -208,6 +208,20 @@ struct EndpointRoutingTests {
     #expect(sent.contains("synthetic"))
   }
 
+  @Test("a non-ASCII file name goes out as an ASCII stand-in plus UTF-8 filename*")
+  func uploadNonASCIIFilename() async throws {
+    let transport = replay("{}")
+    _ = try await client(transport).uploadAvatar(
+      userKey: "u-1",
+      file: KTalkClient.UploadFile(filename: "аватар \"1\".png", data: Data("synthetic".utf8)))
+    let sent = try await String(
+      collecting: try #require(transport.lastRequest?.body), upTo: .max)
+    #expect(sent.contains(#"name="avatar""#))
+    #expect(sent.contains(#"filename="______ _1_.png""#))
+    #expect(sent.contains("filename*=UTF-8''%D0%B0%D0%B2%D0%B0%D1%82%D0%B0%D1%80%20%221%22.png"))
+    #expect(sent.lowercased().contains("content-type: image/png"))
+  }
+
   /// The server rejects an avatar sent as `application/octet-stream`, so the type comes from
   /// the file name.
   @Test func uploadMediaTypeFollowsExtension() {
@@ -224,6 +238,8 @@ struct EndpointRoutingTests {
     #expect(
       KTalkClient.UploadFile.mediaType(forFilename: "trailing.") == "application/octet-stream")
     #expect(KTalkClient.UploadFile.mediaType(forFilename: "noext") == "application/octet-stream")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "IMG_1.HEIC") == "image/heic")
+    #expect(KTalkClient.UploadFile.mediaType(forFilename: "logo.svg") == "image/svg+xml")
     #expect(
       KTalkClient.UploadFile(filename: "a.bin", data: Data(), contentType: "image/png").contentType
         == "image/png")

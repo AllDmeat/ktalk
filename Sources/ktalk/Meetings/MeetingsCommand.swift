@@ -22,6 +22,10 @@ extension Meetings {
     @Option(name: .long, help: "Start date (ISO 8601).") var start: String
     @Option(name: .long, help: "End date (ISO 8601).") var end: String?
     @Option(name: .long, help: "Maximum number of meetings.") var take: Int?
+    func validate() throws {
+      try checkRange(take, "--take", 1...1000)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       let result = try await client.listMeetings(

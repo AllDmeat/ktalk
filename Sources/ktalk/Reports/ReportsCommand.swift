@@ -38,6 +38,11 @@ extension Reports {
     @Option(name: .long, help: "Skip N.") var skip: Int?
     @Option(name: .long, help: "Take N.") var take: Int?
     @Option(name: .long, help: "Filter by room name (repeatable).") var room: [String] = []
+    func validate() throws {
+      try checkRange(skip, "--skip", 0...int32Max)
+      try checkRange(take, "--take", 1...100)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       try printJSON(
@@ -88,6 +93,11 @@ extension Reports {
     @Argument(help: "Conference key.") var key: String
     @Option(name: .long, help: "Skip N.") var skip: Int?
     @Option(name: .long, help: "Take N.") var take: Int?
+    func validate() throws {
+      try checkRange(skip, "--skip", 0...int32Max)
+      try checkRange(take, "--take", 1...100)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       try printJSON(try await client.conferenceActivity(key: key, skip: skip, take: take))
@@ -101,6 +111,11 @@ extension Reports {
     @Argument(help: "Conference key.") var key: String
     @Option(name: .long, help: "Skip N.") var skip: Int?
     @Option(name: .long, help: "Take N.") var take: Int?
+    func validate() throws {
+      try checkRange(skip, "--skip", 0...int32Max)
+      try checkRange(take, "--take", 1...100)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       try printJSON(try await client.conferenceChat(key: key, skip: skip, take: take))

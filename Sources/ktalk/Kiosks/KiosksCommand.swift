@@ -109,18 +109,21 @@ extension Kiosks {
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Free-text search.") var search: String?
     @Option(name: .long, help: "Status filter as free text.") var status: String?
-    @Option(
-      name: .long,
-      help: "Status value: inactive, active, blocked or notActivated. Repeat for several.")
-    var statusValue: [String] = []
+    @Option(name: .long, help: "Status value. Repeat for several.")
+    var statusValue: [KTalkClient.KioskStatus] = []
     @Option(name: .long, help: "App version.") var version: String?
     @Option(name: .long, help: "Skip N kiosks.") var offset: Int?
     @Option(name: .long, help: "Page size.") var pageSize: Int?
     @Option(name: .long, help: "Kiosk group key.") var group: String?
+    func validate() throws {
+      try checkRange(offset, "--offset", 0...int32Max)
+      try checkRange(pageSize, "--page-size", 1...int32Max)
+    }
+
     func run() async throws {
-      let values = try statusValue.map { try parseChoice($0, as: KTalkClient.KioskStatus.self) }
       let count = try await global.makeClient().kioskCount(
-        complexSearch: search, status: status, statusValues: values.isEmpty ? nil : values,
+        complexSearch: search, status: status,
+        statusValues: statusValue.isEmpty ? nil : statusValue,
         version: version, offset: offset, pageSize: pageSize, groupKey: group)
       try printJSON(["count": count])
     }
@@ -279,8 +282,10 @@ extension Kiosks {
       commandName: "upload-screensavers", abstract: "Upload kiosk screensavers.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Image or video files to upload.") var files: [String]
+    @Option(name: .long, help: "Media type to send, e.g. image/png (default: from the extension).")
+    var contentType: String?
     func run() async throws {
-      let uploads = try files.map(uploadFile(atPath:))
+      let uploads = try files.map { try uploadFile(atPath: $0, contentType: contentType) }
       try printJSON(try await global.makeClient().uploadKioskScreensavers(uploads))
     }
   }
@@ -300,8 +305,10 @@ extension Kiosks {
       commandName: "upload-wallpapers", abstract: "Upload kiosk wallpapers.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Image files to upload.") var files: [String]
+    @Option(name: .long, help: "Media type to send, e.g. image/png (default: from the extension).")
+    var contentType: String?
     func run() async throws {
-      let uploads = try files.map(uploadFile(atPath:))
+      let uploads = try files.map { try uploadFile(atPath: $0, contentType: contentType) }
       try printJSON(try await global.makeClient().uploadKioskWallpapers(uploads))
     }
   }

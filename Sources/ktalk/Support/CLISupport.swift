@@ -61,23 +61,41 @@ func printJSON(_ value: some Encodable) throws {
   print(String(decoding: data, as: UTF8.self))
 }
 
-/// Parses one of an API enum's raw values, listing the accepted values on a typo.
-func parseChoice<E: RawRepresentable & CaseIterable>(_ value: String, as _: E.Type) throws -> E
-where E.RawValue == String {
-  if let choice = E(rawValue: value) { return choice }
-  let accepted = E.allCases.map(\.rawValue).joined(separator: ", ")
-  throw ValidationError("Invalid value '\(value)'. Use one of: \(accepted).")
+// API enums taken as arguments: ArgumentParser validates them and lists their values in
+// `--help`, so the choices never drift from the spec.
+extension KTalkClient.SummaryType: ExpressibleByArgument {}
+extension KTalkClient.DefaultRoleType: ExpressibleByArgument {}
+extension KTalkClient.RecordingsOrderMode: ExpressibleByArgument {}
+extension KTalkClient.KioskStatus: ExpressibleByArgument {}
+
+/// The largest value the API's 32-bit integer parameters accept.
+let int32Max = Int(Int32.max)
+
+/// Rejects `value` outside `range` before the request: the server would answer an opaque 400,
+/// and a value beyond 32 bits would otherwise be clamped silently.
+func checkRange(_ value: Int?, _ option: String, _ range: ClosedRange<Int>) throws {
+  if let value, !range.contains(value) {
+    throw ValidationError(
+      "\(option) must be between \(range.lowerBound) and \(range.upperBound).")
+  }
 }
 
 /// Reads a local file for upload, keeping its name. Reads the whole file into memory.
-func uploadFile(atPath path: String) throws -> KTalkClient.UploadFile {
+/// `contentType` overrides the media type guessed from the extension.
+func uploadFile(atPath path: String, contentType: String? = nil) throws -> KTalkClient.UploadFile {
   let url = URL(fileURLWithPath: path)
-  return KTalkClient.UploadFile(filename: url.lastPathComponent, data: try Data(contentsOf: url))
+  return KTalkClient.UploadFile(
+    filename: url.lastPathComponent, data: try Data(contentsOf: url), contentType: contentType)
+}
+
+/// Writes downloaded bytes to `path`. Every download command saves through here.
+func writeDownload(_ data: Data, to path: String) throws {
+  try data.write(to: URL(fileURLWithPath: path))
 }
 
 /// Writes downloaded bytes to `path` and prints where they went.
 func saveDownload(_ data: Data, to path: String) throws {
-  try data.write(to: URL(fileURLWithPath: path))
+  try writeDownload(data, to: path)
   try printJSON(SavedFile(path: path, bytes: data.count))
 }
 

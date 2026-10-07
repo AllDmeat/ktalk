@@ -27,6 +27,11 @@ extension Users {
     @Option(name: .long, help: "Take N.") var top: Int?
     @Flag(name: .long, help: "Include disabled users.") var includeDisabled = false
     @Flag(name: .long, help: "Include guests.") var includeGuests = false
+    func validate() throws {
+      try checkRange(skip, "--skip", 0...int32Max)
+      try checkRange(top, "--top", 1...1000)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       try printJSON(
@@ -46,6 +51,10 @@ extension Users {
     @Option(name: .long, help: "Filter by role.") var role: String?
     @Flag(name: .long, help: "Include disabled users.") var includeDisabled = false
     @Flag(name: .long, help: "Include guests.") var includeGuests = false
+    func validate() throws {
+      try checkRange(top, "--top", 1...1000)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       try printJSON(
@@ -152,8 +161,10 @@ extension Users {
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     @Argument(help: "Image file.") var file: String
+    @Option(name: .long, help: "Media type to send, e.g. image/png (default: from the extension).")
+    var contentType: String?
     func run() async throws {
-      let upload = try uploadFile(atPath: file)
+      let upload = try uploadFile(atPath: file, contentType: contentType)
       try printJSON(try await global.makeClient().uploadAvatar(userKey: key, file: upload))
     }
   }

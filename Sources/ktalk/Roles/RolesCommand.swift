@@ -109,12 +109,11 @@ extension RolesCommand {
   struct DefaultByType: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "default-by-type",
-      abstract: "[space key] Get the default role of one kind: user, anonymousUser or guest.")
+      abstract: "[space key] Get the default role of one kind of user.")
     @OptionGroup var global: GlobalOptions
-    @Argument(help: "Role kind: user, anonymousUser or guest.") var type: String
+    @Argument(help: "Role kind.") var type: KTalkClient.DefaultRoleType
     func run() async throws {
-      let kind = try parseChoice(type, as: KTalkClient.DefaultRoleType.self)
-      try printJSON(try await global.makeClient().defaultRoleByType(kind))
+      try printJSON(try await global.makeClient().defaultRoleByType(type))
     }
   }
 
@@ -123,12 +122,11 @@ extension RolesCommand {
       commandName: "set-default-by-type",
       abstract: "Change the default role of one kind from a JSON file.")
     @OptionGroup var global: GlobalOptions
-    @Argument(help: "Role kind: user, anonymousUser or guest.") var type: String
+    @Argument(help: "Role kind.") var type: KTalkClient.DefaultRoleType
     @Option(name: .long, help: "Path to a JSON ChangeDefaultRoleRequest file.") var fromJSON: String
     func run() async throws {
-      let kind = try parseChoice(type, as: KTalkClient.DefaultRoleType.self)
       let request = try decodeJSON(KTalkClient.ChangeDefaultRoleRequest.self, fromFile: fromJSON)
-      try printJSON(try await global.makeClient().changeDefaultRoleByType(kind, request: request))
+      try printJSON(try await global.makeClient().changeDefaultRoleByType(type, request: request))
     }
   }
 }

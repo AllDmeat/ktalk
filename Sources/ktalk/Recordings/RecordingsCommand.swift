@@ -35,6 +35,10 @@ extension Recordings {
     @Flag(name: .long, help: "Fetch every page and print a flat array.")
     var all = false
 
+    func validate() throws {
+      try checkRange(limit, "--limit", 1...1000)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       if all {
@@ -169,7 +173,7 @@ extension Recordings {
     func run() async throws {
       let client = try global.makeClient()
       let data = try await client.downloadRecording(key: key, quality: quality)
-      try data.write(to: URL(fileURLWithPath: output))
+      try writeDownload(data, to: output)
       try printJSON(
         DownloadResult(recordingKey: key, quality: quality, bytes: data.count, path: output))
     }
@@ -199,7 +203,13 @@ extension Recordings {
     @Option(name: .long, help: "Title filter.") var title: String?
     @Option(name: .long, help: "How many participants to include per recording.")
     var maxParticipantCount: Int?
-    @Option(name: .long, help: "Sort order, e.g. byTimeNewFirst.") var orderMode: String?
+    @Option(name: .long, help: "Sort order.") var orderMode: KTalkClient.RecordingsOrderMode?
+
+    func validate() throws {
+      try checkRange(skip, "--skip", 0...10000)
+      try checkRange(top, "--top", 1...1000)
+      try checkRange(maxParticipantCount, "--max-participant-count", 0...10)
+    }
 
     func run() async throws {
       let client = try global.makeClient()
@@ -208,10 +218,7 @@ extension Recordings {
           startFrom: try startFrom.map(parseISODate), startTo: try startTo.map(parseISODate),
           skip: skip, top: top, query: query, title: title,
           maxParticipantCount: maxParticipantCount,
-          orderMode: try orderMode.map {
-            try parseChoice($0, as: KTalkClient.RecordingsOrderMode.self)
-          }
-        ))
+          orderMode: orderMode))
     }
   }
 
@@ -224,6 +231,11 @@ extension Recordings {
     @Option(name: .long, help: "Skip N participants.") var skip: Int?
     @Option(name: .long, help: "Page size.") var top: Int?
 
+    func validate() throws {
+      try checkRange(skip, "--skip", 0...int32Max)
+      try checkRange(top, "--top", 0...100)
+    }
+
     func run() async throws {
       let client = try global.makeClient()
       try printJSON(try await client.recordingParticipants(key: key, skip: skip, top: top))
@@ -233,16 +245,15 @@ extension Recordings {
   struct SummaryByType: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "summary-by-type",
-      abstract: "[personal key] Get one kind of a recording's summary: shortSummary or protocol.")
+      abstract: "[personal key] Get one kind of a recording's summary.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
-    @Argument(help: "Summary kind: shortSummary or protocol.") var type: String
+    @Argument(help: "Summary kind.") var type: KTalkClient.SummaryType
 
     func run() async throws {
       let client = try global.makeClient()
-      let kind = try parseChoice(type, as: KTalkClient.SummaryType.self)
-      try printJSON(try await client.recordingSummaryByType(key: key, type: kind))
+      try printJSON(try await client.recordingSummaryByType(key: key, type: type))
     }
   }
 

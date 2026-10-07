@@ -67,6 +67,10 @@ public struct KTalkClient: Sendable {
       case "tif", "tiff": return "image/tiff"
       case "gif": return "image/gif"
       case "webp": return "image/webp"
+      case "heic": return "image/heic"
+      case "heif": return "image/heif"
+      case "avif": return "image/avif"
+      case "svg": return "image/svg+xml"
       case "bmp": return "image/bmp"
       case "mp4": return "video/mp4"
       case "mov": return "video/quicktime"
@@ -78,11 +82,30 @@ public struct KTalkClient: Sendable {
     /// A multipart part named `name` that carries this file with its own media type.
     ///
     /// Built raw because the generated typed parts always send `application/octet-stream`.
+    /// A non-ASCII file name goes out twice, per RFC 6266: as an ASCII stand-in in `filename`
+    /// and percent-encoded UTF-8 in `filename*`, so servers that read headers as Latin-1 still
+    /// get a valid name.
     func multipartPart(name: String) -> MultipartRawPart {
-      MultipartRawPart(
-        name: name, filename: filename, headerFields: [.contentType: contentType],
-        body: HTTPBody(data))
+      let body = HTTPBody(data)
+      guard !filename.allSatisfy(\.isASCII) else {
+        return MultipartRawPart(
+          name: name, filename: filename, headerFields: [.contentType: contentType], body: body)
+      }
+      let ascii = String(filename.map { $0.isASCII && $0 != "\"" && $0 != "\\" ? $0 : "_" })
+      let encoded =
+        filename.addingPercentEncoding(withAllowedCharacters: Self.attrChar) ?? ascii
+      return MultipartRawPart(
+        headerFields: [
+          .contentType: contentType,
+          .contentDisposition:
+            "form-data; name=\"\(name)\"; filename=\"\(ascii)\"; filename*=UTF-8''\(encoded)",
+        ],
+        body: body)
     }
+
+    /// RFC 5987 `attr-char`: the characters `filename*` may carry unencoded.
+    private static let attrChar = CharacterSet(
+      charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$&+-.^_`|~")
   }
 
   // MARK: - Error mapping helpers

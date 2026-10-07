@@ -1,6 +1,7 @@
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
+import Synchronization
 import Testing
 
 @testable import KTalkSDK
@@ -179,7 +180,32 @@ struct RecordingsTests {
     let transport = pagingTransport(total: 500, ignoreSkip: true)
     let recordings = try await client(transport).allAccessibleRecordings()
     #expect(recordings.count == KTalkClient.accessibleRecordingsMaxPageSize)
-    #expect(transport.recordedRequests.count == 2)
+    #expect(transport.recordedRequests.count == 4)  // one page, then three stalled ones
+  }
+
+  @Test("allAccessibleRecordings survives 100 recordings added mid-scan")
+  func allAccessibleShiftedPage() async throws {
+    // After the first page, 100 new recordings appear at the top: the second request returns
+    // the first page again, and the rest follows.
+    let calls = Mutex(0)
+    let transport = ReplayTransport { request, _, _, _ in
+      let call = calls.withLock { value -> Int in
+        value += 1
+        return value
+      }
+      let query = URLComponents(string: request.path ?? "")?.queryItems ?? []
+      let skip = Int(query.first { $0.name == "skip" }?.value ?? "0") ?? 0
+      let start = call == 1 ? 100 : skip  // old list sits below 100 new ones from call 2 on
+      let ids = (start..<min(start + 100, 350)).map { #"{"id":"rec-\#($0)"}"# }
+      var headers = HTTPFields()
+      headers[.contentType] = "application/json"
+      return (
+        HTTPResponse(status: .init(code: 200), headerFields: headers),
+        HTTPBody(#"{"recordings":[\#(ids.joined(separator: ","))]}"#)
+      )
+    }
+    let recordings = try await client(transport).allAccessibleRecordings()
+    #expect(Set(recordings.compactMap(\.id)).count == 250)  // every old recording, rec-100…349
   }
 
   @Test("accessibleRecording(key:) decodes from /api/Recordings/{key}")

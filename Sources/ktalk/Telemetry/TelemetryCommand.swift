@@ -19,6 +19,10 @@ extension TelemetryCommand {
     @Option(name: .long, help: "Period end (ISO 8601).") var to: String?
     @Option(name: .long, help: "Page size.") var take: Int?
     @Option(name: .long, help: "Page cursor from a previous response.") var pageToken: String?
+    func validate() throws {
+      try checkRange(take, "--take", 1...1000)
+    }
+
     func run() async throws {
       try printJSON(
         try await global.makeClient().telemetry(
@@ -36,6 +40,10 @@ extension TelemetryCommand {
     @Option(name: .long, help: "Period end (ISO 8601).") var to: String?
     @Option(name: .long, help: "Page size.") var take: Int?
     @Option(name: .long, help: "Page cursor from a previous response.") var pageToken: String?
+    func validate() throws {
+      try checkRange(take, "--take", 1...1000)
+    }
+
     func run() async throws {
       try printJSON(
         try await global.makeClient().telemetryV1(

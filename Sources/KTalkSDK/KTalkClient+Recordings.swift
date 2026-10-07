@@ -133,30 +133,39 @@ extension KTalkClient {
 
   /// Fetches every recording available to a personal access token's user.
   ///
-  /// The endpoint pages by offset and reports no total. Paging stops on an empty page rather
-  /// than a short one, so a server that caps `top` below the requested size loses nothing.
-  /// It also stops on a page identical to the previous one or bringing no unseen recording,
-  /// so a server that ignores `skip` cannot loop forever, with or without ids. After 1,000
-  /// pages it throws ``KTalkError/unexpectedResponse(statusCode:body:)`` rather than return a
-  /// list it cannot vouch for. Recordings
-  /// are de-duplicated by id, which absorbs one added mid-scan; one deleted mid-scan shifts
-  /// the offset and the next recording can be missed — offset paging cannot tell.
+  /// The endpoint pages by offset and reports no total, so paging defends itself:
+  /// - It stops on an empty page, not a short one, so a server that caps `top` loses nothing.
+  /// - It stops after three pages in a row with no unseen recording, or, for recordings
+  ///   without ids, on a page identical to the previous one, so a server that ignores `skip`
+  ///   cannot loop, while recordings added mid-scan do not end it early.
+  /// - It de-duplicates by id. A recording deleted mid-scan shifts the offset and the next
+  ///   one can be missed; offset paging cannot tell.
+  /// - After 1,000 pages it throws ``KTalkError/unexpectedResponse(statusCode:body:)`` rather
+  ///   than return a list it cannot vouch for.
   public func allAccessibleRecordings() async throws(KTalkError) -> [AccessibleRecording] {
     var all: [AccessibleRecording] = []
     var seen = Set<String>()
     var previous: [AccessibleRecording] = []
     var skip = 0
+    var stalled = 0
     // A hard stop for a server that never ends the list: 1,000 pages is 100,000 recordings.
     for _ in 0..<1_000 {
       let page = try await listAccessibleRecordings(
         top: Self.accessibleRecordingsMaxPageSize, skip: skip)
-      if page.isEmpty || page == previous { return all }
+      if page.isEmpty { return all }
+      // Without ids, only a byte-for-byte repeat can show a server ignoring `skip`; with ids,
+      // the stall counter below decides, since 100 recordings added mid-scan can make a page
+      // repeat the previous one legitimately.
+      if page == previous, page.allSatisfy({ $0.id == nil }) { return all }
       var progressed = false
       for recording in page where recording.id.map({ seen.insert($0).inserted }) ?? true {
         all.append(recording)
         progressed = true
       }
-      if !progressed { return all }
+      // Recordings added mid-scan push already-seen ones onto the next page, so one page with
+      // nothing new is not yet the end; three in a row is a server repeating itself.
+      stalled = progressed ? 0 : stalled + 1
+      if stalled == 3 { return all }
       previous = page
       skip += page.count
     }
