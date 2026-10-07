@@ -169,6 +169,7 @@ extension KTalkClient {
   // MARK: - Deepfake source files
 
   /// Downloads the reference file of one deepfake-detection task.
+  /// Buffers the whole file in memory — fine for reports, heavy for large archives or media.
   public func deepFakeTaskFile(conferenceKey: String, taskKey: String) async throws(KTalkError)
     -> Data
   {
@@ -183,6 +184,7 @@ extension KTalkClient {
   }
 
   /// Downloads an archive of every deepfake-detection reference file of a conference.
+  /// Buffers the whole file in memory — fine for reports, heavy for large archives or media.
   public func deepFakeTaskFiles(conferenceKey: String) async throws(KTalkError) -> Data {
     try await call {
       switch try await client.deepFakeDetectorGetTaskSourceFiles(

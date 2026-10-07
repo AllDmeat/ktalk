@@ -160,6 +160,7 @@ extension KTalkClient {
   }
 
   /// Downloads the questions asked in a conference's chat as an Excel file.
+  /// Buffers the whole file in memory — fine for reports, heavy for large archives or media.
   public func conferenceQuestionsReport(key: String) async throws(KTalkError) -> Data {
     try await call {
       switch try await client.conferenceReportsGetConferenceQuestionsExcelReport(
@@ -173,6 +174,7 @@ extension KTalkClient {
   }
 
   /// Downloads the space attendance report for a period as an Excel file.
+  /// Buffers the whole file in memory — fine for reports, heavy for large archives or media.
   public func attendanceReport(from: Date, to: Date? = nil) async throws(KTalkError) -> Data {
     try await call {
       switch try await client.roomReportGetDomainStatisticsExcelReport(

@@ -195,6 +195,7 @@ extension KTalkClient {
   }
 
   /// Downloads a recording's media file for the given quality, returning the raw bytes.
+  /// Buffers the whole file in memory — fine for reports, heavy for large archives or media.
   public func downloadRecording(key: String, quality: String) async throws(KTalkError) -> Data {
     try await call {
       let output = try await client.recordingsDownloadFile(
