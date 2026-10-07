@@ -219,57 +219,30 @@ OCTET_STREAM_ONLY = {
 }
 
 
-def _refs(node, found):
-    """Collects the component schema names `node` references, transitively."""
-    if isinstance(node, dict):
-        ref = node.get("$ref")
-        if isinstance(ref, str) and ref.startswith("#/components/schemas/"):
-            found.add(ref.rsplit("/", 1)[1])
-        for child in node.values():
-            _refs(child, found)
-    elif isinstance(node, list):
-        for child in node:
-            _refs(child, found)
-
-
-def _closure(doc, roots):
-    schemas = (doc.get("components") or {}).get("schemas") or {}
-    seen, pending = set(), list(roots)
-    while pending:
-        name = pending.pop()
-        if name in seen or name not in schemas:
-            continue
-        seen.add(name)
-        more = set()
-        _refs(schemas[name], more)
-        pending.extend(more - seen)
-    return seen
+# Response fields the published spec newly marks required, not confirmed on the live API.
+# Listed one by one: relaxing `required` wholesale would turn non-optional properties of
+# public SDK types optional and break consumers' code.
+RELAXED_RESPONSE_FIELDS = {
+    "EmailCalendarItem": ("timezone",),
+}
 
 
 def relax_response_required(doc):
-    """Drop `required` from schemas that only ever appear in responses.
+    """Drop known-drifted fields from response schemas' `required` lists.
 
-    The published spec tightens response schemas without the live API following (e.g.
-    `timezone` became required on calendar items). A strict decoder then fails the whole
-    response when one item lacks the field. Schemas reachable from a request body or a
-    parameter keep `required`, so what the client sends is still described exactly.
+    The spec tightens some response schemas (e.g. `timezone` became required on calendar
+    items) without evidence that the live API always sends the field. A strict decoder fails
+    the whole response when one item lacks it, so each such field is listed in
+    `RELAXED_RESPONSE_FIELDS` and removed from `required` here.
     """
-    requests, responses = set(), set()
-    for item in (doc.get("paths") or {}).values():
-        if not isinstance(item, dict):
-            continue
-        _refs(item.get("parameters"), requests)
-        for method, operation in item.items():
-            if method not in HTTP_METHODS or not isinstance(operation, dict):
-                continue
-            _refs(operation.get("parameters"), requests)
-            _refs(operation.get("requestBody"), requests)
-            _refs(operation.get("responses"), responses)
     schemas = (doc.get("components") or {}).get("schemas") or {}
-    for name in _closure(doc, responses) - _closure(doc, requests):
-        schema = schemas.get(name)
-        if isinstance(schema, dict):
-            schema.pop("required", None)
+    for name, schema in schemas.items():
+        fields = RELAXED_RESPONSE_FIELDS.get(name.rsplit(".", 1)[-1])
+        if not fields or not isinstance(schema.get("required"), list):
+            continue
+        schema["required"] = [field for field in schema["required"] if field not in fields]
+        if not schema["required"]:
+            del schema["required"]
 
 
 def require_multipart_bodies(doc):
@@ -309,8 +282,9 @@ def add_support_confirmed_operations(doc):
     `x-ktalk-source: support` and a description saying they were added by hand.
 
     Each operation is added only while the published spec lacks it under any path casing, so
-    an upstream definition always wins; a re-normalized file drops the hand-added copy then. The response reuses the published `TalkConferenceRecording` schema, which
-    matches the live payload field for field.
+    an upstream definition always wins; a re-normalized file drops the hand-added copy then.
+    The response reuses the published `TalkConferenceRecording` schema, which matches the
+    live payload field for field.
     """
     # Upstream moves schemas between namespaces, so find it by its short name.
     schemas = (doc.get("components") or {}).get("schemas") or {}
@@ -325,8 +299,8 @@ def add_support_confirmed_operations(doc):
             "operationId": "Recordings_GetAccessible",
             "summary": "List recordings available to the token's user (personal token)",
             "description": SUPPORT_NOTE
-            + " Newest first. Page with `top` (1-100, default 10) and `skip`; a page"
-            " shorter than `top` is the last one.",
+            + " Newest first. Page with `top` (1-100, default 10) and `skip`; there is no"
+            " total, and an empty page marks the end.",
             "parameters": [
                 {
                     "name": "top",
@@ -380,9 +354,12 @@ def add_support_confirmed_operations(doc):
             for existing, item in paths.items()
             if isinstance(item, dict)
         ):
-            paths.get(path, {}).pop(method, None)
-            if path in paths and not paths[path]:
-                del paths[path]
+            # Remove only a copy this script added earlier, never upstream's own operation.
+            ours = paths.get(path, {})
+            if ours.get(method, {}).get("x-ktalk-source") == "support":
+                del ours[method]
+                if not ours:
+                    del paths[path]
             continue
         item = paths.setdefault(path, {})
         item[method] = {"tags": ["Записи"], "x-ktalk-source": "support", **operation}

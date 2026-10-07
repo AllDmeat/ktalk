@@ -94,15 +94,17 @@ struct RecordingsTests {
   }
 
   /// A transport that serves `total` recordings by `skip`/`top`, optionally capping the page
-  /// size or ignoring `skip`, and records each request.
-  private func pagingTransport(total: Int, cap: Int = .max, ignoreSkip: Bool = false)
-    -> ReplayTransport
-  {
+  /// size, ignoring `skip` or omitting ids, and records each request.
+  private func pagingTransport(
+    total: Int, cap: Int = .max, ignoreSkip: Bool = false, withIDs: Bool = true
+  ) -> ReplayTransport {
     ReplayTransport { request, _, _, _ in
       let query = URLComponents(string: request.path ?? "")?.queryItems ?? []
       let skip = ignoreSkip ? 0 : Int(query.first { $0.name == "skip" }?.value ?? "0") ?? 0
       let top = min(Int(query.first { $0.name == "top" }?.value ?? "10") ?? 10, cap)
-      let ids = (skip..<min(skip + top, total)).map { #"{"id":"rec-\#($0)"}"# }
+      let ids = (skip..<min(skip + top, total)).map {
+        withIDs ? #"{"id":"rec-\#($0)"}"# : #"{"title":"rec-\#($0)"}"#
+      }
       var headers = HTTPFields()
       headers[.contentType] = "application/json"
       return (
@@ -110,6 +112,13 @@ struct RecordingsTests {
         HTTPBody(#"{"recordings":[\#(ids.joined(separator: ","))]}"#)
       )
     }
+  }
+
+  @Test("allAccessibleRecordings stops when the server ignores skip and sends no ids")
+  func allAccessibleIgnoredSkipWithoutIDs() async throws {
+    let transport = pagingTransport(total: 500, ignoreSkip: true, withIDs: false)
+    _ = try await client(transport).allAccessibleRecordings()
+    #expect(transport.recordedRequests.count == 1)
   }
 
   @Test("allAccessibleRecordings pages by skip until an empty page")

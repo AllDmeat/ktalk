@@ -39,7 +39,8 @@ public struct KTalkClient: Sendable {
     )
   }
 
-  /// A file to upload: its name as the server should see it and its bytes.
+  /// A file to upload: its name as the server should see it and its bytes. The bytes are held
+  /// in memory, so an upload of several large files holds all of them at once.
   public struct UploadFile: Sendable {
     public let filename: String
     public let data: Data

@@ -69,7 +69,7 @@ where E.RawValue == String {
   throw ValidationError("Invalid value '\(value)'. Use one of: \(accepted).")
 }
 
-/// Reads a local file for upload, keeping its name.
+/// Reads a local file for upload, keeping its name. Reads the whole file into memory.
 func uploadFile(atPath path: String) throws -> KTalkClient.UploadFile {
   let url = URL(fileURLWithPath: path)
   return KTalkClient.UploadFile(filename: url.lastPathComponent, data: try Data(contentsOf: url))

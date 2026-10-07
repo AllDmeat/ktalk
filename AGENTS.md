@@ -59,16 +59,18 @@ stays byte-identical). The complete list of what is changed and why:
    empty 200, discarding the bytes. A `*/*` binary body is declared — not one concrete type,
    because the server labels files as spreadsheets, archives or media and the runtime rejects
    an undeclared content type.
-8. **Response-only `required` dropped** — the spec tightens response schemas without the live
-   API following (`timezone` became required on calendar items). Schemas reachable only from
-   responses lose `required`, so one item missing a field no longer fails the whole response;
-   request schemas keep it.
+8. **Drifted response fields made optional** — the refreshed spec newly marks some response
+   fields required (`timezone` on calendar items) and nobody has confirmed the live API always
+   sends them. A missing required field fails the whole response in a strict decoder, so each one is listed in `RELAXED_RESPONSE_FIELDS` and
+   dropped from `required`. The list is explicit: relaxing every response schema would make
+   non-optional properties of public SDK types optional and break consumers.
 9. **Personal-token recording operations added** — `GET /api/recordings` and
    `GET /api/Recordings/{recordingKey}` are not in the published spec. Kontur.Talk support named
-   them on 2026-10-07 as the way to read recordings with a personal access token, which gets 403
-   on `/api/Domain/...`. They are tagged `x-ktalk-source: support` and added only while upstream
-   lacks them under any path casing, so an upstream definition wins. The response schema is found by its short name,
-   `*.TalkConferenceRecording`, because upstream moves schemas between namespaces.
+   them on 2026-10-07 as the way to read recordings with a personal access token, which gets
+   403 on `/api/Domain/...`. They are tagged `x-ktalk-source: support` and added only while
+   upstream lacks them under any path casing, so an upstream definition wins. The response
+   schema is found by its short name, `*.TalkConferenceRecording`, because upstream moves
+   schemas between namespaces.
 
 None of these change the API's wire behaviour — they only fix or complete the description so
 codegen works and the client survives real responses. Keep this list in sync with the script.
