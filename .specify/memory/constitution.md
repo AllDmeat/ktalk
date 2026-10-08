@@ -13,9 +13,11 @@ Architectural principles for `ktalk`. These take priority over convenience.
 3. **Layered.** Generated core → typed facade (`KTalkClient`) → thin CLI. Consumers use the
    facade; the verbose generated type names stay hidden behind public typealiases.
 
-4. **Strict build.** Swift 6 language mode, complete strict concurrency, and
-   `-warnings-as-errors` in CI on every target. Generated-code warnings are fixed by
-   normalizing the spec, not by relaxing the flag.
+4. **Strict build.** Swift 6 language mode and complete strict concurrency on every target;
+   warnings are errors on every hand-written target, set in `Package.swift`. The generated
+   layer lives in its own `KTalkAPI` target outside that rule: its warnings come from the
+   generator, not from us. Spec-caused generated warnings are still fixed by normalizing the
+   spec.
 
 5. **Hermetic tests, mandatory.** Tests never hit the network; they use `ReplayTransport` with
    synthetic fixtures. Every facade covers success plus 401/403/404 mapping.

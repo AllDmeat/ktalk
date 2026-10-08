@@ -1,6 +1,14 @@
 // swift-tools-version: 6.2
 import PackageDescription
 
+// Warnings are errors on our own targets. Kept in the manifest rather than a global
+// `-Xswiftc -warnings-as-errors`, so the generated layer can stay out of it; SwiftPM
+// ignores these settings when ktalk is consumed as a dependency.
+let strict: [SwiftSetting] = [
+    .swiftLanguageMode(.v6),
+    .treatAllWarnings(as: .error),
+]
+
 let package = Package(
     name: "KTalkSDK",
     platforms: [
@@ -40,9 +48,30 @@ let package = Package(
         ),
     ],
     targets: [
+        // The generated `types` + `client`. Not `strict`: the generator emits unused
+        // `public import`s, and its warnings are not ours to fix.
+        .target(
+            name: "KTalkAPI",
+            dependencies: [
+                .product(
+                    name: "OpenAPIRuntime",
+                    package: "swift-openapi-runtime"
+                )
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v6)
+            ],
+            plugins: [
+                .plugin(
+                    name: "OpenAPIGenerator",
+                    package: "swift-openapi-generator"
+                )
+            ]
+        ),
         .target(
             name: "KTalkSDK",
             dependencies: [
+                "KTalkAPI",
                 .product(
                     name: "OpenAPIRuntime",
                     package: "swift-openapi-runtime"
@@ -56,15 +85,7 @@ let package = Package(
                     package: "swift-http-types"
                 ),
             ],
-            swiftSettings: [
-                .swiftLanguageMode(.v6)
-            ],
-            plugins: [
-                .plugin(
-                    name: "OpenAPIGenerator",
-                    package: "swift-openapi-generator"
-                )
-            ]
+            swiftSettings: strict
         ),
         .executableTarget(
             name: "ktalk",
@@ -75,9 +96,7 @@ let package = Package(
                     package: "swift-argument-parser"
                 ),
             ],
-            swiftSettings: [
-                .swiftLanguageMode(.v6)
-            ]
+            swiftSettings: strict
         ),
         .testTarget(
             name: "KTalkSDKTests",
@@ -88,9 +107,7 @@ let package = Package(
             resources: [
                 .copy("Fixtures")
             ],
-            swiftSettings: [
-                .swiftLanguageMode(.v6)
-            ]
+            swiftSettings: strict
         ),
     ]
 )

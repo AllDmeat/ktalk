@@ -99,9 +99,9 @@ def strip_deprecated(node):
     facades that call it, and a deprecated endpoint is still usable) — only their
     `deprecated` flag is stripped. A whole schema *definition* can also carry
     `deprecated: true`; it cannot be deleted without breaking the `$ref`s that point at it,
-    so its flag is stripped too. Either way no `deprecated` flag survives, which is what
-    keeps the strict build clean (the generator otherwise emits `@available(*, deprecated)`
-    and then references those members in its own coding code, tripping `-warnings-as-errors`).
+    so its flag is stripped too. Either way no `deprecated` flag survives, which keeps the
+    generated layer warning-free (the generator otherwise emits `@available(*, deprecated)`
+    and then references those members in its own coding code).
 
     `deprecated` is only acted on when it is a boolean flag, never when it is a schema
     property literally named `deprecated`.

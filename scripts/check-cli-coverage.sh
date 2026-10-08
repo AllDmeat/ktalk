@@ -10,8 +10,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# The KTalkSDK plugin output only: .build also holds example clients from package checkouts.
-CLIENT="$(find "$REPO_ROOT/.build" -path '*/KTalkSDK/*/GeneratedSources/Client.swift' -exec ls -t {} + 2>/dev/null | head -1)"
+# The KTalkAPI plugin output only: .build also holds example clients from package checkouts.
+CLIENT="$(find "$REPO_ROOT/.build" -path '*/KTalkAPI/*/GeneratedSources/Client.swift' -exec ls -t {} + 2>/dev/null | head -1)"
 if [[ -z "$CLIENT" ]]; then
   echo "check-cli-coverage: no generated Client.swift under .build — run 'swift build' first" >&2
   exit 1

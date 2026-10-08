@@ -169,8 +169,7 @@ takes that. Update with `gemini extensions update ktalk`.
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`AGENTS.md`](AGENTS.md).
 
 ```sh
-swift build && swift test
-swift build -Xswiftc -warnings-as-errors        # the CI gate
+swift build && swift test                       # the CI gate; warnings are errors
 swift format lint --strict --recursive Sources/ Tests/
 scripts/fetch-spec.sh                            # refresh the vendored OpenAPI
 ```

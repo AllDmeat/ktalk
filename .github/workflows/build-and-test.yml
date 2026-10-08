@@ -56,8 +56,8 @@ jobs:
       - name: Resolve package dependencies
         run: swift package resolve
 
-      - name: Test (warnings as errors)
-        run: swift test -Xswiftc -warnings-as-errors
+      - name: Test
+        run: swift test
 
       - name: Check every API operation has a CLI command
         run: scripts/check-cli-coverage.sh
