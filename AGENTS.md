@@ -32,7 +32,7 @@ from examples.
 ### The vendored spec is normalized, not raw
 
 `openapi/talk.json` is **not** the raw upstream document — `fetch-spec.sh` rewrites it so the
-generator accepts it, the strict build (`-warnings-as-errors`) stays clean, and the client
+generator accepts it, the generated layer stays warning-free, and the client
 tolerates the live API. Every normalization is deterministic (re-fetching unchanged content
 stays byte-identical). The complete list of what is changed and why:
 
@@ -49,7 +49,7 @@ stays byte-identical). The complete list of what is changed and why:
    pulled from `required`) so they never reach the generated model. Deprecated *operations* and
    *parameters* are kept (a deprecated endpoint is still usable), but every residual
    `deprecated` flag is stripped so the generator doesn't emit `@available(*, deprecated)` and
-   then reference it in its own coding code (which trips `-warnings-as-errors`).
+   then reference it in its own coding code, which floods the build with warnings.
 5. **Missing path parameters declared** — some paths reference `{param}` without listing it
    (e.g. `qualityName` in the recording-download path); added as required string path params.
 6. **Multipart bodies marked `required`** — the generator silently skips optional multipart
@@ -111,8 +111,8 @@ token gets 403. Commands that change data stay untagged until someone checks the
 
 The SDK is layered — keep the layers separate:
 
-1. **Generated** — `types` + `client` produced by `swift-openapi-generator` into a
-   gitignored `Sources/KTalkSDK/GeneratedSources/`. Never edited by hand.
+1. **Generated** — `types` + `client` produced by `swift-openapi-generator` in the
+   `KTalkAPI` target, which `KTalkSDK` re-exports. Never edited by hand.
 2. **Facade** — `KTalkClient` and `KTalkClient+<Tag>.swift` extensions: typed errors,
    authentication (`X-Auth-Token`), retries, rate limiting, pagination.
 3. **CLI** — the `ktalk` executable, a thin ArgumentParser wrapper that prints JSON.
@@ -120,12 +120,15 @@ The SDK is layered — keep the layers separate:
 ## Build Quality
 
 - Swift 6 language mode (complete strict concurrency) on every target.
-- Warnings are treated as errors **in CI** (`swift build -Xswiftc -warnings-as-errors`),
-  not via `unsafeFlags` in the manifest — that would make the library unusable as a
-  SwiftPM dependency. Keep hand-written code warning-clean.
-- If the generated layer emits a warning, prefer fixing it via a deterministic
-  normalization in `scripts/fetch-spec.sh` (as done for `deprecated`) so the whole build
-  can stay under one global `-warnings-as-errors` flag.
+- Warnings are errors on every hand-written target via `.treatAllWarnings(as: .error)` in
+  `Package.swift` — not `unsafeFlags`, which would make the library unusable as a SwiftPM
+  dependency; SwiftPM ignores warning settings of a dependency. Plain `swift build` enforces
+  it, locally and in CI. Keep hand-written code warning-clean.
+- The generated layer is the `KTalkAPI` target and is not strict: the generator emits
+  warnings we cannot fix (e.g. unused `public import`s). Do not pass a global
+  `-Xswiftc -warnings-as-errors` — it would reach `KTalkAPI` too. Warnings caused by the spec
+  are still fixed by a deterministic normalization in `scripts/fetch-spec.sh` (as done for
+  `deprecated`).
 - Format with `swift format --in-place --recursive Sources/ Tests/`; CI lints with
   `swift format lint --strict`.
 

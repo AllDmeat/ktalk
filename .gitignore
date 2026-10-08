@@ -4,6 +4,6 @@
 *.xcodeproj/
 *.xcworkspace/
 .claude/
-Sources/KTalkSDK/GeneratedSources/
+Sources/KTalkAPI/GeneratedSources/
 .worktrees/
 DerivedData

@@ -68,7 +68,7 @@ jobs:
 
       - name: Build and test the regenerated client
         if: steps.diff.outputs.changed == 'true'
-        run: swift test -Xswiftc -warnings-as-errors
+        run: swift test
 
       - name: Open pull request
         if: steps.diff.outputs.changed == 'true'
