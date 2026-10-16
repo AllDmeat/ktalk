@@ -53,13 +53,31 @@ extension KTalkClient {
   public typealias AccessibleRecording =
     Components.Schemas.SkbKontur_Talk_Recordings_Api_TalkConferenceRecording
 
-  /// The largest page `listAccessibleRecordings` accepts; the API rejects a bigger `top`.
+  /// A page of the resources linked to a recording.
+  public typealias RecordingLinksPage =
+    Components.Schemas
+    .SkbKontur_Talk_Web_Entities_TalkPageSkbKontur_Talk_Resources_Api_TalkResourceLinkInfo
+  /// A whiteboard's metadata and elements.
+  public typealias WhiteboardState =
+    Components.Schemas.SkbKontur_Talk_Whiteboards_Api_Models_TalkWhiteboardState
+  /// The kind of resource a link points to.
+  public typealias LinkTargetType = Components.Schemas.SkbKontur_Talk_Resources_Api_TalkResourceType
+
+  /// Where a recording came from: Talk itself or an external upload.
+  public typealias RecordingSource = Components.Schemas
+    .SkbKontur_Talk_Recordings_Api_TalkRecordingSource
+  /// Whether a recording is video or audio.
+  public typealias RecordingContentType =
+    Components.Schemas.SkbKontur_Talk_Recordings_Api_TalkRecordingContentType
+
+  /// The largest page `listAccessibleRecordings` accepts. The spec sets no maximum; a live
+  /// space answered 400 above 100 (2026-10-07).
   public static let accessibleRecordingsMaxPageSize = 100
 
   /// Lists recordings in the space (one page). Requires a space key.
   ///
   /// A space key (admin panel → API keys) sees every recording in the space. A personal
-  /// access token gets `forbidden` here — use ``listAccessibleRecordings(top:skip:)``.
+  /// access token gets `forbidden` here — use ``listAccessibleRecordings(top:skip:initiator:query:excludeTopic:source:type:)``.
   ///
   /// - Parameters:
   ///   - pageToken: A cursor from a previous page's `nextPageToken` (`nil` for the first page).
@@ -107,24 +125,40 @@ extension KTalkClient {
   /// Lists recordings available to a personal access token's user (one page), newest first.
   ///
   /// A personal access token (profile → Settings → API keys) acts with its user's rights,
-  /// so this returns only the recordings that user can open — not the whole space. The
-  /// endpoint is missing from the published spec; it was described by Kontur.Talk support.
+  /// so this returns only the recordings that user can open — not the whole space.
   ///
   /// - Parameters:
   ///   - top: Page size, 1 to ``accessibleRecordingsMaxPageSize``; the server defaults to 10.
   ///   - skip: Number of recordings to skip.
+  ///   - initiator: Only recordings the user started.
+  ///   - query: Text to search for.
+  ///   - excludeTopic: A topic to leave out.
+  ///   - source: Only recordings from this source.
+  ///   - type: Only video or only audio recordings.
   public func listAccessibleRecordings(
     top: Int? = nil,
-    skip: Int? = nil
+    skip: Int? = nil,
+    initiator: Bool? = nil,
+    query: String? = nil,
+    excludeTopic: String? = nil,
+    source: RecordingSource? = nil,
+    type: RecordingContentType? = nil
   ) async throws(KTalkError) -> [AccessibleRecording] {
     try await call {
-      let output = try await client.recordingsGetAccessible(
+      let output = try await client.recordingsGetUserRecordings(
         .init(
-          query: .init(top: top.map { Int32(clamping: $0) }, skip: skip.map { Int32(clamping: $0) })
-        ))
+          query: .init(
+            skip: skip.map { Int32(clamping: $0) }, top: top.map { Int32(clamping: $0) },
+            initiator: initiator, query: query, excludeTopic: excludeTopic, source: source,
+            _type: type)))
       switch output {
       case .ok(let ok):
-        return try ok.body.json.recordings
+        // A reply without the list is a changed shape, not an empty page: an empty page
+        // would end `allAccessibleRecordings` early and silently.
+        guard let recordings = try ok.body.json.recordings else {
+          throw KTalkError.unexpectedResponse(statusCode: 200, body: nil)
+        }
+        return recordings
       case .undocumented(let statusCode, _):
         throw statusError(statusCode: statusCode, body: nil)
       }
@@ -142,7 +176,13 @@ extension KTalkClient {
   ///   one can be missed; offset paging cannot tell.
   /// - After 1,000 pages it throws ``KTalkError/unexpectedResponse(statusCode:body:)`` rather
   ///   than return a list it cannot vouch for.
-  public func allAccessibleRecordings() async throws(KTalkError) -> [AccessibleRecording] {
+  public func allAccessibleRecordings(
+    initiator: Bool? = nil,
+    query: String? = nil,
+    excludeTopic: String? = nil,
+    source: RecordingSource? = nil,
+    type: RecordingContentType? = nil
+  ) async throws(KTalkError) -> [AccessibleRecording] {
     var all: [AccessibleRecording] = []
     var seen = Set<String>()
     var previous: [AccessibleRecording] = []
@@ -151,7 +191,8 @@ extension KTalkClient {
     // A hard stop for a server that never ends the list: 1,000 pages is 100,000 recordings.
     for _ in 0..<1_000 {
       let page = try await listAccessibleRecordings(
-        top: Self.accessibleRecordingsMaxPageSize, skip: skip)
+        top: Self.accessibleRecordingsMaxPageSize, skip: skip, initiator: initiator, query: query,
+        excludeTopic: excludeTopic, source: source, type: type)
       if page.isEmpty { return all }
       // Without ids, only a byte-for-byte repeat can show a server ignoring `skip`; with ids,
       // the stall counter below decides, since 100 recordings added mid-scan can make a page
@@ -404,6 +445,51 @@ extension KTalkClient {
       case .ok(let ok): return try ok.body.json
       case .undocumented(let s, _):
         throw notFoundOrStatus(s, resource: "recording", identifier: key)
+      }
+    }
+  }
+
+  /// Lists the resources of one kind linked to a recording, one page at a time.
+  public func recordingLinks(
+    key: String, targetType: LinkTargetType, take: Int? = nil, pageToken: String? = nil
+  ) async throws(KTalkError) -> RecordingLinksPage {
+    try await call {
+      switch try await client.recordingLinksGetRecordingLinks(
+        .init(
+          path: .init(recordingKey: key),
+          query: .init(
+            take: take.map { Int32(clamping: $0) }, targetType: targetType,
+            pageTokenString: pageToken)))
+      {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _):
+        throw notFoundOrStatus(s, resource: "recording", identifier: key)
+      }
+    }
+  }
+
+  /// Downloads several recordings in one file, returning the raw bytes. Buffers the whole
+  /// file in memory.
+  public func downloadRecordings(keys: [String], quality: String? = nil) async throws(KTalkError)
+    -> Data
+  {
+    try await call {
+      switch try await client.recordingsDownloadBulk(
+        .init(query: .init(recordingKeys: keys, qualityName: quality)))
+      {
+      case .ok(let ok): return try await Data(collecting: ok.body.any, upTo: .max)
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Fetches a whiteboard's metadata and elements.
+  public func whiteboardState(key: String) async throws(KTalkError) -> WhiteboardState {
+    try await call {
+      switch try await client.whiteboardsGetWhiteboardState(.init(path: .init(key: key))) {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _):
+        throw notFoundOrStatus(s, resource: "whiteboard", identifier: key)
       }
     }
   }

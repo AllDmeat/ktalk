@@ -67,6 +67,9 @@ extension KTalkClient.SummaryType: ExpressibleByArgument {}
 extension KTalkClient.DefaultRoleType: ExpressibleByArgument {}
 extension KTalkClient.RecordingsOrderMode: ExpressibleByArgument {}
 extension KTalkClient.KioskStatus: ExpressibleByArgument {}
+extension KTalkClient.LinkTargetType: ExpressibleByArgument {}
+extension KTalkClient.RecordingSource: ExpressibleByArgument {}
+extension KTalkClient.RecordingContentType: ExpressibleByArgument {}
 
 /// The largest value the API's 32-bit integer parameters accept.
 let int32Max = Int(Int32.max)

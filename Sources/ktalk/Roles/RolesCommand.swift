@@ -36,7 +36,7 @@ extension RolesCommand {
 
   struct Create: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "create", abstract: "Create a role from a JSON file.")
+      commandName: "create", abstract: "[space key] Create a role from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON RoleCreateRequest file.") var fromJSON: String
     func run() async throws {
@@ -47,7 +47,7 @@ extension RolesCommand {
 
   struct Update: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "update", abstract: "Update a role from a JSON file.")
+      commandName: "update", abstract: "[space key] Update a role from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Role id.") var id: String
     @Option(name: .long, help: "Path to a JSON RoleUpdateRequest file.") var fromJSON: String
@@ -59,7 +59,7 @@ extension RolesCommand {
 
   struct Delete: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete", abstract: "Delete a role.")
+      commandName: "delete", abstract: "[space key] Delete a role.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Role id.") var id: String
     func run() async throws {
@@ -97,7 +97,8 @@ extension RolesCommand {
   struct SetDefault: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "set-default",
-      abstract: "Change the role every registered user gets by default, from a JSON file.")
+      abstract:
+        "[space key] Change the role every registered user gets by default, from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON ChangeDefaultRoleRequest file.") var fromJSON: String
     func run() async throws {
@@ -120,7 +121,7 @@ extension RolesCommand {
   struct SetDefaultByType: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "set-default-by-type",
-      abstract: "Change the default role of one kind from a JSON file.")
+      abstract: "[space key] Change the default role of one kind from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Role kind.") var type: KTalkClient.DefaultRoleType
     @Option(name: .long, help: "Path to a JSON ChangeDefaultRoleRequest file.") var fromJSON: String

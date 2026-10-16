@@ -18,6 +18,14 @@ extension KTalkClient {
   /// The result of uploading a user's avatar.
   public typealias AvatarUploadResult =
     Components.Schemas.SkbKontur_Talk_Web_Services_TalkUserProfileUpdateResult
+  /// The profile of the key's user.
+  public typealias UserProfile = Components.Schemas.SkbKontur_Talk_Web_Entities_User_TalkUserProfile
+  /// Changes to the profile of the key's user.
+  public typealias ProfileParams = Components.Schemas
+    .SkbKontur_Talk_Users_Api_Models_TalkCurrentUserParams
+  /// Options for deleting the key's user or logging them out.
+  public typealias DeleteSelfParams = Components.Schemas
+    .SkbKontur_Talk_Web_Entities_TalkUserDeleteSelfParams
   /// A request to change a user's roles.
   public typealias ChangeRolesRequest =
     Components.Schemas.SkbKontur_Talk_Web_Entities_UserRoles_TalkUserChangeRolesRequest
@@ -187,6 +195,99 @@ extension KTalkClient {
   public func syncAvatar(userKey: String) async throws(KTalkError) {
     try await call {
       switch try await client.usersSyncAvatar(.init(path: .init(userKey: userKey))) {
+      case .ok: return
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
+      }
+    }
+  }
+
+  /// Fetches the profile of the key's user.
+  public func profile() async throws(KTalkError) -> UserProfile {
+    try await call {
+      switch try await client.usersGetProfile() {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Updates the profile of the key's user.
+  public func updateProfile(_ params: ProfileParams) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersModifyUser(.init(body: .json(params))) {
+      case .ok: return
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Deletes the key's user. The key stops working.
+  public func deleteSelf(_ params: DeleteSelfParams) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersDeleteSelf(.init(body: .json(params))) {
+      case .ok: return
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Restores a user who deleted themselves.
+  public func unlockSelfDeleted(userKey: String) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersUnlockSelfDeleted(.init(path: .init(userKey: userKey))) {
+      case .ok: return
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
+      }
+    }
+  }
+
+  /// Ends the sessions of the key's user.
+  public func logOut(_ params: DeleteSelfParams) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersLogOut(.init(body: .json(params))) {
+      case .ok: return
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Uploads the avatar of the key's user.
+  public func uploadOwnAvatar(file: UploadFile) async throws(KTalkError) -> AvatarUploadResult {
+    try await call {
+      let parts: [Operations.UsersUploadAvatar.Input.Body.MultipartFormPayload] = [
+        .undocumented(file.multipartPart(name: "avatar"))
+      ]
+      switch try await client.usersUploadAvatar(.init(body: .multipartForm(.init(parts)))) {
+      case .ok(let ok): return try ok.body.json
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Deletes the avatar of the key's user.
+  public func deleteOwnAvatar() async throws(KTalkError) {
+    try await call {
+      switch try await client.usersDeleteAvatar() {
+      case .ok: return
+      case .undocumented(let s, _): throw statusError(statusCode: s, body: nil)
+      }
+    }
+  }
+
+  /// Gives a user a role.
+  public func addRole(userKey: String, role: String) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersSetRole(.init(path: .init(userKey: userKey, role: role))) {
+      case .ok: return
+      case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
+      }
+    }
+  }
+
+  /// Takes a role from a user.
+  public func removeRole(userKey: String, role: String) async throws(KTalkError) {
+    try await call {
+      switch try await client.usersRemoveRole(.init(path: .init(userKey: userKey, role: role))) {
       case .ok: return
       case .undocumented(let s, _): throw notFoundOrStatus(s, resource: "user", identifier: userKey)
       }

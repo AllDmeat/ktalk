@@ -36,7 +36,7 @@ extension Kiosks {
 
   struct Create: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "create", abstract: "Create a kiosk from a JSON file.")
+      commandName: "create", abstract: "[space key] Create a kiosk from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskCreateParams file.") var fromJSON: String
     func run() async throws {
@@ -47,7 +47,7 @@ extension Kiosks {
 
   struct Update: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "update", abstract: "Update a kiosk from a JSON file.")
+      commandName: "update", abstract: "[space key] Update a kiosk from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Kiosk id.") var id: String
     @Option(name: .long, help: "Path to a JSON KioskUpdateParams file.") var fromJSON: String
@@ -59,7 +59,7 @@ extension Kiosks {
 
   struct Delete: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete", abstract: "Delete a kiosk.")
+      commandName: "delete", abstract: "[space key] Delete a kiosk.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Kiosk id.") var id: String
     func run() async throws {
@@ -141,7 +141,7 @@ extension Kiosks {
 
   struct Block: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "block", abstract: "Block a kiosk.")
+      commandName: "block", abstract: "[space key] Block a kiosk.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Kiosk id.") var id: String
     func run() async throws {
@@ -152,7 +152,7 @@ extension Kiosks {
 
   struct Unblock: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "unblock", abstract: "Unblock a kiosk.")
+      commandName: "unblock", abstract: "[space key] Unblock a kiosk.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Kiosk id.") var id: String
     func run() async throws {
@@ -163,7 +163,7 @@ extension Kiosks {
 
   struct EquipmentCheck: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "equipment-check", abstract: "Start an equipment check on a kiosk.")
+      commandName: "equipment-check", abstract: "[space key] Start an equipment check on a kiosk.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Kiosk id.") var id: String
     func run() async throws {
@@ -194,7 +194,7 @@ extension Kiosks {
 
   struct CreateGroup: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "create-group", abstract: "Create a kiosk group from a JSON file.")
+      commandName: "create-group", abstract: "[space key] Create a kiosk group from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskCreateGroupRequest file.") var fromJSON: String
     func run() async throws {
@@ -205,7 +205,7 @@ extension Kiosks {
 
   struct UpdateGroup: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "update-group", abstract: "Update a kiosk group from a JSON file.")
+      commandName: "update-group", abstract: "[space key] Update a kiosk group from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Group key.") var key: String
     @Option(name: .long, help: "Path to a JSON KioskUpdateGroupRequest file.") var fromJSON: String
@@ -217,7 +217,7 @@ extension Kiosks {
 
   struct DeleteGroup: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete-group", abstract: "Delete a kiosk group.")
+      commandName: "delete-group", abstract: "[space key] Delete a kiosk group.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Group key.") var key: String
     func run() async throws {
@@ -228,7 +228,7 @@ extension Kiosks {
 
   struct Move: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "move", abstract: "Move kiosks into a group from a JSON file.")
+      commandName: "move", abstract: "[space key] Move kiosks into a group from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskMoveRequest file.") var fromJSON: String
     func run() async throws {
@@ -241,7 +241,7 @@ extension Kiosks {
   struct MassUpdate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "mass-update",
-      abstract: "Apply settings to many kiosks at once from a JSON file.")
+      abstract: "[space key] Apply settings to many kiosks at once from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskMassUpdateRequest file.") var fromJSON: String
     func run() async throws {
@@ -254,7 +254,7 @@ extension Kiosks {
   struct AddNotificationUnit: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "add-notification-unit",
-      abstract: "Subscribe a user to status notifications of every kiosk and gadget.")
+      abstract: "[space key] Subscribe a user to status notifications of every kiosk and gadget.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskNotificationUnit file.") var fromJSON: String
     func run() async throws {
@@ -267,7 +267,7 @@ extension Kiosks {
   struct RemoveNotificationUnit: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "remove-notification-unit",
-      abstract: "Remove a user's status-notification subscription from every kiosk.")
+      abstract: "[space key] Remove a user's status-notification subscription from every kiosk.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskNotificationUnit file.") var fromJSON: String
     func run() async throws {
@@ -279,7 +279,7 @@ extension Kiosks {
 
   struct UploadScreensavers: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "upload-screensavers", abstract: "Upload kiosk screensavers.")
+      commandName: "upload-screensavers", abstract: "[space key] Upload kiosk screensavers.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Image or video files to upload.") var files: [String]
     @Option(name: .long, help: "Media type to send, e.g. image/png (default: from the extension).")
@@ -292,7 +292,7 @@ extension Kiosks {
 
   struct DeleteScreensaver: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete-screensaver", abstract: "Delete a kiosk screensaver.")
+      commandName: "delete-screensaver", abstract: "[space key] Delete a kiosk screensaver.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Screensaver key.") var key: String
     func run() async throws {
@@ -302,7 +302,7 @@ extension Kiosks {
 
   struct UploadWallpapers: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "upload-wallpapers", abstract: "Upload kiosk wallpapers.")
+      commandName: "upload-wallpapers", abstract: "[space key] Upload kiosk wallpapers.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Image files to upload.") var files: [String]
     @Option(name: .long, help: "Media type to send, e.g. image/png (default: from the extension).")
@@ -315,7 +315,7 @@ extension Kiosks {
 
   struct DeleteWallpaper: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete-wallpaper", abstract: "Delete a kiosk wallpaper.")
+      commandName: "delete-wallpaper", abstract: "[space key] Delete a kiosk wallpaper.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Wallpaper key.") var key: String
     func run() async throws {
@@ -326,7 +326,7 @@ extension Kiosks {
   struct SetDefaultWallpapers: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "set-default-wallpapers",
-      abstract: "Choose the wallpapers kiosks show, from a JSON file.")
+      abstract: "[space key] Choose the wallpapers kiosks show, from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON KioskWallpaperSettings file.") var fromJSON: String
     func run() async throws {

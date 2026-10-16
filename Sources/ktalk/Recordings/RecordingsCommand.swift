@@ -15,7 +15,7 @@ struct Recordings: AsyncParsableCommand {
       List.self, ListV1.self, Get.self, ListAccessible.self, GetAccessible.self,
       Participants.self, Transcript.self, Summary.self, SummaryByType.self, Artifacts.self,
       Download.self, Current.self, Start.self, Edit.self, Delete.self, Access.self,
-      SetAccess.self, SetImmutable.self, UnsetImmutable.self,
+      SetAccess.self, SetImmutable.self, UnsetImmutable.self, Links.self, DownloadBulk.self,
     ]
   )
 }
@@ -23,7 +23,8 @@ struct Recordings: AsyncParsableCommand {
 extension Recordings {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "[space key] List every recording in the space.")
+      commandName: "list",
+      abstract: "[personal key] List every recording in the space.")
 
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Page cursor from a previous response's nextPageToken.")
@@ -79,6 +80,13 @@ extension Recordings {
       help: "Page size, 1 to \(KTalkClient.accessibleRecordingsMaxPageSize) (server default: 10).")
     var top: Int?
     @Option(name: .long, help: "Skip N recordings.") var skip: Int?
+    @Flag(name: .long, help: "Only recordings you started.") var initiator = false
+    @Option(name: .long, help: "Text to search for.") var query: String?
+    @Option(name: .long, help: "A topic to leave out.") var excludeTopic: String?
+    @Option(name: .long, help: "Only recordings from this source.")
+    var source: KTalkClient.RecordingSource?
+    @Option(name: .long, help: "Only video or only audio recordings.")
+    var type: KTalkClient.RecordingContentType?
     @Flag(name: .long, help: "Fetch every page and print a flat array.")
     var all = false
 
@@ -96,9 +104,15 @@ extension Recordings {
     func run() async throws {
       let client = try global.makeClient()
       if all {
-        try printJSON(try await client.allAccessibleRecordings())
+        try printJSON(
+          try await client.allAccessibleRecordings(
+            initiator: initiator ? true : nil, query: query, excludeTopic: excludeTopic,
+            source: source, type: type))
       } else {
-        try printJSON(try await client.listAccessibleRecordings(top: top, skip: skip))
+        try printJSON(
+          try await client.listAccessibleRecordings(
+            top: top, skip: skip, initiator: initiator ? true : nil, query: query,
+            excludeTopic: excludeTopic, source: source, type: type))
       }
     }
   }
@@ -125,7 +139,8 @@ extension Recordings {
 
   struct Transcript: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "transcript", abstract: "[personal key] Get a recording's transcript.")
+      commandName: "transcript",
+      abstract: "[personal key] Get a recording's transcript.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -259,7 +274,8 @@ extension Recordings {
     static let configuration = CommandConfiguration(
       commandName: "artifacts",
       abstract:
-        "[personal key] Get a recording's transcript, short summary and protocol in one request.")
+        "[personal key] Get a recording's transcript, short summary and protocol in one request."
+    )
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -287,7 +303,7 @@ extension Recordings {
 
   struct Start: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "start", abstract: "Start recording a conference from a JSON file.")
+      commandName: "start", abstract: "[space key] Start recording a conference from a JSON file.")
 
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON StartRecordingParams file.") var fromJSON: String
@@ -300,7 +316,8 @@ extension Recordings {
 
   struct Edit: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "edit", abstract: "Edit a recording's title and description from a JSON file.")
+      commandName: "edit",
+      abstract: "[space key] Edit a recording's title and description from a JSON file.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -315,7 +332,7 @@ extension Recordings {
 
   struct Delete: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete", abstract: "Delete a recording.")
+      commandName: "delete", abstract: "[space key] Delete a recording.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -341,7 +358,8 @@ extension Recordings {
 
   struct SetAccess: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "set-access", abstract: "Change who can open a recording from a JSON file.")
+      commandName: "set-access",
+      abstract: "[space key] Change who can open a recording from a JSON file.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -356,7 +374,7 @@ extension Recordings {
 
   struct SetImmutable: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "set-immutable", abstract: "Protect a recording from deletion.")
+      commandName: "set-immutable", abstract: "[space key] Protect a recording from deletion.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -369,7 +387,8 @@ extension Recordings {
 
   struct UnsetImmutable: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "unset-immutable", abstract: "Remove a recording's deletion protection.")
+      commandName: "unset-immutable",
+      abstract: "[space key] Remove a recording's deletion protection.")
 
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Recording key.") var key: String
@@ -377,6 +396,50 @@ extension Recordings {
     func run() async throws {
       try await global.makeClient().unsetRecordingImmutable(key: key)
       try printJSON(["recording": key, "action": "unset-immutable"])
+    }
+  }
+
+  struct Links: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "links",
+      abstract:
+        "[personal key] List the resources of one kind linked to a recording."
+    )
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Recording key.") var key: String
+    @Option(name: .long, help: "Kind of linked resource.") var targetType:
+      KTalkClient.LinkTargetType
+    @Option(name: .long, help: "Page size.") var take: Int?
+    @Option(name: .long, help: "Token of the page to fetch, from a previous page.")
+    var pageToken: String?
+    func validate() throws {
+      try checkRange(take, "--take", 1...100)
+    }
+
+    func run() async throws {
+      try printJSON(
+        try await global.makeClient().recordingLinks(
+          key: key, targetType: targetType, take: take, pageToken: pageToken))
+    }
+  }
+
+  struct DownloadBulk: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "download-bulk",
+      abstract: "[personal key] Download several recordings as one file.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Recording keys.") var keys: [String]
+    @Option(name: .long, help: "Quality name (e.g. source).") var quality: String?
+    @Option(name: [.customShort("o"), .long], help: "Output file path.") var output: String
+    func validate() throws {
+      if !(1...60).contains(keys.count) {
+        throw ValidationError("Pass 1 to 60 recording keys.")
+      }
+    }
+
+    func run() async throws {
+      let data = try await global.makeClient().downloadRecordings(keys: keys, quality: quality)
+      try saveDownload(data, to: output)
     }
   }
 }

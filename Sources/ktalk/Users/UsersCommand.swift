@@ -10,7 +10,9 @@ struct Users: AsyncParsableCommand {
     subcommands: [
       Search.self, Scan.self, Get.self, CreateOrUpdate.self, Delete.self, RevokeSessions.self,
       Roles.self, ChangeRoles.self, SetPermissions.self, UploadAvatar.self, DeleteAvatar.self,
-      SyncAvatar.self,
+      SyncAvatar.self, Profile.self, UpdateProfile.self, DeleteSelf.self,
+      UnlockSelfDeleted.self, Logout.self, UploadOwnAvatar.self, DeleteOwnAvatar.self,
+      AddRole.self, RemoveRole.self,
     ]
   )
 }
@@ -78,7 +80,7 @@ extension Users {
   struct CreateOrUpdate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "create-or-update",
-      abstract: "Create, update, or restore users from a JSON array file.")
+      abstract: "[personal key] Create, update, or restore users from a JSON array file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON array of user params.") var fromJSON: String
     func run() async throws {
@@ -90,7 +92,7 @@ extension Users {
 
   struct Delete: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete", abstract: "Delete a user.")
+      commandName: "delete", abstract: "[personal key] Delete a user.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
@@ -102,7 +104,7 @@ extension Users {
 
   struct RevokeSessions: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "revoke-sessions", abstract: "Revoke all of a user's sessions.")
+      commandName: "revoke-sessions", abstract: "[space key] Revoke all of a user's sessions.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
@@ -114,7 +116,7 @@ extension Users {
 
   struct Roles: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "roles", abstract: "[space key] Get a user's roles.")
+      commandName: "roles", abstract: "[personal key] Get a user's roles.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
@@ -125,7 +127,8 @@ extension Users {
 
   struct ChangeRoles: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "change-roles", abstract: "Change a user's roles from a JSON file.")
+      commandName: "change-roles",
+      abstract: "[personal key] Change a user's roles from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     @Option(name: .long, help: "Path to a JSON ChangeRolesRequest file.") var fromJSON: String
@@ -139,7 +142,9 @@ extension Users {
   struct SetPermissions: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
       commandName: "set-permissions",
-      abstract: "Set a user's permissions (block/restore) from a JSON file.")
+      abstract:
+        "[personal key] Set a user's permissions (block/restore) from a JSON file."
+    )
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     @Option(name: .long, help: "Path to a JSON UserPermissions file.") var fromJSON: String
@@ -171,7 +176,7 @@ extension Users {
 
   struct DeleteAvatar: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete-avatar", abstract: "Delete a user's avatar.")
+      commandName: "delete-avatar", abstract: "[personal key] Delete a user's avatar.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
@@ -182,12 +187,121 @@ extension Users {
 
   struct SyncAvatar: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "sync-avatar", abstract: "Re-sync a user's avatar from the identity provider.")
+      commandName: "sync-avatar",
+      abstract: "[personal key] Re-sync a user's avatar from the identity provider.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "User key.") var key: String
     func run() async throws {
       try await global.makeClient().syncAvatar(userKey: key)
       try printJSON(["user": key, "action": "sync-avatar"])
+    }
+  }
+
+  struct Profile: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "profile", abstract: "[personal key] Get your own profile.")
+    @OptionGroup var global: GlobalOptions
+    func run() async throws {
+      try printJSON(try await global.makeClient().profile())
+    }
+  }
+
+  struct UpdateProfile: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "update-profile",
+      abstract: "[personal key] Update your own profile from a JSON file.")
+    @OptionGroup var global: GlobalOptions
+    @Option(name: .long, help: "Path to a JSON ProfileParams file.") var fromJSON: String
+    func run() async throws {
+      let params = try decodeJSON(KTalkClient.ProfileParams.self, fromFile: fromJSON)
+      try await global.makeClient().updateProfile(params)
+      try printJSON(["action": "update-profile"])
+    }
+  }
+
+  struct DeleteSelf: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "delete-self",
+      abstract: "[personal key] Delete your own user, from a JSON options file.")
+    @OptionGroup var global: GlobalOptions
+    @Option(name: .long, help: "Path to a JSON DeleteSelfParams file.") var fromJSON: String
+    func run() async throws {
+      let params = try decodeJSON(KTalkClient.DeleteSelfParams.self, fromFile: fromJSON)
+      try await global.makeClient().deleteSelf(params)
+      try printJSON(["action": "delete-self"])
+    }
+  }
+
+  struct UnlockSelfDeleted: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "unlock-self-deleted",
+      abstract: "[personal key] Restore a user who deleted themselves.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "User key.") var key: String
+    func run() async throws {
+      try await global.makeClient().unlockSelfDeleted(userKey: key)
+      try printJSON(["user": key, "action": "unlock-self-deleted"])
+    }
+  }
+
+  struct Logout: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "logout",
+      abstract: "[personal key] End your own sessions, from a JSON options file.")
+    @OptionGroup var global: GlobalOptions
+    @Option(name: .long, help: "Path to a JSON DeleteSelfParams file.") var fromJSON: String
+    func run() async throws {
+      let params = try decodeJSON(KTalkClient.DeleteSelfParams.self, fromFile: fromJSON)
+      try await global.makeClient().logOut(params)
+      try printJSON(["action": "logout"])
+    }
+  }
+
+  struct UploadOwnAvatar: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "upload-own-avatar", abstract: "[personal key] Upload your own avatar.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "Image file.") var file: String
+    @Option(name: .long, help: "Media type to send, e.g. image/png (default: from the extension).")
+    var contentType: String?
+    func run() async throws {
+      let upload = try uploadFile(atPath: file, contentType: contentType)
+      try printJSON(try await global.makeClient().uploadOwnAvatar(file: upload))
+    }
+  }
+
+  struct DeleteOwnAvatar: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "delete-own-avatar", abstract: "[personal key] Delete your own avatar.")
+    @OptionGroup var global: GlobalOptions
+    func run() async throws {
+      try await global.makeClient().deleteOwnAvatar()
+      try printJSON(["action": "delete-own-avatar"])
+    }
+  }
+
+  struct AddRole: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "add-role", abstract: "[personal key] Give a user a role.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "User key.") var key: String
+    @Argument(help: "Role id.") var role: String
+    func run() async throws {
+      try await global.makeClient().addRole(userKey: key, role: role)
+      try printJSON(["user": key, "role": role, "action": "add-role"])
+    }
+  }
+
+  struct RemoveRole: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "remove-role",
+      abstract: "[personal key] Take a role from a user.")
+    @OptionGroup var global: GlobalOptions
+    @Argument(help: "User key.") var key: String
+    @Argument(help: "Role id.") var role: String
+    func run() async throws {
+      try await global.makeClient().removeRole(userKey: key, role: role)
+      try printJSON(["user": key, "role": role, "action": "remove-role"])
     }
   }
 }

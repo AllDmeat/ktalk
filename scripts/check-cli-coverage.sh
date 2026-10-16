@@ -4,7 +4,8 @@
 # Maps every operation the generator emitted into the client to the facade method that calls
 # it and the CLI commands that reach it, and fails unless: one facade method calls each
 # operation, each operation has exactly one command, each command reaches exactly one
-# operation, and every command is registered in its group and the group in `ktalk`.
+# operation, every command is registered in its group and the group in `ktalk`, and every
+# command's abstract starts with the key tag its operation implies.
 # Reads the generated Client.swift, so run it after `swift build`. Read-only; exits 1 and
 # lists every gap on failure.
 set -euo pipefail
@@ -18,6 +19,7 @@ if [[ -z "$CLIENT" ]]; then
 fi
 
 python3 - "$CLIENT" "$REPO_ROOT" <<'PY'
+import json
 import pathlib
 import re
 import sys
@@ -39,13 +41,31 @@ def blocks(text, header, end=r"^\S"):
         yield match.group(1), text[match.start():stop.start() if stop else len(text)]
 
 
-operations = {
-    name: route
-    for route, name in re.findall(
-        r"/// - Remark: HTTP `([A-Z]+ [^`]+)`\.\n\s*/// - Remark: Generated from[^\n]*\n"
-        r"\s*public func (\w+)\(",
-        client.read_text(encoding="utf-8"),
-    )
+found_operations = re.findall(
+    r"/// - Remark: HTTP `([A-Z]+ [^`]+)`\.\n\s*/// - Remark: Generated from[^\n]*\((\w+)\)`\.\n"
+    r"\s*public func (\w+)\(",
+    client.read_text(encoding="utf-8"),
+)
+operations = {name: route for route, _, name in found_operations}
+
+# Not in the personal token spec, which leaves deprecated methods out, yet answered a personal
+# key on a live space (2026-10-06).
+CHECKED_WITH_PERSONAL_KEY = {"RecordingsTranscription_GetRecordingTranscriptSummary"}
+
+# The key each operation takes: a personal key for what Kontur's personal access token spec
+# lists (marked by scripts/fetch-spec.sh), support confirmed or a live check passed, a space
+# key for the rest.
+spec = json.loads((root / "openapi/talk.json").read_text(encoding="utf-8"))
+personal_ids = {
+    op["operationId"]
+    for item in spec["paths"].values()
+    for op in item.values()
+    if isinstance(op, dict)
+    and (op.get("x-ktalk-personal-token") or op.get("x-ktalk-source") == "support")
+} | CHECKED_WITH_PERSONAL_KEY
+key_tag = {
+    name: "[personal key]" if op_id in personal_ids else "[space key]"
+    for _, op_id, name in found_operations
 }
 
 problems = []
@@ -102,6 +122,10 @@ for path in sorted((root / "Sources/ktalk").rglob("*.swift")):
                 op for method in re.findall(r"\.(\w+)\(", body) if method in facade
                 for op in facade[method]
             }
+            abstract = re.search(r'abstract:\s*"([^"]*)"', body)
+            for tag in {key_tag[op] for op in commands[label]}:
+                if not (abstract and abstract.group(1).startswith(tag + " ")):
+                    problems.append(f"command {label}: its abstract must start with {tag}")
     # Commands must live in `extension <Group> {}` blocks, the only place this script reads.
     declared = len(re.findall(
         r"struct \w+: AsyncParsableCommand\b(?:(?!\nstruct |\n  struct ).)*?func run\(\)",
@@ -124,7 +148,7 @@ for op, route in sorted(operations.items(), key=lambda item: item[1]):
         problems.append(f"{route} has {len(owned)} commands: {', '.join(owned) or 'none'}")
 
 if problems:
-    print(f"check-cli-coverage: {len(problems)} violations of one operation = one command")
+    print(f"check-cli-coverage: {len(problems)} violations of one operation = one command or key tags")
     print("\n".join(f"  {p}" for p in problems))
     sys.exit(1)
 print(f"check-cli-coverage: {len(operations)} operations, {len(commands)} commands, one to one")

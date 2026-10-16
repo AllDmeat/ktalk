@@ -1,6 +1,59 @@
 {
   "components": {
     "schemas": {
+      "SkbKontur.Talk.Api.Entities.Files.TalkFileMeta": {
+        "description": "Метаданные по загруженному файлу",
+        "properties": {
+          "contentType": {
+            "description": "Тип содержимого",
+            "type": "string"
+          },
+          "created": {
+            "description": "Дата создания",
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileName": {
+            "description": "Название файла",
+            "type": "string"
+          },
+          "height": {
+            "description": "Image height",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "description": "Идентификатор файла",
+            "type": "string"
+          },
+          "size": {
+            "description": "Размер файла",
+            "format": "int64",
+            "type": "integer"
+          },
+          "width": {
+            "description": "Image width",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Api.Entities.Files.TalkUploadResult": {
+        "description": "Ответ на загрузку файла",
+        "properties": {
+          "files": {
+            "description": "Список метаданных по загруженным файлам",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Api.Entities.Files.TalkFileMeta"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "SkbKontur.Talk.Api.Entities.TalkRoleInfo": {
         "description": "Информация о роли",
         "properties": {
@@ -382,6 +435,48 @@
             "description": "Ширина",
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Common.TalkError": {
+        "properties": {
+          "errorCode": {
+            "description": "Код ошибки из справочника кодов, например ValidationError",
+            "nullable": true,
+            "type": "string"
+          },
+          "errorDetails": {
+            "additionalProperties": {
+              "nullable": true
+            },
+            "description": "Дополнительные данные об ошибке, например список полей с ошибками валидации",
+            "nullable": true,
+            "type": "object"
+          },
+          "errorId": {
+            "description": "Идентификатор ошибки. Укажите его при обращении в поддержку",
+            "readOnly": true,
+            "type": "string"
+          },
+          "errorMessage": {
+            "description": "Текст ошибки для пользователя",
+            "type": "string"
+          },
+          "errorSubType": {
+            "description": "Уточнённый тип ошибки: конкретная причина внутри типа, например CalendarBadRequest",
+            "nullable": true,
+            "type": "string"
+          },
+          "errorType": {
+            "description": "Тип ошибки: HTTP-код ответа, например BadRequest",
+            "readOnly": true,
+            "type": "string"
+          },
+          "exception": {
+            "description": "Описание ошибки для разработчика. Может содержать детали, которых нет в тексте ошибки",
+            "nullable": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -3227,6 +3322,19 @@
         ],
         "type": "object"
       },
+      "SkbKontur.Talk.Recordings.Api.TalkRecordingsList": {
+        "description": "Список записей",
+        "properties": {
+          "recordings": {
+            "description": "Записи",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkConferenceRecording"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "SkbKontur.Talk.Recordings.Api.TalkStartRecordingParams": {
         "properties": {
           "description": {
@@ -3360,6 +3468,304 @@
           "global"
         ],
         "type": "string"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkConferenceLinkInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+          }
+        ],
+        "description": "Сводная информация о конференции",
+        "properties": {
+          "content": {
+            "description": "Артефакты конференции",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.ConferencesHistory.Entities.ConferenceContent"
+            },
+            "type": "array"
+          },
+          "endTime": {
+            "description": "Время и дата конца конференции",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasSessionHalls": {
+            "description": "Наличие сессионного зала",
+            "type": "boolean"
+          },
+          "participants": {
+            "description": "Участники конференции",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUserRef"
+            },
+            "type": "array"
+          },
+          "startTime": {
+            "description": "Время и дата начала конференции",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkConferenceSpeechCoreResult": {
+        "description": "Результат обработки записи в речевых сервисах",
+        "properties": {
+          "duration": {
+            "description": "Продолжительность записи в секундах",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "protocolV2": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryV2Result"
+          },
+          "shortSummaryV2": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.SpeechCore.Api.Models.Summarization.TalkSummaryV2Result"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkNoteLinkInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+          }
+        ],
+        "description": "Сводная информация о заметке",
+        "properties": {
+          "createdBy": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          },
+          "latestLink": {
+            "description": "Последняя связь заметки",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkConferenceLinkInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkNoteLinkInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkRecordingLinkInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkTopicConferenceLinkInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkTopicLinkInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkWhiteboardLinkInfo"
+              }
+            ]
+          },
+          "participantsAccessEnabled": {
+            "description": "Признак публичного доступа к заметке",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "createdBy"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkRecordingLinkInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+          }
+        ],
+        "description": "Сводная информация о записи",
+        "properties": {
+          "createdBy": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          },
+          "description": {
+            "description": "Описание записи",
+            "nullable": true,
+            "type": "string"
+          },
+          "isAnyQualityCompleted": {
+            "description": "Готовность записи хотя бы одного качества",
+            "type": "boolean"
+          },
+          "uploadStatus": {
+            "description": "Общий статус загрузки",
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdBy",
+          "description",
+          "uploadStatus"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo": {
+        "description": "Сводная информация о ресурсе",
+        "discriminator": {
+          "propertyName": "$type"
+        },
+        "properties": {
+          "$type": {
+            "description": "Служебное поле: конкретный тип объекта полиморфной модели. Значение должно совпадать с именем одного из типов модели.",
+            "type": "string"
+          },
+          "key": {
+            "description": "Идентификатор ресурса",
+            "type": "string"
+          },
+          "linkedDate": {
+            "description": "Дата связывания",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "modifiedDate": {
+            "description": "Последняя дата изменения",
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "description": "Заголовок ресурса",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceType"
+          }
+        },
+        "required": [
+          "$type",
+          "key",
+          "modifiedDate",
+          "type"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkResourceType": {
+        "description": "Тип связи<li><i>conference</i> - Конференция</li><li><i>recording</i> - Запись</li><li><i>note</i> - Заметка</li><li><i>whiteboard</i> - Доска</li><li><i>topic</i> - Тема</li><li><i>messengerRoom</i> - Чат</li>",
+        "enum": [
+          "conference",
+          "recording",
+          "note",
+          "whiteboard",
+          "topic",
+          "messengerRoom"
+        ],
+        "type": "string"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkTopicConferenceLinkInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+          }
+        ],
+        "properties": {
+          "content": {
+            "description": "Артефакты конференции",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.ConferencesHistory.Entities.ConferenceContent"
+            },
+            "type": "array"
+          },
+          "endTime": {
+            "description": "Время и дата конца конференции",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasChatMessages": {
+            "description": "Наличие сообщений в чате",
+            "type": "boolean"
+          },
+          "hasSessionHalls": {
+            "description": "Наличие сессионного зала",
+            "type": "boolean"
+          },
+          "participants": {
+            "description": "Участники конференции",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUserRef"
+            },
+            "type": "array"
+          },
+          "speechCoreResults": {
+            "description": "Саммари и пересказы",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkConferenceSpeechCoreResult"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "startTime": {
+            "description": "Время и дата начала конференции",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkTopicLinkInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+          }
+        ],
+        "description": "Сводная информация о теме",
+        "properties": {
+          "createdBy": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          }
+        },
+        "required": [
+          "createdBy"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Resources.Api.TalkWhiteboardLinkInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+          }
+        ],
+        "description": "Сводная информация о белой доске",
+        "properties": {
+          "createdBy": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          },
+          "createdDate": {
+            "description": "Дата создания доски",
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentUserRole": {
+            "description": "Роль текущего пользователя",
+            "type": "string"
+          },
+          "isBlocked": {
+            "description": "Доступна ли доска пользователю",
+            "type": "boolean"
+          },
+          "isPublic": {
+            "description": "Доступна ли доска кому-то, кроме владельца",
+            "type": "boolean"
+          },
+          "linkAccess": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Access.LinkAccess.ResourceLinkAccessScope"
+          }
+        },
+        "required": [
+          "createdBy",
+          "currentUserRole"
+        ],
+        "type": "object"
       },
       "SkbKontur.Talk.Rooms.Statistics.Reports.Models.ParticipantTotalDurationModel": {
         "description": "Статистика по пользователю",
@@ -3981,6 +4387,61 @@
         },
         "type": "object"
       },
+      "SkbKontur.Talk.Users.Api.Models.TalkCurrentUserParams": {
+        "description": "Параметры редактирования профиля пользователя",
+        "properties": {
+          "department": {
+            "description": "Отдел",
+            "nullable": true,
+            "type": "string"
+          },
+          "firstname": {
+            "description": "Имя",
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "innerPhone": {
+            "description": "Дополнительный номер",
+            "maxLength": 15,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "mobilePhone": {
+            "description": "Мобильный номер",
+            "maxLength": 15,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "patronymic": {
+            "description": "Отчество",
+            "maxLength": 50,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "post": {
+            "description": "Должность",
+            "maxLength": 120,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "surname": {
+            "description": "Фамилия",
+            "maxLength": 50,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstname"
+        ],
+        "type": "object"
+      },
       "SkbKontur.Talk.Users.Api.Models.TalkFaceRectangle": {
         "description": "Прямоугольник с местоположением лица на аватаре пользователя",
         "properties": {
@@ -4369,6 +4830,108 @@
           },
           "userInfo": {
             "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.AttendeeEditModel": {
+        "properties": {
+          "optionExternalAttendeesEmails": {
+            "description": "Список необязательных внешних участников. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "optionalAttendees": {
+            "description": "Список необязательных участников встречи с расширенными настройками. Если поле не передано, список считается пустым",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.CalendarItemAttendeeModel"
+            },
+            "type": "array"
+          },
+          "optionalUserKeys": {
+            "description": "Список необязательных участников встречи. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "requiredAttendees": {
+            "description": "Список обязательных участников встречи с расширенными настройками. Если поле не передано, список считается пустым",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.CalendarItemAttendeeModel"
+            },
+            "type": "array"
+          },
+          "requiredExternalAttendeesEmails": {
+            "description": "Список обязательных внешних участников. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "requiredUserKeys": {
+            "description": "Список обязательных участников встречи. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "useCustomRoomModerators": {
+            "description": "Использовать настройки модераторов из встречи",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel": {
+        "description": "Модель импорта внешнего календаря",
+        "properties": {
+          "calendarName": {
+            "description": "Имя календаря",
+            "type": "string"
+          },
+          "externalCalendarIcsFilePath": {
+            "description": "Url до внешнего файла календаря в формате Ics",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "id привязки",
+            "type": "string"
+          }
+        },
+        "required": [
+          "externalCalendarIcsFilePath"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.CalendarItemAttendeeModel": {
+        "description": "Участник встречи",
+        "properties": {
+          "federationUser": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkFederationUser"
+          },
+          "groupAttendee": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkUsersGroup"
+          },
+          "isModerator": {
+            "description": "Признак модератора встречи",
+            "type": "boolean"
+          },
+          "key": {
+            "description": "Идентификатор участника: ключ пользователя, группы или внешнего пользователя",
+            "nullable": true,
+            "type": "string"
+          },
+          "mailbox": {
+            "description": "Электронный адрес участника",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkAttendeeType"
           }
         },
         "type": "object"
@@ -4881,6 +5444,34 @@
         ],
         "type": "string"
       },
+      "SkbKontur.Talk.Web.Entities.Calendar.GetUsersBusyStatusRequest": {
+        "properties": {
+          "emails": {
+            "description": "Список почт для проверки занятости",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "type": "array"
+          },
+          "end": {
+            "description": "Дата окончания периода проверки занятости",
+            "format": "date-time",
+            "type": "string"
+          },
+          "start": {
+            "description": "Дата начала периода проверки занятости",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "emails",
+          "start"
+        ],
+        "type": "object"
+      },
       "SkbKontur.Talk.Web.Entities.Calendar.Recurrence.TalkCalendarDayOfTheWeek": {
         "description": "День недели",
         "enum": [
@@ -5003,6 +5594,193 @@
         ],
         "type": "string"
       },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkAttendeeType": {
+        "description": "Тип участника встречи",
+        "enum": [
+          "user",
+          "group",
+          "person",
+          "federationUser",
+          "usersGroup"
+        ],
+        "type": "string"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem": {
+        "properties": {
+          "aiScenarioIds": {
+            "description": "Командные AI-сценарии, привязанные к событию (или его серии) для авто-запуска. Заполняется\nтолько при активной фиче сценариев в домене; null — фича выключена или привязок нет.",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "busyType": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Calendar.Abstractions.Entities.CalendarItemBusyType"
+          },
+          "calendarSource": {
+            "description": "Календарь, из которого создан ряд встреч",
+            "type": "string"
+          },
+          "controlledViaExternalSystem": {
+            "description": "Встреча управляется внешней системой",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "description": {
+            "description": "Описание",
+            "type": "string"
+          },
+          "enableAutoRecording": {
+            "description": "Включена автозапись встречи",
+            "type": "boolean"
+          },
+          "end": {
+            "description": "Дата и время окончания",
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalMeeting": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkExternalMeeting"
+          },
+          "id": {
+            "description": "Идентификатор мероприятия в календаре",
+            "type": "string"
+          },
+          "isAllDayEvent": {
+            "description": "Событие на весь день",
+            "type": "boolean"
+          },
+          "isCancelled": {
+            "description": "Признак отмененного мероприятия",
+            "type": "boolean"
+          },
+          "isPrivate": {
+            "description": "Признак приватной встречи",
+            "type": "boolean"
+          },
+          "isRecurring": {
+            "description": "Признак повторяющейся встречи",
+            "type": "boolean"
+          },
+          "location": {
+            "description": "Место проведения",
+            "type": "string"
+          },
+          "locationAttendee": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItemAttendee"
+          },
+          "meetId": {
+            "description": "Универсальный идентификатор календарной встречи, общий для участников и повторений",
+            "nullable": true,
+            "type": "string"
+          },
+          "onlineMeetingUrl": {
+            "description": "Ссылка на встречу",
+            "type": "string"
+          },
+          "onlineUsers": {
+            "description": "Информация о пользователях",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUserRef"
+            },
+            "type": "array"
+          },
+          "onlineUsersCount": {
+            "description": "Количество пользователей онлайн",
+            "format": "int32",
+            "type": "integer"
+          },
+          "optionalAttendees": {
+            "description": "Необязательные участники",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItemAttendee"
+            },
+            "type": "array"
+          },
+          "organizer": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItemAttendee"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.Recurrence.TalkCalendarRecurrence"
+          },
+          "requiredAttendees": {
+            "description": "Обязательные участники",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItemAttendee"
+            },
+            "type": "array"
+          },
+          "room": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+          },
+          "roomName": {
+            "description": "Комната, в которой будет проходить встреча",
+            "type": "string"
+          },
+          "start": {
+            "description": "Дата и время начала",
+            "format": "date-time",
+            "type": "string"
+          },
+          "stream": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomStream"
+          },
+          "subject": {
+            "description": "Название встречи",
+            "type": "string"
+          },
+          "timezone": {
+            "description": "Временная зона в формате GMT+X",
+            "type": "string"
+          },
+          "urlParams": {
+            "description": "Параметры, передаваемы в ссылку на встречу",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItemAttendee": {
+        "description": "Участник встречи в календаре",
+        "properties": {
+          "federationUser": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkFederationUser"
+          },
+          "mailbox": {
+            "description": "Email пользователя",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Имя пользователя",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Calendar.Abstractions.Entities.AttendeeStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkAttendeeType"
+          },
+          "user": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarResult": {
+        "properties": {
+          "items": {
+            "description": "Список встреч",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarType": {
         "description": "Тип календаря<li><i>talkCalendar</i> - Календарь толка</li><li><i>externalIntegration</i> - Пользовательский</li><li><i>ewsCalendar</i> - Интеграция с exchange</li><li><i>ewsOffice365Calendar</i> - Интеграция с exchange office 365</li><li><i>calDavCalendar</i> - Интеграция по протоколу CalDAV</li>",
         "enum": [
@@ -5011,6 +5789,353 @@
           "ewsCalendar",
           "ewsOffice365Calendar",
           "calDavCalendar"
+        ],
+        "type": "string"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkCreateCalendarEventModel": {
+        "properties": {
+          "allowAnonymous": {
+            "description": "Разрешить присутствие внешних пользователей",
+            "type": "boolean"
+          },
+          "anonymousAccessExpirationDate": {
+            "description": "Разрешить подключение анонимных пользователей до даты",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "autoRunDeepFakeDetection": {
+            "description": "Настройка автоматического запуска выявления дипфейков в комнате",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "controlledViaExternalSystem": {
+            "description": "Встреча управляется внешней системой",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "customMeetingUrl": {
+            "description": "Пользовательский URL",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Описание встречи",
+            "maxLength": 262144,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enableAutoRecording": {
+            "description": "Включить автоматическую запись встречи",
+            "type": "boolean"
+          },
+          "enableSip": {
+            "description": "Включить возможность позвонить в конференцию по протоколу SIP",
+            "type": "boolean"
+          },
+          "end": {
+            "description": "Дата и время окончания встречи в формате ISO 8601, например 2026-10-11T10:58:48.7426763Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "isAllDayEvent": {
+            "description": "Регулярная встреча",
+            "type": "boolean"
+          },
+          "isRecurring": {
+            "description": "Признак, что встреча является повторяющейся",
+            "type": "boolean"
+          },
+          "maskingSettings": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.Masking.TalkMaskingSettings"
+          },
+          "optionExternalAttendeesEmails": {
+            "description": "Список необязательных внешних участников. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "optionalAttendees": {
+            "description": "Список необязательных участников встречи с расширенными настройками. Если поле не передано, список считается пустым",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.CalendarItemAttendeeModel"
+            },
+            "type": "array"
+          },
+          "optionalUserKeys": {
+            "description": "Список необязательных участников встречи. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pinCode": {
+            "description": "Устанавливает пин код для комнаты",
+            "type": "string"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.Recurrence.TalkCalendarRecurrence"
+          },
+          "requiredAttendees": {
+            "description": "Список обязательных участников встречи с расширенными настройками. Если поле не передано, список считается пустым",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.CalendarItemAttendeeModel"
+            },
+            "type": "array"
+          },
+          "requiredExternalAttendeesEmails": {
+            "description": "Список обязательных внешних участников. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "requiredUserKeys": {
+            "description": "Список обязательных участников встречи. Если поле не передано, список считается пустым",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "roomName": {
+            "description": "Комната, в которой будет проходить встреча",
+            "minLength": 1,
+            "type": "string"
+          },
+          "simultaneousTranslation": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslationUpdateRequest"
+          },
+          "start": {
+            "description": "Дата и время начала встречи в формате ISO 8601, например 2026-10-11T09:58:48.7426763Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "subject": {
+            "description": "Тема встречи",
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "timezone": {
+            "description": "Временная зона в формате GMT+X, например GMT+3 или UTC+05:30",
+            "nullable": true,
+            "type": "string"
+          },
+          "useCustomRoomModerators": {
+            "description": "Использовать настройки модераторов из встречи",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "roomName",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkEditCalendarEventModel": {
+        "properties": {
+          "allowAnonymous": {
+            "description": "Разрешить присутствие внешних пользователей",
+            "type": "boolean"
+          },
+          "anonymousAccessExpirationDate": {
+            "description": "Разрешить подключение анонимных пользователей до даты",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "autoRunDeepFakeDetection": {
+            "description": "Настройка автоматического запуска выявления дипфейков в комнате",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "customMeetingUrl": {
+            "description": "Пользовательский URL",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Описание встречи",
+            "maxLength": 262144,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enableAutoRecording": {
+            "description": "Включить автоматическую запись встречи",
+            "type": "boolean"
+          },
+          "enableSip": {
+            "description": "Включить возможность позвонить в конференцию по протоколу SIP",
+            "type": "boolean"
+          },
+          "end": {
+            "description": "Дата и время окончания встречи в формате ISO 8601, например 2026-10-11T10:58:48.7426763Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "isRecurring": {
+            "description": "Признак, что встреча является повторяющейся",
+            "type": "boolean"
+          },
+          "maskingSettings": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.Masking.TalkMaskingSettings"
+          },
+          "pinCode": {
+            "description": "Устанавливает пин код для комнаты",
+            "type": "string"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.Recurrence.TalkCalendarRecurrence"
+          },
+          "roomName": {
+            "description": "Комната, в которой будет проходить встреча",
+            "minLength": 1,
+            "type": "string"
+          },
+          "simultaneousTranslation": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslationUpdateRequest"
+          },
+          "start": {
+            "description": "Дата и время начала встречи в формате ISO 8601, например 2026-10-11T09:58:48.7426763Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "subject": {
+            "description": "Тема встречи",
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "timezone": {
+            "description": "Временная зона в формате GMT+X, например GMT+3 или UTC+05:30",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "roomName",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkExternalMeeting": {
+        "description": "Внешнее мероприятие",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.ExternalMeetingType"
+          },
+          "url": {
+            "description": "Адрес",
+            "type": "string"
+          },
+          "vcsName": {
+            "description": "Имя внешней ВКС",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkFederationUser": {
+        "description": "Внешний пользователь другого пространства",
+        "properties": {
+          "department": {
+            "description": "Подразделение",
+            "nullable": true,
+            "type": "string"
+          },
+          "federationKey": {
+            "description": "Идентификатор внешнего пространства",
+            "type": "string"
+          },
+          "firstname": {
+            "description": "Имя",
+            "type": "string"
+          },
+          "key": {
+            "description": "Идентификатор внешнего пользователя",
+            "type": "string"
+          },
+          "mailbox": {
+            "description": "Электронный адрес",
+            "nullable": true,
+            "type": "string"
+          },
+          "mobilePhone": {
+            "description": "Мобильный телефон",
+            "nullable": true,
+            "type": "string"
+          },
+          "organizationName": {
+            "description": "Название организации",
+            "type": "string"
+          },
+          "patronymic": {
+            "description": "Отчество",
+            "nullable": true,
+            "type": "string"
+          },
+          "post": {
+            "description": "Должность",
+            "nullable": true,
+            "type": "string"
+          },
+          "surname": {
+            "description": "Фамилия",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.TalkUsersGroup": {
+        "description": "Группа пользователей, добавляемая во встречу",
+        "properties": {
+          "excludeUserKeys": {
+            "description": "Идентификаторы пользователей, исключаемых из группы",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "usersGroupKey": {
+            "description": "Ключ группы пользователей",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.UserBusyStatus": {
+        "description": "Занятость пользователя по данным его календаря",
+        "properties": {
+          "busyEnd": {
+            "description": "Окончание занятости",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "busyStart": {
+            "description": "Начало занятости",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "busyType": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.UserBusyType"
+          },
+          "email": {
+            "description": "Электронный адрес пользователя",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Calendar.UserBusyType": {
+        "description": "Тип занятости пользователя",
+        "enum": [
+          "unknown",
+          "free",
+          "busy"
         ],
         "type": "string"
       },
@@ -5804,6 +6929,124 @@
         },
         "type": "object"
       },
+      "SkbKontur.Talk.Web.Entities.PushNotifications.TalkSendNotificationResult": {
+        "description": "Результат отправки оповещений участникам комнаты",
+        "properties": {
+          "userSendStatuses": {
+            "description": "Список оповещенных участников",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.PushNotifications.TalkSentRoomPushNotificationResult"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.PushNotifications.TalkSentRoomPushNotificationResult": {
+        "properties": {
+          "notifyStatus": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.PushNotifications.TalkSentRoomPushNotificationStatus"
+          },
+          "user": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.PushNotifications.TalkSentRoomPushNotificationStatus": {
+        "description": "<li><i>notificationSent</i> - Оповещение отправлено</li><li><i>alreadySent</i> - Необходимое время между отпракой не прошло</li><li><i>notSend</i> - Ошибка при отправке</li>",
+        "enum": [
+          "notificationSent",
+          "alreadySent",
+          "notSend"
+        ],
+        "type": "string"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.ChangeUserNameRequest": {
+        "description": "Смена имени анонимного участника конференции",
+        "properties": {
+          "anonymousId": {
+            "description": "Идентификатор анонимного участника",
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "newName": {
+            "description": "Новое имя участника",
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "anonymousId",
+          "newName"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomRequest": {
+        "description": "Параметры создания чата",
+        "properties": {
+          "description": {
+            "description": "Описание чата, не более 1000 символов",
+            "maxLength": 1000,
+            "nullable": true,
+            "type": "string"
+          },
+          "privacy": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkMessengerRoomPrivacy"
+          },
+          "title": {
+            "description": "Название чата: от 3 до 255 символов",
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[\\p{IsCyrillic}A-Za-z0-9!\"№,._?:;\\-—'`()\\[\\]{}%^₽$=#@*/\\\\ ]+$",
+            "type": "string"
+          },
+          "userKeys": {
+            "description": "Идентификаторы пользователей, которых нужно добавить в чат: не менее одного",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "privacy",
+          "title",
+          "userKeys"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomResponse": {
+        "description": "Результат создания чата",
+        "properties": {
+          "messengerRoomId": {
+            "description": "Идентификатор созданного чата",
+            "type": "string"
+          }
+        },
+        "required": [
+          "messengerRoomId"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.KickUserRequest": {
+        "description": "Параметры исключения участника конференции",
+        "properties": {
+          "userUniqueId": {
+            "description": "Уникальный идентификатор участника конференции. Совпадает с полем uniqueId участника\nиз метода «Получить список онлайн-участников конференции» (GET /api/Rooms/{roomName}/online-users)",
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "userUniqueId"
+        ],
+        "type": "object"
+      },
       "SkbKontur.Talk.Web.Entities.Rooms.LockRoomRequest": {
         "description": "Запрос проверки/установки ПИН-кода",
         "properties": {
@@ -5946,6 +7189,35 @@
         },
         "type": "object"
       },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkClippedRoomRecordingWithParticipants": {
+        "properties": {
+          "duration": {
+            "description": "Продолжительность",
+            "format": "int32",
+            "type": "integer"
+          },
+          "key": {
+            "description": "Ключ записи",
+            "type": "string"
+          },
+          "participants": {
+            "description": "Участники",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUserBaseInfoRef"
+            },
+            "type": "array"
+          },
+          "roomName": {
+            "description": "Название комнаты, в которой сделана запись",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Domain.MediaUploadStatus"
+          }
+        },
+        "type": "object"
+      },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkInputPolicy": {
         "description": "Политика ввода",
         "enum": [
@@ -6003,6 +7275,14 @@
           "translators"
         ],
         "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkMessengerRoomPrivacy": {
+        "description": "Приватность чата",
+        "enum": [
+          "public",
+          "private"
+        ],
+        "type": "string"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkParticipantsAbilities": {
         "description": "Возможности участников",
@@ -6187,6 +7467,58 @@
           "roomName",
           "stageConferenceId"
         ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomDurationLimits": {
+        "description": "Ограничения длительности конференции в комнате",
+        "properties": {
+          "conferenceDurationTimeLeftInSeconds": {
+            "description": "Оставшееся время конференции в секундах",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomOnlineUserRef": {
+        "properties": {
+          "anonymousId": {
+            "description": "Идентификатор анонима",
+            "nullable": true,
+            "type": "string"
+          },
+          "anonymousName": {
+            "description": "Имя анонима",
+            "nullable": true,
+            "type": "string"
+          },
+          "isAnonymous": {
+            "description": "Признак анонимного пользователя",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "uniqueId": {
+            "description": "Уникальный идентификатор участника конференции",
+            "type": "string"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomOnlineUsersList": {
+        "description": "Список онлайн-участников конференции",
+        "properties": {
+          "onlineUsers": {
+            "description": "Онлайн-участники конференции",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomOnlineUserRef"
+            },
+            "type": "array"
+          }
+        },
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkRoomParams": {
@@ -6417,6 +7749,64 @@
           "enabled",
           "languagePairs"
         ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceProperties": {
+        "properties": {
+          "calendarEventDescription": {
+            "description": "Описание встречи в календаре",
+            "maxLength": 20971520,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "calendarEventEndTime": {
+            "description": "Запланированное время окончания встречи",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "calendarEventId": {
+            "description": "Идентификатор события календаря, из которого начата встреча",
+            "nullable": true,
+            "type": "string"
+          },
+          "meetId": {
+            "description": "Универсальный идентификатор календарной встречи, общий для участников и повторений.",
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "organizerMailbox": {
+            "description": "Email организатора встречи.",
+            "nullable": true,
+            "type": "string"
+          },
+          "participantsEmails": {
+            "description": "Адреса электронной почты участников для оповещения",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "roomTitle": {
+            "description": "Заголовок комнаты",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "meetId",
+          "roomTitle"
+        ],
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceResult": {
+        "properties": {
+          "sendNotificationResult": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.PushNotifications.TalkSendNotificationResult"
+          }
+        },
         "type": "object"
       },
       "SkbKontur.Talk.Web.Entities.Rooms.TalkTranslator": {
@@ -6716,6 +8106,75 @@
         },
         "type": "object"
       },
+      "SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo": {
+        "description": "Страница результатов",
+        "properties": {
+          "entities": {
+            "description": "Элементы текущей страницы",
+            "items": {
+              "description": "Сводная информация о ресурсе",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkConferenceLinkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkNoteLinkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkRecordingLinkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkTopicConferenceLinkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkTopicLinkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkWhiteboardLinkInfo"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "description": "Токен следующей страницы",
+            "nullable": true,
+            "type": "string"
+          },
+          "prevPageToken": {
+            "description": "Токен предыдущей страницы",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Web.Entities.Rooms.TalkClippedRoomRecordingWithParticipants": {
+        "description": "Страница результатов",
+        "properties": {
+          "entities": {
+            "description": "Элементы текущей страницы",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkClippedRoomRecordingWithParticipants"
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "description": "Токен следующей страницы",
+            "nullable": true,
+            "type": "string"
+          },
+          "prevPageToken": {
+            "description": "Токен предыдущей страницы",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SkbKontur.Talk.Web.Entities.TalkRecordingsOnlineStatistics": {
         "description": "Статистика идущих записей",
         "properties": {
@@ -6766,6 +8225,18 @@
         },
         "type": "object"
       },
+      "SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams": {
+        "properties": {
+          "deleteSingleUserDomain": {
+            "description": "Удалять пространство вместе с пользователем, если он в нём единственный",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deleteSingleUserDomain"
+        ],
+        "type": "object"
+      },
       "SkbKontur.Talk.Web.Entities.TalkUserPermissions": {
         "description": "Права пользователя",
         "properties": {
@@ -6803,6 +8274,43 @@
               "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkUser"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Web.Entities.User.TalkUserProfile": {
+        "description": "Профиль текущего пользователя вместе с его пространством.",
+        "properties": {
+          "domainTitle": {
+            "description": "Название пространства пользователя",
+            "nullable": true,
+            "type": "string"
+          },
+          "firstname": {
+            "description": "Имя",
+            "nullable": true,
+            "type": "string"
+          },
+          "patronymic": {
+            "description": "Отчество",
+            "nullable": true,
+            "type": "string"
+          },
+          "post": {
+            "description": "Должность",
+            "nullable": true,
+            "type": "string"
+          },
+          "sessionExpiresAt": {
+            "description": "Expiration of the current browser session. Null for personal access tokens.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "surname": {
+            "description": "Фамилия",
+            "nullable": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -7320,6 +8828,28 @@
         ],
         "type": "object"
       },
+      "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardElementState": {
+        "description": "Элемент доски в составе состояния доски, получаемого через REST API",
+        "properties": {
+          "modifyDate": {
+            "description": "Дата изменения элемента",
+            "format": "date-time",
+            "type": "string"
+          },
+          "objId": {
+            "description": "Идентификатор объекта на клиенте",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Properties.WhiteboardSingleProperty"
+            },
+            "description": "Свойства элемента",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardLinkAccess": {
         "description": "Доступ по ссылке",
         "properties": {
@@ -7327,6 +8857,25 @@
             "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Access.LinkAccess.ResourceLinkAccessScope"
           }
         },
+        "type": "object"
+      },
+      "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardState": {
+        "description": "Состояние доски: метаданные и элементы",
+        "properties": {
+          "elements": {
+            "description": "Элементы доски",
+            "items": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardElementState"
+            },
+            "type": "array"
+          },
+          "whiteboard": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboard"
+          }
+        },
+        "required": [
+          "whiteboard"
+        ],
         "type": "object"
       },
       "SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardsStatistics": {
@@ -7375,6 +8924,47 @@
           "holst"
         ],
         "type": "string"
+      },
+      "SkbKontur.Talk.Whiteboards.Properties.Values.WhiteboardPropertyValueBase": {
+        "description": "Значение свойства объекта на доске",
+        "type": "object"
+      },
+      "SkbKontur.Talk.Whiteboards.Properties.WhiteboardSingleProperty": {
+        "description": "Свойство объекта на доске",
+        "properties": {
+          "modifyDate": {
+            "description": "Дата и время изменения свойства",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Имя свойства",
+            "type": "string"
+          },
+          "nonce": {
+            "description": "Идентификатор изменения, по которому разрешаются конфликты правок: при равных ревизиях\nприменяется изменение с большим значением",
+            "nullable": true,
+            "type": "string"
+          },
+          "objId": {
+            "description": "Идентификатор объекта на доске",
+            "type": "string"
+          },
+          "rev": {
+            "description": "Номер ревизии объекта",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "type": {
+            "description": "Тип свойства",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Properties.Values.WhiteboardPropertyValueBase"
+          }
+        },
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -7499,6 +9089,333 @@
         ]
       }
     },
+    "/api/Calendar": {
+      "get": {
+        "description": "Возвращает встречи пользователя за период, указанный в запросе. В ответ попадают и повторяющиеся встречи.\nДаты начала и окончания периода (`start` и `end`) передаются в формате ISO 8601,\nнапример `2026-10-11T09:58:48.7426763Z`.",
+        "operationId": "Calendar_Get",
+        "parameters": [
+          {
+            "description": "Дата на которую требуется получить календарь",
+            "in": "query",
+            "name": "start",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Дата окончания",
+            "in": "query",
+            "name": "end",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Количество элементов, которые будут выведены в ответе",
+            "in": "query",
+            "name": "take",
+            "schema": {
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Имя комнаты",
+            "in": "query",
+            "name": "roomName",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "По возрастанию или убыванию времени начала",
+            "in": "query",
+            "name": "ascendingOrder",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Не учитывать события, у которых организатор является федеративным пользователь",
+            "in": "query",
+            "name": "excludeWithFederationOrganizer",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarResult"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить события в календаре",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "post": {
+        "description": "Создаёт встречу в календаре пользователя и рассылает приглашения участникам.\nДата и время начала и окончания встречи (`start` и `end`) передаются в формате ISO 8601,\nнапример `2026-10-11T09:58:48.7426763Z`, а часовой пояс встречи — отдельным полем `timezone`\nв формате `GMT+X`, например `GMT+3`.\nСписки участников необязательны: если список не передан, он считается пустым.",
+        "operationId": "Calendar_CreateCalendarEvent",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCreateCalendarEventModel"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCreateCalendarEventModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCreateCalendarEventModel"
+              }
+            }
+          },
+          "description": "Модель встречи"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Создать встречу в календаре",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/busy-statuses": {
+      "post": {
+        "description": "Возвращает занятость пользователей по их электронным адресам за указанный период.",
+        "operationId": "Calendar_GetUsersBusyStatuses",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.GetUsersBusyStatusRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.GetUsersBusyStatusRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.GetUsersBusyStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.UserBusyStatus"
+                  },
+                  "type": "array"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.UserBusyStatus"
+                  },
+                  "type": "array"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.UserBusyStatus"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Проверить занятость пользователей по их календарям за период времени",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/externalbindings": {
+      "get": {
+        "description": "Возвращает внешние календари, привязанные к учётной записи текущего пользователя.",
+        "operationId": "Calendar_GetExternalCalendarsBindings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+                  },
+                  "type": "array"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+                  },
+                  "type": "array"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить внешние календари пользователя",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "put": {
+        "description": "Привязывает внешний календарь по ссылке на ics-файл и импортирует из него события.",
+        "operationId": "Calendar_BindExternalCalendar",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+              }
+            }
+          },
+          "description": "Параметры привязываемого календаря"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.BindExternalCalendarModel"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Импортировать внешний календарь пользователя",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/externalbindings/{bindingId}": {
+      "delete": {
+        "description": "Отвязывает внешний календарь пользователя: события этого календаря больше не импортируются.",
+        "operationId": "Calendar_UnbindExternalCalendar",
+        "parameters": [
+          {
+            "description": "Идентификатор привязки",
+            "in": "path",
+            "name": "bindingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Отвязать внешний календарь",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
     "/api/Calendar/servers": {
       "get": {
         "description": "Разрешения: application.calendar-control.read",
@@ -7568,7 +9485,8 @@
         "summary": "Получить список календарных сервисов",
         "tags": [
           "Управление календарями"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "post": {
         "description": "Позволяет интегрировать пространство с дополнительным календарем Exchange: Exchange Web Services или Exchange Online.\nВ запросе передаются настройки календаря и список доменов, к которым он будет применен.\n            \n1. Создайте API-ключ с разрешением «Управление календарями»: Чтение и изменение.\n2. Отправьте запрос на добавление дополнительного календаря.\n            \nВ теле запроса передайте его настройки и список доменов, к которым календарь будет применен.\nПараметры запроса зависят от типа календаря: Exchange Web Services или Exchange Online.\nПример тела запроса для календаря каждого типа смотрите ниже.\n            \n**Ограничения**\n            \n**Основным календарем** пространства должен быть календарь EWS или Exchange Online (Office365).\nЕсли в качестве основного календаря выбран календарь Толка или CalDav, добавить дополнительный календарь нельзя.\n            \n**Дополнительными календарями** пространства могут быть только EWS или Exchange Online.\nНельзя добавить CalDav или календарь Толка как дополнительный.\n            \nДополнительный календарь применяется к пользователям, у которых домен в логине совпадает с доменами из настроек этого календаря.\nК другим пользователям применяется основной календарь.\n            \nВ свойстве integrationSettings необходимо передавать (* - обязательные значения):\n            \n1. Для всех типов календарей:\n    - type * (поддерживаемые значения ewsCalendar, ewsOffice365Calendar, calDavCalendar)\n2. Для EWS:\n    - userName *\n    - password *\n    - url *\n    - enableSyncPhoto (по умолчанию false)\n    - ewsVersion (по умолчанию определяется автоматически)\n3. Для EWS Office 365:\n    - tenantId*\n    - clientId*\n    - clientSecret*\n    - enableSyncPhoto (по умолчанию false)\n4. Для CalDav:\n    - userName *\n    - password *\n    - url *\n\nРазрешения: application.calendar-control.write",
@@ -7623,7 +9541,8 @@
         "summary": "Добавить календарный сервис",
         "tags": [
           "Управление календарями"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Calendar/servers/{calendarServerId}": {
@@ -7661,7 +9580,8 @@
         "summary": "Удалить календарный сервис",
         "tags": [
           "Управление календарями"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "get": {
         "description": "Разрешения: application.calendar-control.read",
@@ -7711,7 +9631,8 @@
         "summary": "Получить календарный сервис по идентификатору",
         "tags": [
           "Управление календарями"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "put": {
         "description": "В свойстве integrationSettings необходимо передавать (* - обязательные значения)\n1. Для всех типов календарей:\n    - type * (поддерживаемые значения ewsCalendar, ewsOffice365Calendar, calDavCalendar)\n2. Для EWS:\n    - userName (если не передано, то используется ранее сохраненное значение)\n    - password (если не передано, то используется ранее сохраненное значение)\n    - url *\n    - enableSyncPhoto (по умолчанию false)\n    - ewsVersion (по умолчанию определяется автоматически)\n3. Для EWS Office 365:\n    - tenantId (если не передано, то используется ранее сохраненное значение)\n    - clientId (если не передано, то используется ранее сохраненное значение)\n    - clientSecret (если не передано, то используется ранее сохраненное значение)\n    - enableSyncPhoto (по умолчанию false)\n4. Для CalDav:\n    - userName (если не передано, то используется ранее сохраненное значение)\n    - password (если не передано, то используется ранее сохраненное значение)\n    - url *\n\nРазрешения: application.calendar-control.write",
@@ -7760,7 +9681,370 @@
         "summary": "Изменить календарный сервис",
         "tags": [
           "Управление календарями"
-        ]
+        ],
+        "x-ktalk-personal-token": true
+      }
+    },
+    "/api/Calendar/{eventId}": {
+      "get": {
+        "description": "Возвращает встречу по её идентификатору.",
+        "operationId": "Calendar_GetEventById",
+        "parameters": [
+          {
+            "description": "Идентификатор события",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить событие календаря по идентификатору",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "put": {
+        "description": "Изменяет параметры встречи и её повторяемость. Участники меняются отдельным методом\n«Редактировать участников встречи» (`POST /api/Calendar/{eventId}/attendees`).\nДата и время начала и окончания встречи (`start` и `end`) передаются в формате ISO 8601,\nнапример `2026-10-11T09:58:48.7426763Z`, а часовой пояс встречи — отдельным полем `timezone`\nв формате `GMT+X`, например `GMT+3`.",
+        "operationId": "Calendar_EditCalendarEvent",
+        "parameters": [
+          {
+            "description": "Идентификатор встречи",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkEditCalendarEventModel"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkEditCalendarEventModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkEditCalendarEventModel"
+              }
+            }
+          },
+          "description": "Модель редактирования"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Редактировать встречу в календаре",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/{eventId}/accept": {
+      "post": {
+        "description": "Подтверждает присутствие текущего пользователя на встрече.\nПодтверждение поддерживается только календарём Толка: если пространство подключено\nк внешнему календарю (Exchange, Exchange Online, CalDAV), метод вернёт 400.",
+        "operationId": "Calendar_AcceptEvent",
+        "parameters": [
+          {
+            "description": "Идентификатор встречи",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Подтвердить присутствие на встрече",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/{eventId}/attendees": {
+      "post": {
+        "description": "Меняет списки обязательных и необязательных участников встречи. Списки заменяются целиком: участники,\nкоторых нет в запросе, удаляются из встречи.\nМинимальный запрос — только один из списков участников, например `{\"requiredUserKeys\": [\"<userKey>\"]}`.\nНепереданные списки считаются пустыми.",
+        "operationId": "Calendar_EditAttendee",
+        "parameters": [
+          {
+            "description": "Идентификатор встречи",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.AttendeeEditModel"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.AttendeeEditModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.AttendeeEditModel"
+              }
+            }
+          },
+          "description": "Модель редактирования участников"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Редактировать участников встречи",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/{eventId}/cancel": {
+      "post": {
+        "description": "Отменяет встречу и уведомляет участников. В параметре `message` можно передать сообщение для участников.",
+        "operationId": "Calendar_CancelEvent",
+        "parameters": [
+          {
+            "description": "Идентификатор встречи",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Причина отмены встречи",
+            "in": "query",
+            "name": "message",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Отменить встречу",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/{eventId}/ics": {
+      "get": {
+        "description": "Возвращает событие или весь ряд повторяющихся событий в формате ics-файла.",
+        "operationId": "Calendar_DownloadIcsCalendarFile",
+        "parameters": [
+          {
+            "description": "Идентификатор события для одиночных встреч или ряда событий для повторяющихся",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Признак внешнего календаря",
+            "in": "query",
+            "name": "isExternalCalendar",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Скачать событие календаря или ряд событий в формате ics-файла",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/{eventId}/recurrence": {
+      "get": {
+        "description": "Возвращает ряд повторяющихся встреч, в который входит указанное событие.",
+        "operationId": "Calendar_GetRecurrenceEventById",
+        "parameters": [
+          {
+            "description": "Идентификатор события из ряда",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Calendar.TalkCalendarItem"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить ряд повторяющихся встреч по идентификатору события из ряда",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Calendar/{eventId}/reject": {
+      "post": {
+        "description": "Отклоняет встречу от имени текущего пользователя. При `withNotification = true` организатору отправляется уведомление.",
+        "operationId": "Calendar_RejectEvent",
+        "parameters": [
+          {
+            "description": "Идентификатор встречи",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Отправить сообщение об отклонении встречи",
+            "in": "query",
+            "name": "withNotification",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Отклонить встречу в календаре",
+        "tags": [
+          "Управление календарями"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/ClientsTelemetry": {
@@ -9075,7 +11359,8 @@
         "summary": "Получить список записей пространства",
         "tags": [
           "Записи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Domain/recordings/{recordingKey}": {
@@ -11089,6 +13374,149 @@
         ]
       }
     },
+    "/api/Messenger/room": {
+      "post": {
+        "description": "Создаёт чат от имени текущего пользователя и добавляет в него пользователей из запроса.\nВ пространстве должна быть включена функция «Чаты».\nУказанные пользователи должны быть зарегистрированы в пространстве.",
+        "operationId": "Messenger_CreateMessengerRoom",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomRequest"
+              }
+            }
+          },
+          "description": "Параметры создания чата"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomResponse"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.CreateMessengerRoomResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Создать чат",
+        "tags": [
+          "Толк.Чаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Recordings": {
+      "get": {
+        "description": "Возвращает страницу записей, доступных текущему пользователю.\nЗаписи можно отфильтровать по названию (`Query`), источнику (`Source`) и типу (`Type`),\nа также запросить только те встречи, инициатором которых был пользователь (`Initiator`).",
+        "operationId": "Recordings_GetUserRecordings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "top",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "initiator",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "excludeTopic",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Источник записи",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkRecordingSource"
+            }
+          },
+          {
+            "description": "Тип содержимого записи",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkRecordingContentType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkRecordingsList"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkRecordingsList"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkRecordingsList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить записи пользователя",
+        "tags": [
+          "Записи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
     "/api/Recordings/current": {
       "get": {
         "description": "Разрешения: application.recording.active.read",
@@ -11592,7 +14020,8 @@
         "summary": "Получить комнату по ключу",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "put": {
         "description": "Администратор может задавать некоторые параметры комнаты по умолчанию в настройках пространства\n\nРазрешения: application.rooms.write",
@@ -11653,7 +14082,8 @@
         "summary": "Редактировать или создать комнату",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Rooms/{roomName}/anonymousAccess": {
@@ -11715,7 +14145,8 @@
         "summary": "Изменить доступ внешних участников",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Rooms/{roomName}/cancelCall": {
@@ -11764,6 +14195,212 @@
         ]
       }
     },
+    "/api/Rooms/{roomName}/change-user-name": {
+      "post": {
+        "description": "Меняет имя анонимного участника в активной конференции комнаты.",
+        "operationId": "Rooms_ChangeUserName",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.ChangeUserNameRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.ChangeUserNameRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.ChangeUserNameRequest"
+              }
+            }
+          },
+          "description": "Новое имя"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Изменить имя анонимного участника конференции",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/chatChannels/allowedUsers/{userRef}": {
+      "delete": {
+        "description": "Убирает пользователя из списка тех, кому разрешено писать в приватный чат-канал комнаты, и возвращает настройки комнаты.",
+        "operationId": "Rooms_RemovedChatChannelAllowedUser",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Ключ пользователя или идентификатор анонимного участника",
+            "in": "path",
+            "name": "userRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Удалить пользователя, которому разрешено писать в приватный чат-канал",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "post": {
+        "description": "Добавляет пользователя в список тех, кому разрешено писать в приватный чат-канал комнаты, и возвращает настройки комнаты.",
+        "operationId": "Rooms_AppendChatChannelAllowedUser",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Ключ пользователя или идентификатор анонимного участника",
+            "in": "path",
+            "name": "userRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Добавить пользователя, которому разрешено писать в приватный чат-канал",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/conference/limits": {
+      "get": {
+        "description": "Возвращает оставшееся время конференции, если для пространства задано ограничение длительности.",
+        "operationId": "Rooms_GetCurrentConferenceLimits",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forceStart",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomDurationLimits"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomDurationLimits"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomDurationLimits"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить ограничения длительности конференции в комнате",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
     "/api/Rooms/{roomName}/endconference": {
       "post": {
         "description": "Запрос завершает конференцию для всех участников в указанной комнате. Конференция будет завершена в момент запроса\n\nРазрешения: application.rooms.write",
@@ -11787,7 +14424,125 @@
         "summary": "Принудительно завершить конференцию для всех участников",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
+      }
+    },
+    "/api/Rooms/{roomName}/file": {
+      "post": {
+        "description": "Загружает файл в чат или в конференцию комнаты и возвращает метаданные загруженного файла.\nТело запроса должно быть в формате multipart/form-data, файл передаётся в составе формы.\nМаксимальный размер файла — 50 Мб.",
+        "operationId": "Rooms_UploadFile",
+        "parameters": [
+          {
+            "description": "Название комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Api.Entities.Files.TalkUploadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Api.Entities.Files.TalkUploadResult"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Api.Entities.Files.TalkUploadResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Загрузить файл в комнату",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/kick-user": {
+      "post": {
+        "description": "Исключает участника из активной конференции комнаты по его уникальному идентификатору.\nИдентификатор участника (поле userUniqueId) совпадает с полем uniqueId участника из метода\n«Получить список онлайн-участников конференции» (GET /api/Rooms/{roomName}/online-users).",
+        "operationId": "Rooms_KickUser",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.KickUserRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.KickUserRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.KickUserRequest"
+              }
+            }
+          },
+          "description": "Исключаемый пользователь"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Исключить участника конференции",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/Rooms/{roomName}/lock": {
@@ -11833,7 +14588,8 @@
         "summary": "Задать или удалить ПИН-код для комнаты",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Rooms/{roomName}/moderators/{userRef}": {
@@ -11885,7 +14641,8 @@
         "summary": "Удалить модератора",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "post": {
         "description": "Разрешения: application.rooms.write",
@@ -11935,7 +14692,8 @@
         "summary": "Добавить модератора",
         "tags": [
           "Комнаты"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Rooms/{roomName}/notifyCall": {
@@ -12000,6 +14758,311 @@
         "tags": [
           "Комнаты"
         ]
+      }
+    },
+    "/api/Rooms/{roomName}/online-users": {
+      "get": {
+        "description": "Возвращает участников, которые сейчас находятся в конференции комнаты.",
+        "operationId": "Rooms_GetOnlineUsers",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomOnlineUsersList"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomOnlineUsersList"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoomOnlineUsersList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить список онлайн-участников конференции",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/recordings": {
+      "get": {
+        "description": "Возвращает страницу записей комнаты с учётом фильтров запроса: доступны только те записи, которые пользователь может смотреть.",
+        "operationId": "Rooms_GetRoomRecordings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "top",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageTokenString",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Web.Entities.Rooms.TalkClippedRoomRecordingWithParticipants"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Web.Entities.Rooms.TalkClippedRoomRecordingWithParticipants"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Web.Entities.Rooms.TalkClippedRoomRecordingWithParticipants"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить записи комнаты",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/simultaneousTranslation": {
+      "put": {
+        "description": "Языки языковых пар задаются кодом языка (например, RU, EN, DE), регистр значения не имеет:\nзначение приводится к нижнему регистру и сравнивается со справочником языков синхронного перевода\nпространства (справочник отображается в интерфейсе при настройке синхронного перевода комнаты).\nЕсли передать неизвестный код, метод вернёт 400 с перечислением недопустимых языков.\n\nРазрешения: writeDomainConferences",
+        "operationId": "Rooms_UpdateSimultaneousTranslation",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslationUpdateRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslationUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkSimultaneousTranslationUpdateRequest"
+              }
+            }
+          },
+          "description": "Настройки синхронного перевода"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkRoom"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Обновить настройки синхронного перевода",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/sip": {
+      "delete": {
+        "description": "Удаляет sip-номер комнаты: звонить по нему больше нельзя.",
+        "operationId": "Rooms_DisableSipNumber",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Удалить sip-номер конференции",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "put": {
+        "description": "Генерирует sip-номер комнаты и возвращает настройки телефонии комнаты.",
+        "operationId": "Rooms_GenerateSipNumber",
+        "parameters": [
+          {
+            "description": "Ключ комнаты",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.RoomSipSettings"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.RoomSipSettings"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.RoomSipSettings"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Генерировать sip-номер конференции",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Rooms/{roomName}/startconference": {
+      "post": {
+        "description": "Выполняет все действия по началу конференции в комнате, где запланирована встреча, а именно:\n\n1) Заполняет историю конференций параметрами из встречи.\n\n2) Отправляет оповещение о начале встречи участникам, указанным во встрече.\n\nОтвет содержит результат отправки оповещений участникам встречи.",
+        "operationId": "Rooms_StartRoomConference",
+        "parameters": [
+          {
+            "description": "Имя комнаты, в которой нужно начать конференцию",
+            "in": "path",
+            "name": "roomName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceProperties"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceProperties"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceProperties"
+              }
+            }
+          },
+          "description": "Параметры встречи, из которой начата конференция"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceResult"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.Rooms.TalkStartConferenceResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Начать конференцию в комнате, где запланирована встреча",
+        "tags": [
+          "Комнаты"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/Users": {
@@ -12137,7 +15200,8 @@
         "summary": "Поиск пользователей",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "post": {
         "description": "Максимальное количество пользователей, которых можно обновить, — 1000\n\nЗначение поля можно не передавать. В этом случае Толк не будет обновлять это свойство в профиле\n\nРазрешения: application.profiles.write",
@@ -12202,7 +15266,223 @@
         "summary": "Обновить, создать или восстановить пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
+      },
+      "put": {
+        "description": "Обновляет профиль текущего пользователя. Требует, чтобы в пространстве было включено редактирование профиля.",
+        "operationId": "Users_ModifyUser",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkCurrentUserParams"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkCurrentUserParams"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Users.Api.Models.TalkCurrentUserParams"
+              }
+            }
+          },
+          "description": "Профиль пользователя"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Обновить профиль пользователя",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Users/avatar": {
+      "delete": {
+        "description": "Удаляет аватар текущего пользователя. Требует, чтобы в пространстве было включено редактирование профиля.",
+        "operationId": "Users_DeleteAvatar",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Удалить аватар пользователя",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "post": {
+        "description": "Загружает аватар текущего пользователя. Размер файла — не более 10 Мб.\nТребует, чтобы в пространстве было включено редактирование профиля.",
+        "operationId": "Users_UploadAvatar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "avatar": {
+                  "style": "form"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "avatar": {
+                    "description": "Аватар",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "avatar"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Services.TalkUserProfileUpdateResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Services.TalkUserProfileUpdateResult"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Services.TalkUserProfileUpdateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Загрузить аватар пользователя",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Users/deleteSelf": {
+      "post": {
+        "description": "Удаляет учётную запись текущего пользователя и отзывает его токены входа.\nЕсли пользователь последний в пространстве, вместе с ним можно удалить и пространство:\nдля этого передайте `DeleteSingleUserDomain = true`.",
+        "operationId": "Users_DeleteSelf",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Удалить свою учётную запись",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Users/logout": {
+      "post": {
+        "description": "Завершает сессию, токен которой передан в запросе: заголовок `Authorization: Session {токен}`,\nquery-параметр или cookie `sessionToken`.\nПерсональный токен — не сессия: если вызвать метод с `X-Auth-Token`, он вернёт 200, но ни одна сессия\nпользователя не завершится, потому что отзывать нечего.",
+        "operationId": "Users_LogOut",
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkUserDeleteSelfParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Завершить сессию пользователя",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      }
+    },
+    "/api/Users/profile": {
+      "get": {
+        "description": "Возвращает профиль текущего пользователя и срок действия его сессии.",
+        "operationId": "Users_GetProfile",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.User.TalkUserProfile"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.User.TalkUserProfile"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.User.TalkUserProfile"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить профиль текущего пользователя",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/Users/scan": {
@@ -12280,7 +15560,8 @@
         "summary": "Получить список всех пользователей пространства",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Users/{userKey}": {
@@ -12306,7 +15587,8 @@
         "summary": "Удалить пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "get": {
         "description": "Разрешения: application.profiles.read",
@@ -12347,7 +15629,8 @@
         "summary": "Получить пользователя по ключу",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Users/{userKey}/avatar": {
@@ -12373,7 +15656,8 @@
         "summary": "Удалить аватар пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "post": {
         "description": "Изображение принимается в виде файла в теле запроса с заголовком **Content-type:multipart/form-data**\n\nРазрешения: application.profiles.write",
@@ -12439,7 +15723,8 @@
         "summary": "Загрузить аватар пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Users/{userKey}/avatar/sync": {
@@ -12465,7 +15750,8 @@
         "summary": "Синхронизировать аватар пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Users/{userKey}/permissions": {
@@ -12528,7 +15814,8 @@
         "summary": "Блокировать или восстановить учетную запись пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/Users/{userKey}/roles": {
@@ -12580,7 +15867,8 @@
         "summary": "Получить роли пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       },
       "post": {
         "description": "Разрешения: application.roles.write",
@@ -12650,7 +15938,80 @@
         "summary": "Изменить роли пользователя",
         "tags": [
           "Пользователи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
+      }
+    },
+    "/api/Users/{userKey}/roles/{role}": {
+      "delete": {
+        "description": "Забирает у пользователя указанную роль. В ответе возвращается 200 без тела. Гостям роли менять нельзя,\nа если пользователь не найден, вернётся 404.\n\nРазрешения: writeDomainRoles",
+        "operationId": "Users_RemoveRole",
+        "parameters": [
+          {
+            "description": "Внешний ключ пользователя",
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Роль",
+            "in": "path",
+            "name": "role",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Удалить роль пользователю",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
+      },
+      "post": {
+        "description": "Выдаёт пользователю указанную роль. В ответе возвращается 200 без тела. Гостям роли менять нельзя,\nа если пользователь не найден, вернётся 404.\n\nРазрешения: writeDomainRoles",
+        "operationId": "Users_SetRole",
+        "parameters": [
+          {
+            "description": "Внешний ключ пользователя",
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Роль",
+            "in": "path",
+            "name": "role",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Добавить роль пользователю",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/Users/{userKey}/sessions": {
@@ -12676,6 +16037,34 @@
         "tags": [
           "Пользователи"
         ]
+      }
+    },
+    "/api/Users/{userKey}/unlockSelfDeleted": {
+      "post": {
+        "description": "Возвращает доступ пользователю, который удалил свою учётную запись сам: после разблокировки он снова\nможет войти в пространство. Если пользователь не найден, вернётся 404.\n\nРазрешения: writeDomainAndUsersInfo",
+        "operationId": "Users_UnlockSelfDeleted",
+        "parameters": [
+          {
+            "description": "Внешний ключ пользователя",
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Разрешить вход после удаления учётной записи",
+        "tags": [
+          "Пользователи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/Webhooks": {
@@ -12839,6 +16228,50 @@
         "tags": [
           "Вебхуки"
         ]
+      }
+    },
+    "/api/Whiteboards/{key}/state": {
+      "get": {
+        "description": "Возвращает метаданные доски и её элементы: параметры доски и содержимое, по которому строится отрисовка.\nМетод доступен зарегистрированным пользователям и по персональному токену.\n\nРазрешения: writeDomainWhiteboards",
+        "operationId": "Whiteboards_GetWhiteboardState",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardState"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardState"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Whiteboards.Api.Models.TalkWhiteboardState"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить состояние доски",
+        "tags": [
+          "Белые доски"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/domain/applications": {
@@ -13771,61 +17204,6 @@
         ]
       }
     },
-    "/api/recordings": {
-      "get": {
-        "description": "Added by ktalk's scripts/fetch-spec.sh: this operation is NOT in the published Kontur.Talk spec. It was described by Kontur.Talk support on 2026-10-07 as the way to read recordings with a personal access token (Profile → Settings → API keys), and verified against the live API. Newest first. Page with `top` (1-100, default 10) and `skip`; there is no total, and an empty page marks the end.",
-        "operationId": "Recordings_GetAccessible",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "top",
-            "schema": {
-              "format": "int32",
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "skip",
-            "schema": {
-              "format": "int32",
-              "minimum": 0,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "recordings": {
-                      "items": {
-                        "$ref": "#/components/schemas/SkbKontur.Talk.Recordings.Api.TalkConferenceRecording"
-                      },
-                      "type": "array"
-                    }
-                  },
-                  "required": [
-                    "recordings"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "summary": "List recordings available to the token's user (personal token)",
-        "tags": [
-          "Записи"
-        ],
-        "x-ktalk-source": "support"
-      }
-    },
     "/api/recordings/v2/{recordingKey}/summary": {
       "get": {
         "description": "Разрешения: application.recording.read",
@@ -13866,7 +17244,81 @@
         "summary": "Получить протокол, краткий пересказ и транскрипцию встречи в формате JSON",
         "tags": [
           "Записи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
+      }
+    },
+    "/api/recordings/{recordingKey}/links": {
+      "get": {
+        "description": "Возвращает страницу ресурсов указанного типа, связанных с записью: встречи, темы, заметки, доски.\n\nРазрешения: readDomainRecordings",
+        "operationId": "RecordingLinks_GetRecordingLinks",
+        "parameters": [
+          {
+            "description": "Ключ записи",
+            "in": "path",
+            "name": "recordingKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Количество связей, которые хотим получить",
+            "in": "query",
+            "name": "take",
+            "schema": {
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Тип объектов, связи с которыми мы хотим получить",
+            "in": "query",
+            "name": "targetType",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SkbKontur.Talk.Resources.Api.TalkResourceType"
+            }
+          },
+          {
+            "description": "Токен для получения следующей страницы данных",
+            "in": "query",
+            "name": "pageTokenString",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkbKontur.Talk.Web.Entities.TalkPage_SkbKontur.Talk.Resources.Api.TalkResourceLinkInfo"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Получить связанные с записью ресурсы",
+        "tags": [
+          "Записи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     },
     "/api/recordings/{recordingKey}/summary": {
@@ -13961,7 +17413,8 @@
         "summary": "Получить краткий пересказ или протокол встречи в формате JSON",
         "tags": [
           "Записи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/recordings/{recordingKey}/transcript": {
@@ -14004,7 +17457,8 @@
         "summary": "Получить транскрипцию записи",
         "tags": [
           "Записи"
-        ]
+        ],
+        "x-ktalk-personal-token": true
       }
     },
     "/api/roles": {
@@ -14458,6 +17912,55 @@
         "tags": [
           "Роли"
         ]
+      }
+    },
+    "/recording-blob/bulk": {
+      "get": {
+        "description": "Записи, недоступные для скачивания, пропускаются, их список складывается\nв `errors.txt` внутри архива.\nСуммарный размер архива не может превышать 10 Гб: иначе метод возвращает 400.\nДокачка и Range-запросы не поддерживаются: размер архива заранее неизвестен.\n\nРазрешения: readDomainRecordings",
+        "operationId": "Recordings_DownloadBulk",
+        "parameters": [
+          {
+            "description": "Ключи записей. В одном запросе можно указать не более 60 записей",
+            "in": "query",
+            "name": "recordingKeys",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 60,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          {
+            "description": "Качество видео. Укажите имя из поля `qualities[].name` записи, например `900p` или `720p`.\nЕсли не задано, берётся максимальное доступное",
+            "in": "query",
+            "name": "qualityName",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Скачать несколько записей пространства одним zip-архивом",
+        "tags": [
+          "Записи"
+        ],
+        "x-ktalk-personal-token": true,
+        "x-ktalk-source": "personal-token-spec"
       }
     }
   },

@@ -44,7 +44,8 @@ There are two kinds of keys. A **space key** (admin panel → API keys) reads th
 **personal key** (profile → Settings → API keys) acts with its user's rights. Each
 command's `--help` starts with the key it takes: `[personal key]` works with a personal key,
 `[space key]` gets `Forbidden` from one. With a personal key, pick a `[personal key]` command
-instead of retrying a `[space key]` one. Untagged commands change data and are unchecked.
+instead of retrying a `[space key]` one. A `Forbidden` on a `[personal key]` command means the
+key's user lacks an admin permission or access to that recording.
 
 Space keys are scoped: a read-only key returns **`Forbidden` (403)** on writes. `ktalk api-keys
 access-info` shows what the current key allows — a 403 is a permissions fact, not a bug to retry

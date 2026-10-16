@@ -23,7 +23,7 @@ extension Webhooks {
 
   struct Create: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "create", abstract: "Create a webhook from a JSON file.")
+      commandName: "create", abstract: "[space key] Create a webhook from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON CreateWebhookRequest file.") var fromJSON: String
     func run() async throws {
@@ -34,7 +34,7 @@ extension Webhooks {
 
   struct Activate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "activate", abstract: "Activate a webhook from a JSON file.")
+      commandName: "activate", abstract: "[space key] Activate a webhook from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Webhook key.") var webhookKey: String
     @Option(name: .long, help: "Path to a JSON ActivateWebhookRequest file.") var fromJSON: String
@@ -47,7 +47,7 @@ extension Webhooks {
 
   struct Delete: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete", abstract: "Delete a webhook.")
+      commandName: "delete", abstract: "[space key] Delete a webhook.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Webhook key.") var webhookKey: String
     func run() async throws {

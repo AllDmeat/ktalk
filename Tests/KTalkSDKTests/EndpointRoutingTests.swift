@@ -351,4 +351,170 @@ struct EndpointRoutingTests {
       return
     }
   }
+
+  // MARK: - Personal access token spec
+
+  /// Decodes a request body the way the CLI reads `--from-json` files.
+  private func body<T: Decodable>(_ json: String) throws -> T {
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    return try decoder.decode(T.self, from: Data(json.utf8))
+  }
+
+  private static let event = #"{"id":"e-1","subject":"Sync"}"#
+  private static let binding = #"{"externalCalendarIcsFilePath":"https://example.ktalk.ru/c.ics"}"#
+
+  @Test func calendar() async throws {
+    try await expectRoute(.get, "/api/Calendar", reply: #"{"items":[]}"#) {
+      _ = try await $0.calendarEvents(start: Date(timeIntervalSince1970: 0), take: 5)
+    }
+    try await expectRoute(.post, "/api/Calendar", reply: Self.event) {
+      _ = try await $0.createCalendarEvent(try body(#"{"roomName":"demo","subject":"Sync"}"#))
+    }
+    try await expectRoute(.post, "/api/Calendar/busy-statuses", reply: "[]") {
+      _ = try await $0.busyStatuses(
+        try body(#"{"emails":["a@example.com"],"start":"2026-01-01T00:00:00Z"}"#))
+    }
+    try await expectRoute(.get, "/api/Calendar/externalbindings", reply: "[\(Self.binding)]") {
+      _ = try await $0.externalCalendarBindings()
+    }
+    try await expectRoute(.put, "/api/Calendar/externalbindings", reply: Self.binding) {
+      _ = try await $0.bindExternalCalendar(try body(Self.binding))
+    }
+    try await expectRoute(.delete, "/api/Calendar/externalbindings/b-1") {
+      try await $0.unbindExternalCalendar(bindingId: "b-1")
+    }
+    try await expectRoute(.get, "/api/Calendar/e-1", reply: Self.event) {
+      _ = try await $0.calendarEvent(id: "e-1")
+    }
+    try await expectRoute(.put, "/api/Calendar/e-1", reply: Self.event) {
+      _ = try await $0.editCalendarEvent(
+        id: "e-1", event: try body(#"{"roomName":"demo","subject":"Sync"}"#))
+    }
+    try await expectRoute(.get, "/api/Calendar/e-1/recurrence", reply: Self.event) {
+      _ = try await $0.calendarEventRecurrence(id: "e-1")
+    }
+    try await expectRoute(.post, "/api/Calendar/e-1/accept") {
+      try await $0.acceptCalendarEvent(id: "e-1")
+    }
+    try await expectRoute(.post, "/api/Calendar/e-1/reject") {
+      try await $0.rejectCalendarEvent(id: "e-1", withNotification: true)
+    }
+    try await expectRoute(.post, "/api/Calendar/e-1/cancel") {
+      try await $0.cancelCalendarEvent(id: "e-1", message: "Moved")
+    }
+    try await expectRoute(.post, "/api/Calendar/e-1/attendees", reply: Self.event) {
+      _ = try await $0.editCalendarEventAttendees(id: "e-1", attendees: try body("{}"))
+    }
+  }
+
+  @Test func personalTokenRooms() async throws {
+    try await expectRoute(.get, "/api/Rooms/demo/recordings", reply: #"{"entities":[]}"#) {
+      _ = try await $0.roomRecordings(name: "demo", top: 5, pageToken: "p-1")
+    }
+    try await expectRoute(.post, "/api/Rooms/demo/file", reply: #"{"files":[]}"#) {
+      _ = try await $0.uploadRoomFile(
+        roomName: "demo",
+        file: KTalkClient.UploadFile(filename: "notes.txt", data: Data("hi".utf8)))
+    }
+    try await expectRoute(.put, "/api/Rooms/demo/simultaneousTranslation", reply: Self.room) {
+      _ = try await $0.setSimultaneousTranslation(
+        roomName: "demo", request: try body(#"{"enabled":false,"languagePairs":[]}"#))
+    }
+    try await expectRoute(.put, "/api/Rooms/demo/sip", reply: #"{"sipNumber":"100"}"#) {
+      _ = try await $0.generateSipNumber(roomName: "demo")
+    }
+    try await expectRoute(.delete, "/api/Rooms/demo/sip") {
+      try await $0.disableSipNumber(roomName: "demo")
+    }
+    try await expectRoute(.post, "/api/Rooms/demo/chatChannels/allowedUsers/u-1", reply: Self.room)
+    {
+      _ = try await $0.addChatChannelUser(roomName: "demo", userRef: "u-1")
+    }
+    try await expectRoute(
+      .delete, "/api/Rooms/demo/chatChannels/allowedUsers/u-1", reply: Self.room
+    ) {
+      _ = try await $0.removeChatChannelUser(roomName: "demo", userRef: "u-1")
+    }
+    try await expectRoute(.post, "/api/Rooms/demo/startconference", reply: "{}") {
+      _ = try await $0.startConference(
+        roomName: "demo", properties: try body(#"{"meetId":"m-1","roomTitle":"Demo"}"#))
+    }
+    try await expectRoute(.post, "/api/Rooms/demo/kick-user") {
+      try await $0.kickUser(roomName: "demo", request: try body(#"{"userUniqueId":"p-1"}"#))
+    }
+    try await expectRoute(.post, "/api/Rooms/demo/change-user-name") {
+      try await $0.changeParticipantName(
+        roomName: "demo", request: try body(#"{"anonymousId":"a-1","newName":"Guest"}"#))
+    }
+    try await expectRoute(.get, "/api/Rooms/demo/online-users", reply: #"{"onlineUsers":[]}"#) {
+      _ = try await $0.onlineUsers(roomName: "demo")
+    }
+    try await expectRoute(.get, "/api/Rooms/demo/conference/limits", reply: "{}") {
+      _ = try await $0.conferenceLimits(roomName: "demo", forceStart: true)
+    }
+    try await expectRoute(.post, "/api/Messenger/room", reply: #"{"messengerRoomId":"chat-1"}"#) {
+      let value = try await $0.createMessengerRoom(
+        try body(#"{"privacy":"private","title":"Team","userKeys":["u-1"]}"#))
+      #expect(value.messengerRoomId == "chat-1")
+    }
+  }
+
+  @Test func ownUser() async throws {
+    try await expectRoute(.get, "/api/Users/profile", reply: #"{"firstname":"Test"}"#) {
+      _ = try await $0.profile()
+    }
+    try await expectRoute(.put, "/api/Users") {
+      try await $0.updateProfile(try body(#"{"firstname":"Test"}"#))
+    }
+    try await expectRoute(.post, "/api/Users/deleteSelf") {
+      try await $0.deleteSelf(try body(#"{"deleteSingleUserDomain":false}"#))
+    }
+    try await expectRoute(.post, "/api/Users/u-1/unlockSelfDeleted") {
+      try await $0.unlockSelfDeleted(userKey: "u-1")
+    }
+    try await expectRoute(.post, "/api/Users/logout") {
+      try await $0.logOut(try body(#"{"deleteSingleUserDomain":false}"#))
+    }
+    try await expectRoute(.post, "/api/Users/avatar", reply: #"{"avatarUrl":"a.png"}"#) {
+      _ = try await $0.uploadOwnAvatar(
+        file: KTalkClient.UploadFile(filename: "a.png", data: Data([1]), contentType: nil))
+    }
+    try await expectRoute(.delete, "/api/Users/avatar") { try await $0.deleteOwnAvatar() }
+    try await expectRoute(.post, "/api/Users/u-1/roles/r-1") {
+      try await $0.addRole(userKey: "u-1", role: "r-1")
+    }
+    try await expectRoute(.delete, "/api/Users/u-1/roles/r-1") {
+      try await $0.removeRole(userKey: "u-1", role: "r-1")
+    }
+  }
+
+  @Test func recordingLinksAndWhiteboard() async throws {
+    try await expectRoute(.get, "/api/recordings/rec-1/links", reply: #"{"entities":[]}"#) {
+      _ = try await $0.recordingLinks(key: "rec-1", targetType: .whiteboard, take: 5)
+    }
+    let whiteboard = #"""
+      {"whiteboard":{"createdBy":{},"createdDate":"2026-01-01T00:00:00Z",
+      "currentUserRole":"owner","key":"wb-1","title":"Board"}}
+      """#
+    try await expectRoute(.get, "/api/Whiteboards/wb-1/state", reply: whiteboard) {
+      let value = try await $0.whiteboardState(key: "wb-1")
+      #expect(value.whiteboard.key == "wb-1")
+    }
+  }
+
+  /// Bulk download and ICS come back as files of whatever type the server labels them.
+  @Test func personalTokenDownloads() async throws {
+    try await expectRoute(
+      .get, "/recording-blob/bulk", reply: "zip", contentType: "application/zip"
+    ) {
+      let value = try await $0.downloadRecordings(keys: ["rec-1", "rec-2"], quality: "source")
+      #expect(value == Data("zip".utf8))
+    }
+    try await expectRoute(.get, "/api/Calendar/e-1/ics", reply: "ics", contentType: "text/calendar")
+    {
+      let value = try await $0.calendarEventICS(id: "e-1")
+      #expect(value == Data("ics".utf8))
+    }
+  }
 }

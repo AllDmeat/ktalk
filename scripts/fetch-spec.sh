@@ -1,35 +1,45 @@
 #!/usr/bin/env bash
-# Fetches the published Kontur.Talk OpenAPI document and vendors it at openapi/talk.json.
+# Fetches the published Kontur.Talk OpenAPI documents — the public API and the personal
+# access token API — merges them and vendors the result at openapi/talk.json.
 #
-# The document is public and uses the {space} placeholder for the workspace host, so it
-# contains no workspace-specific data. Run `swift build` afterwards to regenerate the client.
+# The documents are public and use the {space} placeholder for the workspace host, so they
+# contain no workspace-specific data. Run `swift build` afterwards to regenerate the client.
 set -euo pipefail
 
 SPEC_URL="https://developer.kontur.ru/api/documentations/talk.public.api/file"
+PERSONAL_SPEC_URL="https://developer.kontur.ru/api/documentations/talk.personal-access-token.api/file"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="${1:-$REPO_ROOT/openapi/talk.json}"
 
 mkdir -p "$(dirname "$OUT")"
 
 tmp="$(mktemp)"
-trap 'rm -f "$tmp"' EXIT
+personal="$(mktemp)"
+trap 'rm -f "$tmp" "$personal"' EXIT
 
 # SPEC_SOURCE=<file> re-normalizes a local document instead of fetching — e.g. the vendored
-# spec itself, to apply a new normalization without pulling upstream changes. Every
-# normalization is idempotent, so re-running it over an already normalized file is safe.
+# spec itself, to apply a new normalization without pulling upstream changes. The vendored
+# spec already holds the personal-token operations, so nothing is merged into it unless
+# PERSONAL_SPEC_SOURCE=<file> names a personal-token document too. Every normalization is
+# idempotent, so re-running it over an already normalized file is safe.
 if [[ -n "${SPEC_SOURCE:-}" ]]; then
   echo "Normalizing $SPEC_SOURCE"
   cp "$SPEC_SOURCE" "$tmp"
+  if [[ -n "${PERSONAL_SPEC_SOURCE:-}" ]]; then
+    cp "$PERSONAL_SPEC_SOURCE" "$personal"
+  fi
 else
   echo "Fetching $SPEC_URL"
   curl -fsSL "$SPEC_URL" -o "$tmp"
+  echo "Fetching $PERSONAL_SPEC_URL"
+  curl -fsSL "$PERSONAL_SPEC_URL" -o "$personal"
 fi
 
 # Normalize and pretty-print for a stable, diff-friendly checked-in file.
 # The published document omits the OpenAPI-required `info.version`; inject a stable
 # placeholder so swift-openapi-generator accepts it. The value is constant so repeated
 # fetches of unchanged content stay byte-identical (the weekly updater relies on that).
-python3 - "$tmp" "$OUT" <<'PY'
+python3 - "$tmp" "$personal" "$OUT" <<'PY'
 import json
 import re
 import sys
@@ -184,6 +194,8 @@ BINARY_DOWNLOADS = (
     "/api/RoomReport/statistics",
     "/api/DeepFakeDetector/conference/{conferenceKey}/task/{taskKey}/file",
     "/api/DeepFakeDetector/conference/{conferenceKey}/tasks/files",
+    "/recording-blob/bulk",
+    "/api/Calendar/{eventId}/ics",
 )
 
 
@@ -224,6 +236,7 @@ OCTET_STREAM_ONLY = {
 # public SDK types optional and break consumers' code.
 RELAXED_RESPONSE_FIELDS = {
     "EmailCalendarItem": ("timezone",),
+    "TalkCalendarItem": ("timezone",),
 }
 
 
@@ -277,14 +290,119 @@ def same_route(a, b):
     return template(a) == template(b)
 
 
+PERSONAL_SOURCE = "personal-token-spec"
+
+
+def merge_personal_token_spec(doc, personal):
+    """Merge the personal access token document into the public one.
+
+    Kontur publishes the operations a personal access token can call as a separate document.
+    Most of them are in the public document too; the rest (the user's own calendar, room
+    control, profile, ...) are only there. The public definition wins wherever both have a
+    route, in any path casing, and wherever both have a schema. Where shared schemas differ,
+    the personal one only adds deprecated properties (removed anyway, see strip_deprecated),
+    narrows an enum or requires one more field. Merged operations are marked
+    `x-ktalk-source: personal-token-spec`.
+
+    Every operation the personal document lists is marked `x-ktalk-personal-token: true`,
+    the merged ones and the public ones alike: that is Kontur's own statement that a
+    personal token can call it.
+
+    A merged operation keeps only its 2xx responses. The personal document declares the same
+    error body for 400/401/403/404/429 on every operation; the facade maps statuses itself,
+    and declared errors would add five switch cases to each method without adding anything.
+    """
+    paths = doc.setdefault("paths", {})
+    schemas = doc.setdefault("components", {}).setdefault("schemas", {})
+    for name, schema in ((personal.get("components") or {}).get("schemas") or {}).items():
+        schemas.setdefault(name, schema)
+    for path, item in (personal.get("paths") or {}).items():
+        for method, operation in item.items():
+            if method not in HTTP_METHODS or not isinstance(operation, dict):
+                continue
+            existing = next(
+                (
+                    other[method]
+                    for other_path, other in paths.items()
+                    if isinstance(other, dict)
+                    and same_route(other_path, path)
+                    and isinstance(other.get(method), dict)
+                    and other[method].get("x-ktalk-source") != "support"
+                ),
+                None,
+            )
+            if existing is None:
+                operation = {
+                    **operation,
+                    "x-ktalk-source": PERSONAL_SOURCE,
+                    "responses": {
+                        code: response
+                        for code, response in operation.get("responses", {}).items()
+                        if code.startswith("2")
+                    },
+                }
+                # Join the route's upstream path item in whatever casing it uses, so one route
+                # never becomes two path items; a support-only item does not count.
+                target_path = next(
+                    (
+                        other_path
+                        for other_path, other in paths.items()
+                        if isinstance(other, dict)
+                        and same_route(other_path, path)
+                        and any(
+                            isinstance(op, dict) and op.get("x-ktalk-source") != "support"
+                            for key, op in other.items()
+                            if key in HTTP_METHODS
+                        )
+                    ),
+                    path,
+                )
+                target = paths.setdefault(target_path, {})
+                for key, value in item.items():  # path-level parameters, if any
+                    if key not in HTTP_METHODS:
+                        target.setdefault(key, value)
+                target[method] = operation
+                existing = operation
+            existing["x-ktalk-personal-token"] = True
+
+
+ROOM_FILE_UPLOAD = "/api/Rooms/{roomName}/file"
+
+
+def declare_room_upload_body(doc):
+    """Declare the multipart body of the room file upload.
+
+    The personal token document says in prose that the file goes in a multipart/form-data
+    form, but declares no request body, so the generated client could only send an empty
+    POST. Declare a required form with one binary part. Its name, `file`, is an assumption:
+    the document does not give it and nobody has checked it on a live space yet.
+    """
+    item = (doc.get("paths") or {}).get(ROOM_FILE_UPLOAD) or {}
+    operation = item.get("post")
+    if isinstance(operation, dict) and "requestBody" not in operation:
+        operation["requestBody"] = {
+            "required": True,
+            "content": {
+                "multipart/form-data": {
+                    "schema": {
+                        "type": "object",
+                        "required": ["file"],
+                        "properties": {"file": {"type": "string", "format": "binary"}},
+                    },
+                    "encoding": {"file": {"style": "form"}},
+                }
+            },
+        }
+
+
 def add_support_confirmed_operations(doc):
     """Declare personal-token recording operations missing from the published spec.
 
     Kontur.Talk has two kinds of keys. A space key (admin panel → API keys) works with
     `/api/Domain/...` and sees every recording in the space. A personal access token
     (profile → Settings → API keys) gets 403 there and acts with its user's rights. Support
-    named the endpoints a personal token can use; transcript and summary are already in the
-    spec, but listing and fetching a recording are not. Declare them, marked with
+    named the endpoints a personal token can use. Listing recordings now comes from the
+    personal token document; fetching one is in neither document. Declare them, marked with
     `x-ktalk-source: support` and a description saying they were added by hand.
 
     Each operation is added only while the published spec lacks it under any path casing, so
@@ -387,9 +505,13 @@ def add_support_confirmed_operations(doc):
         item[method] = {"tags": recordings_tags, "x-ktalk-source": "support", **operation}
 
 
-src, dst = sys.argv[1], sys.argv[2]
+src, personal_src, dst = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(src, encoding="utf-8") as f:
     doc = json.load(f)
+with open(personal_src, encoding="utf-8") as f:
+    text = f.read()
+if text.strip():
+    merge_personal_token_spec(doc, json.loads(text))
 
 info = doc.setdefault("info", {})
 info.setdefault("version", "1.0.0")
@@ -401,6 +523,7 @@ ensure_path_parameters(doc)
 require_multipart_bodies(doc)
 declare_binary_download_bodies(doc)
 add_support_confirmed_operations(doc)
+declare_room_upload_body(doc)
 
 with open(dst, "w", encoding="utf-8") as f:
     json.dump(doc, f, ensure_ascii=False, indent=2, sort_keys=True)
