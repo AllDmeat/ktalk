@@ -43,11 +43,16 @@ Kontur.Talk issues two kinds of keys, and they see different recordings:
 | Key | Where to create it | What it reads |
 | --- | ------------------ | ------------- |
 | Space key | Admin panel → **API keys**, by a space admin | Every recording in the space, plus whatever other scopes the admin grants |
-| Personal key | Your profile → **Settings** → **API keys** | What you can see yourself: the recordings you can open, user search, rooms |
+| Personal key | Your profile → **Settings** → **API keys** | What you can do yourself: the recordings you can open, your calendar and profile, rooms, user search |
 
-Each command's `--help` starts with the key it takes: `[personal key]` works with a personal
-key, `[space key]` answers `403` to one. Commands that change data are untagged — they have not
-been checked with a personal key.
+Each command's `--help` starts with the key it takes:
+
+- `[personal key]` works with a personal key. Some of these, such as `recordings list`, also
+  need your user to be a space admin.
+- `[space key]` needs a space key.
+
+The tags follow Kontur's
+[Personal API Token](https://developer.kontur.ru/doc/talk.personal-access-token.api) document.
 
 Every command also accepts `--base-url` / `--token` to override per-invocation.
 
@@ -57,8 +62,8 @@ Every command also accepts `--base-url` / `--token` to override per-invocation.
 ktalk --help                                  # list all command groups
 ktalk recordings --help                       # help for a group
 
-ktalk recordings list --limit 20              # space key: JSON to stdout
-ktalk recordings list --all | jq '.[].key'    # space key: follow all pages, pipe to jq
+ktalk recordings list --limit 20              # every recording in the space: JSON to stdout
+ktalk recordings list --all | jq '.[].key'    # follow all pages, pipe to jq
 ktalk recordings list-accessible --all | jq '.[].id'  # personal key: your recordings
 ktalk recordings transcript <recordingKey>              # raw JSON
 ktalk recordings transcript <recordingKey> --format text  # readable speaker dialogue
@@ -87,11 +92,12 @@ request-body file.
 
 | Group | Commands |
 | ----- | -------- |
-| `recordings` | `list [--page-token --limit --query --all]`, `list-v1 [--start-from --start-to --skip --top --query --title --max-participant-count --order-mode]`, `get <key>`, `list-accessible [--top --skip --all]`, `get-accessible <key>`, `participants <key> [--skip --top]`, `transcript <key> [--format --no-timestamps]`, `summary <key>`, `summary-by-type <key> <type>`, `artifacts <key>`, `download <key> -o <path> [--quality]`, `current --room [--session-hall]`, `start --from-json`, `edit <key> --from-json`, `delete <key> [--force]`, `access <key>`, `set-access <key> --from-json`, `set-immutable <key>`, `unset-immutable <key>` |
-| `rooms` | `get <name>`, `update <name> --from-json`, `lock <name> --from-json`, `end-conference <name>`, `add-moderator <name> <user-ref>`, `remove-moderator <name> <user-ref>`, `set-anonymous-access <name> --from-json`, `notify-call <name> --from-json`, `cancel-call <name> --from-json` |
+| `recordings` | `list [--page-token --limit --query --all]`, `list-v1 [--start-from --start-to --skip --top --query --title --max-participant-count --order-mode]`, `get <key>`, `list-accessible [--top --skip --initiator --query --exclude-topic --source --type --all]`, `get-accessible <key>`, `participants <key> [--skip --top]`, `transcript <key> [--format --no-timestamps]`, `summary <key>`, `summary-by-type <key> <type>`, `artifacts <key>`, `download <key> -o <path> [--quality]`, `current --room [--session-hall]`, `start --from-json`, `edit <key> --from-json`, `delete <key> [--force]`, `access <key>`, `set-access <key> --from-json`, `set-immutable <key>`, `unset-immutable <key>`, `links <key> --target-type [--take --page-token]`, `download-bulk <keys> ... -o <path> [--quality]` |
+| `rooms` | `get <name>`, `update <name> --from-json`, `lock <name> --from-json`, `end-conference <name>`, `add-moderator <name> <user-ref>`, `remove-moderator <name> <user-ref>`, `set-anonymous-access <name> --from-json`, `notify-call <name> --from-json`, `cancel-call <name> --from-json`, `recordings <name> [--top --page-token]`, `upload-file <name> <file> [--content-type]`, `set-simultaneous-translation <name> --from-json`, `generate-sip <name>`, `disable-sip <name>`, `add-chat-user <name> <user-ref>`, `remove-chat-user <name> <user-ref>`, `start-conference <name> --from-json`, `kick-user <name> --from-json`, `change-user-name <name> --from-json`, `online-users <name>`, `conference-limits <name> [--force-start]`, `create-chat --from-json` |
 | `meetings` | `list <email> --start [--end --take]`, `create <email> --from-json`, `edit <email> <event-id> --from-json`, `cancel <email> <event-id> [--message]`, `edit-attendees <email> <event-id> --from-json`, `recurrence <email> <event-id>` |
+| `calendar` | `list --start [--end --take --room --ascending --exclude-federation]`, `create --from-json`, `busy-statuses --from-json`, `bindings`, `bind --from-json`, `unbind <id>`, `get <id>`, `edit <id> --from-json`, `recurrence <id>`, `ics <id> -o <path> [--external]`, `accept <id>`, `reject <id> [--notify]`, `cancel <id> [--message]`, `edit-attendees <id> --from-json` |
 | `reports` | `audit-log --start --end`, `conferences [--from --to --skip --take --room]`, `conference <key>`, `conference-enriched <key>`, `participants <key>`, `activity <key> [--skip --take]`, `chat <key> [--skip --take]`, `room <name> --from [--to]`, `questions <key> -o <path>`, `attendance --from -o <path> [--to]` |
-| `users` | `search [--query --email --role --skip --top --include-disabled --include-guests]`, `scan [--offset --top --role --include-disabled --include-guests]`, `get <key>`, `create-or-update --from-json`, `delete <key>`, `revoke-sessions <key>`, `roles <key>`, `change-roles <key> --from-json`, `set-permissions <key> --from-json`, `upload-avatar <key> <file> [--content-type]`, `delete-avatar <key>`, `sync-avatar <key>` |
+| `users` | `search [--query --email --role --skip --top --include-disabled --include-guests]`, `scan [--offset --top --role --include-disabled --include-guests]`, `get <key>`, `create-or-update --from-json`, `delete <key>`, `revoke-sessions <key>`, `roles <key>`, `change-roles <key> --from-json`, `set-permissions <key> --from-json`, `upload-avatar <key> <file> [--content-type]`, `delete-avatar <key>`, `sync-avatar <key>`, `profile`, `update-profile --from-json`, `delete-self --from-json`, `unlock-self-deleted <key>`, `logout --from-json`, `upload-own-avatar <file> [--content-type]`, `delete-own-avatar`, `add-role <key> <role>`, `remove-role <key> <role>` |
 | `roles` | `list`, `get <id>`, `create --from-json`, `update <id> --from-json`, `delete <id>`, `permissions`, `defaults`, `default`, `set-default --from-json`, `default-by-type <type>`, `set-default-by-type <type> --from-json` |
 | `webhooks` | `list`, `create --from-json`, `activate <webhook-key> --from-json`, `delete <webhook-key>` |
 | `stats` | `domain [--start --end]`, `registered-users`, `conferences [--from --to]`, `recordings [--start --end]`, `kiosks [--start --end]`, `online`, `conferences-online`, `recordings-online`, `kiosks-online`, `streams-online`, `recordings-size`, `whiteboards`, `deepfake`, `tariff` |
@@ -101,6 +107,7 @@ request-body file.
 | `deepfake` | `report <conference-key> [--timezone]`, `statistic`, `task-file <conference-key> <task-key> -o <path>`, `task-files <conference-key> -o <path>` |
 | `api-keys` | `list`, `access-info` |
 | `telemetry` | `list [--from --to --take --page-token]`, `list-v1 [--from --to --take --page-token]` |
+| `whiteboards` | `state <key>` |
 
 Note: your token's scopes decide what works — read-only keys can `list`/`get` but `403` on
 writes. Run `ktalk api-keys access-info` to see what yours allows.

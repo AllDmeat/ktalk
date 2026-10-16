@@ -14,7 +14,7 @@ struct CalendarServers: AsyncParsableCommand {
 extension CalendarServers {
   struct List: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "list", abstract: "[space key] List calendar servers.")
+      commandName: "list", abstract: "[personal key] List calendar servers.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Skip N.") var skip: Int?
     @Option(name: .long, help: "Take N.") var take: Int?
@@ -30,7 +30,8 @@ extension CalendarServers {
 
   struct Get: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "get", abstract: "[space key] Get a calendar server by id.")
+      commandName: "get",
+      abstract: "[personal key] Get a calendar server by id.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar server id.") var id: String
     func run() async throws { try printJSON(try await global.makeClient().calendarServer(id: id)) }
@@ -38,7 +39,8 @@ extension CalendarServers {
 
   struct Add: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "add", abstract: "Add a calendar server from a JSON file.")
+      commandName: "add",
+      abstract: "[personal key] Add a calendar server from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON CalendarServerCreate file.") var fromJSON: String
     func run() async throws {
@@ -49,7 +51,8 @@ extension CalendarServers {
 
   struct Update: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "update", abstract: "Update a calendar server from a JSON file.")
+      commandName: "update",
+      abstract: "[personal key] Update a calendar server from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar server id.") var id: String
     @Option(name: .long, help: "Path to a JSON CalendarServerUpdate file.") var fromJSON: String
@@ -62,7 +65,8 @@ extension CalendarServers {
 
   struct Delete: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "delete", abstract: "Delete a calendar server.")
+      commandName: "delete",
+      abstract: "[personal key] Delete a calendar server.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar server id.") var id: String
     func run() async throws {

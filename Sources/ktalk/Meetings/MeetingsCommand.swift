@@ -39,7 +39,7 @@ extension Meetings {
 
   struct Create: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "create", abstract: "Create a meeting from a JSON file.")
+      commandName: "create", abstract: "[space key] Create a meeting from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar owner email.") var email: String
     @Option(name: .long, help: "Path to a JSON CreateMeeting file.") var fromJSON: String
@@ -52,7 +52,7 @@ extension Meetings {
 
   struct Edit: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "edit", abstract: "Edit a meeting from a JSON file.")
+      commandName: "edit", abstract: "[space key] Edit a meeting from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar owner email.") var email: String
     @Argument(help: "Event id.") var eventId: String
@@ -66,7 +66,7 @@ extension Meetings {
 
   struct Cancel: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "cancel", abstract: "Cancel (delete) a meeting.")
+      commandName: "cancel", abstract: "[space key] Cancel (delete) a meeting.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar owner email.") var email: String
     @Argument(help: "Event id.") var eventId: String
@@ -80,7 +80,8 @@ extension Meetings {
 
   struct EditAttendees: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "edit-attendees", abstract: "Edit a meeting's attendees from a JSON file.")
+      commandName: "edit-attendees",
+      abstract: "[space key] Edit a meeting's attendees from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Calendar owner email.") var email: String
     @Argument(help: "Event id.") var eventId: String

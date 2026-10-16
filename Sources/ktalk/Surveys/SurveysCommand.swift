@@ -29,7 +29,7 @@ extension Surveys {
 
   struct Create: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "create", abstract: "Create a survey from a JSON file.")
+      commandName: "create", abstract: "[space key] Create a survey from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Option(name: .long, help: "Path to a JSON SurveyRequest file.") var fromJSON: String
     func run() async throws {
@@ -40,7 +40,7 @@ extension Surveys {
 
   struct Update: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "update", abstract: "Update a survey from a JSON file.")
+      commandName: "update", abstract: "[space key] Update a survey from a JSON file.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Survey id.") var id: String
     @Option(name: .long, help: "Path to a JSON SurveyRequest file.") var fromJSON: String
@@ -52,7 +52,7 @@ extension Surveys {
 
   struct Publish: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "publish", abstract: "Publish a survey.")
+      commandName: "publish", abstract: "[space key] Publish a survey.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Survey id.") var id: String
     func run() async throws { try printJSON(try await global.makeClient().publishSurvey(id: id)) }
@@ -60,7 +60,7 @@ extension Surveys {
 
   struct Unpublish: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "unpublish", abstract: "Unpublish a survey.")
+      commandName: "unpublish", abstract: "[space key] Unpublish a survey.")
     @OptionGroup var global: GlobalOptions
     @Argument(help: "Survey id.") var id: String
     func run() async throws {

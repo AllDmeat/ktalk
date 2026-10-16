@@ -5,7 +5,8 @@ sync with the code. See [`AGENTS.md`](../AGENTS.md) for the workflow and hard ru
 
 ## Source of truth
 
-- **`openapi/talk.json`** — the vendored Kontur.Talk OpenAPI document, fetched and normalized by
+- **`openapi/talk.json`** — the vendored Kontur.Talk OpenAPI document: the public API and the
+  personal access token API, fetched, merged and normalized by
   [`scripts/fetch-spec.sh`](../scripts/fetch-spec.sh). It is the source of truth for the
   generated `types` + `client` layer. Do not hand-edit it except to remove real data from
   examples; add normalizations to the fetch script instead so they survive a refresh.

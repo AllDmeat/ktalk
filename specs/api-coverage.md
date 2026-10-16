@@ -15,25 +15,33 @@ exactly one operation. `scripts/check-cli-coverage.sh` checks this in CI.
 | Space key | Admin panel → API keys, by a space admin | The whole space, within the scopes the admin grants |
 | Personal key | Profile → Settings → API keys | Its user, with that user's rights |
 
+Kontur publishes what a personal key can call as a separate document,
+[Personal API Token](https://developer.kontur.ru/doc/talk.personal-access-token.api).
+`scripts/fetch-spec.sh` merges it into `openapi/talk.json` (normalization 10 in `AGENTS.md`).
 A command's abstract starts with the key it takes:
 
-- `[personal key]` — checked against a live space: works with a personal key.
-- `[space key]` — checked against a live space: a personal key gets 403.
-- No tag — the command changes data and has not been checked with a personal key.
+| Tag | Meaning |
+| --- | ------- |
+| `[personal key]` | The document lists the operation, support named it, or it answered a personal key on a live space |
+| `[space key]` | Everything else: the document says a personal key works only with what it lists |
+
+A personal key acts with its user's rights. Some `[personal key]` commands, such as
+`recordings list` or `users roles`, also need the user to hold an admin permission, and answer
+403 otherwise. Methods that work with one recording also check that the user can open it.
+
+`scripts/check-cli-coverage.sh` fails unless every command starts with the tag its operation
+implies.
 
 ## Recordings with a personal key
 
-The personal key gets 403 on every `/api/Domain/...` endpoint. Kontur.Talk support named two
-endpoints that work with it; neither is in the published spec, so `scripts/fetch-spec.sh` adds
-them (normalization 9 in `AGENTS.md`):
-
 | Endpoint | Command | Returns |
 | -------- | ------- | ------- |
-| `GET /api/recordings` | `recordings list-accessible` | Recordings the user can open, newest first |
+| `GET /api/Recordings` | `recordings list-accessible` | Recordings the user can open, newest first |
 | `GET /api/Recordings/{recordingKey}` | `recordings get-accessible <key>` | One such recording |
 
-Transcript, summary and artifacts (`recordings transcript`, `summary`, `summary-by-type`,
-`artifacts`) are in the published spec and work with either key.
+`GET /api/Recordings` is in the personal token document. `GET /api/Recordings/{recordingKey}`
+is in neither document: Kontur.Talk support named it, and `scripts/fetch-spec.sh` adds it
+(normalization 9 in `AGENTS.md`).
 
 ### Paging `list-accessible`
 

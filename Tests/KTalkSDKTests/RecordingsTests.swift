@@ -89,9 +89,33 @@ struct RecordingsTests {
     #expect(recordings.map(\.id) == ["rec-2", "rec-1"])
     #expect(recordings.first?.title == "Synthetic retro")
     let path = transport.lastRequest?.request.path ?? ""
-    #expect(path.hasPrefix("/api/recordings?"))
+    #expect(path.hasPrefix("/api/Recordings?"))
     #expect(path.contains("top=2"))
     #expect(path.contains("skip=4"))
+  }
+
+  @Test("listAccessibleRecordings sends the filters")
+  func listAccessibleSendsFilters() async throws {
+    let transport = ReplayTransport.returning(statusCode: 200, body: #"{"recordings":[]}"#)
+    _ = try await client(transport).listAccessibleRecordings(
+      initiator: true, query: "retro", excludeTopic: "standup", source: .talk, type: .audio)
+    let path = transport.lastRequest?.request.path ?? ""
+    for part in [
+      "initiator=true", "query=retro", "excludeTopic=standup", "source=talk", "type=audio",
+    ] {
+      #expect(path.contains(part), "\(part) missing from \(path)")
+    }
+  }
+
+  @Test("uploadRoomFile sends the file as the multipart part `file`")
+  func uploadRoomFileSendsPart() async throws {
+    let transport = ReplayTransport.returning(statusCode: 200, body: #"{"files":[]}"#)
+    _ = try await client(transport).uploadRoomFile(
+      roomName: "demo", file: KTalkClient.UploadFile(filename: "notes.txt", data: Data("hi".utf8)))
+    let body = try #require(transport.lastRequest?.body)
+    let sent = String(decoding: try await Data(collecting: body, upTo: .max), as: UTF8.self)
+    #expect(sent.contains(#"name="file""#))
+    #expect(sent.contains(#"filename="notes.txt""#))
   }
 
   /// A transport that serves `total` recordings by `skip`/`top`, optionally capping the page
@@ -152,8 +176,8 @@ struct RecordingsTests {
     let error = await #expect(throws: KTalkError.self) {
       _ = try await client.listAccessibleRecordings()
     }
-    guard case .decodingError = error else {
-      Issue.record("expected .decodingError, got \(String(describing: error))")
+    guard case .unexpectedResponse(200, _) = error else {
+      Issue.record("expected .unexpectedResponse, got \(String(describing: error))")
       return
     }
   }

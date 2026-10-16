@@ -25,15 +25,15 @@ Use only synthetic placeholders in code, tests, fixtures, and docs:
 ## Spec-First Development
 
 The vendored OpenAPI document (`openapi/talk.json`) and the specifications in `specs/`
-are the single source of truth. It is fetched from Kontur's published documentation via
-`scripts/fetch-spec.sh` — do not hand-edit the vendored spec except to remove real data
+are the single source of truth. It is built from Kontur's two published documents — the
+public API and the personal access token API — by `scripts/fetch-spec.sh` — do not hand-edit the vendored spec except to remove real data
 from examples.
 
 ### The vendored spec is normalized, not raw
 
-`openapi/talk.json` is **not** the raw upstream document — `fetch-spec.sh` rewrites it so the
-generator accepts it, the generated layer stays warning-free, and the client
-tolerates the live API. Every normalization is deterministic (re-fetching unchanged content
+`openapi/talk.json` is **not** a raw upstream document — `fetch-spec.sh` merges the two and
+rewrites the result so the generator accepts it, the generated layer stays warning-free, and
+the client tolerates the live API. Every normalization is deterministic (re-fetching unchanged content
 stays byte-identical). The complete list of what is changed and why:
 
 1. **`info.version` injected** — upstream omits the OpenAPI-required field, without which the
@@ -55,29 +55,41 @@ stays byte-identical). The complete list of what is changed and why:
 6. **Multipart bodies marked `required`** — the generator silently skips optional multipart
    bodies, so uploads (avatars, kiosk artwork) wouldn't generate; marking them required fixes it.
 7. **Binary download bodies declared** — the spec leaves the endpoints that return a file
-   (`GET …/file/{qualityName}`, the Excel reports, the deepfake-detector source files) with an
+   (`GET …/file/{qualityName}`, the Excel reports, the deepfake-detector source files, the bulk
+   recording download, the calendar ICS file) with an
    empty 200, discarding the bytes. A `*/*` binary body is declared — not one concrete type,
    because the server labels files as spreadsheets, archives or media and the runtime rejects
    an undeclared content type.
 8. **Drifted response fields made optional** — the refreshed spec newly marks some response
-   fields required (`timezone` on calendar items) and nobody has confirmed the live API always
+   fields required (`timezone` on both kinds of calendar items) and nobody has confirmed the live API always
    sends them. A missing required field fails the whole response in a strict decoder, so each
    one is listed in `RELAXED_RESPONSE_FIELDS` and dropped from `required`. The list is
    explicit: relaxing every response schema would make non-optional properties of public SDK
    types optional and break consumers.
-9. **Personal-token recording operations added** — `GET /api/recordings` and
-   `GET /api/Recordings/{recordingKey}` are not in the published spec. Kontur.Talk support named
-   them on 2026-10-07 as the way to read recordings with a personal access token, which gets
-   403 on `/api/Domain/...`. They are tagged `x-ktalk-source: support` and added only while
-   upstream lacks them under any path casing, so an upstream definition wins. The response
-   schema is found by its short name, `*.TalkConferenceRecording`, because upstream moves
-   schemas between namespaces.
+9. **Support-confirmed recording operation added** — `GET /api/Recordings/{recordingKey}` is
+   in neither published document. Kontur.Talk support named it on 2026-10-07 as the way to read
+   a recording with a personal access token. It is tagged `x-ktalk-source: support` and added
+   only while upstream lacks it under any path casing, so an upstream definition wins — as
+   already happened to its sibling `GET /api/recordings`, now in the personal token document.
+   The response schema is found by its short name, `*.TalkConferenceRecording`, because
+   upstream moves schemas between namespaces.
+10. **Personal access token document merged** — Kontur publishes the operations a personal
+   access token can call as a second document (`talk.personal-access-token.api`). Its operations
+   missing from the public document are added with `x-ktalk-source: personal-token-spec`; where
+   both have a route or a schema, the public one wins. Merged operations keep only their 2xx
+   responses: every one declares the same error body for 400/401/403/404/429, and the facade
+   maps statuses itself. Every operation the document lists gets `x-ktalk-personal-token: true`.
+11. **Room file upload body declared** — the personal token document says in prose that
+   `POST /api/Rooms/{roomName}/file` takes the file in a multipart form, but declares no body,
+   so the client could only send an empty request. A required form with one binary part is
+   declared. The part name, `file`, is an assumption not yet checked on a live space.
 
 None of these change the API's wire behaviour — they only fix or complete the description so
 codegen works and the client survives real responses. Keep this list in sync with the script.
 
 To apply a new normalization without pulling upstream changes, re-normalize the vendored file:
-`SPEC_SOURCE=openapi/talk.json scripts/fetch-spec.sh`.
+`SPEC_SOURCE=openapi/talk.json scripts/fetch-spec.sh`. It already holds the personal token
+operations; pass `PERSONAL_SPEC_SOURCE=<file>` to merge a personal token document as well.
 
 Workflow:
 
@@ -103,9 +115,17 @@ this in CI and fails unless the mapping holds and every command is registered in
 and the group in `ktalk`. Facade method names must be unique — overloads would make the
 mapping ambiguous. The behaviour is specified in [`specs/api-coverage.md`](specs/api-coverage.md).
 
-Each command's abstract starts with the key it takes, as checked against a live space:
-`[personal key]` — works with a personal access token; `[space key]` — a personal access
-token gets 403. Commands that change data stay untagged until someone checks them.
+Each command's abstract starts with the key it takes. There are two kinds of keys:
+
+- `[personal key]` — the personal token document lists the operation (`x-ktalk-personal-token`),
+  Kontur.Talk support named it (`x-ktalk-source: support`), or it answered a personal key on a
+  live space (`CHECKED_WITH_PERSONAL_KEY` in the coverage script).
+- `[space key]` — everything else: the document says a personal token works only with the
+  operations it lists.
+
+A personal key acts with its user's rights, so some `[personal key]` commands also need the
+user to hold an admin permission; the tag does not say which. `scripts/check-cli-coverage.sh`
+fails unless every command starts with the tag its operation implies.
 
 ## Architecture
 
