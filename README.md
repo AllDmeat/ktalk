@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" alt="ktalk" width="128">
+</p>
+
 # ktalk
 
 `ktalk` is a command-line tool for the [Kontur.Talk](https://ktalk.ru) API. It talks to your
