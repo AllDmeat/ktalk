@@ -7,6 +7,8 @@ on:
 
 env:
   PRODUCT_NAME: ktalk
+  # Ships in the same archive, so `mise use github:AllDmeat/ktalk` installs both.
+  MCP_PRODUCT_NAME: ktalk-mcp
 
 jobs:
   build:
@@ -76,6 +78,7 @@ jobs:
           BUILD_FLAGS="$STATIC_FLAG -Xswiftc -gnone"
           BIN_PATH="$(swift build -c release --product "$PRODUCT_NAME" $BUILD_FLAGS --show-bin-path)"
           swift build -c release --product "$PRODUCT_NAME" $BUILD_FLAGS
+          swift build -c release --product "$MCP_PRODUCT_NAME" $BUILD_FLAGS
           echo "bin-path=$BIN_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Package binary
@@ -83,7 +86,7 @@ jobs:
         run: |
           ARCHIVE_NAME="${PRODUCT_NAME}_${GITHUB_REF_NAME}_${{ matrix.archive-suffix }}.tar.gz"
           BIN_PATH="${{ steps.build.outputs.bin-path }}"
-          tar -czf "${ARCHIVE_NAME}" -C "${BIN_PATH}" "${{ matrix.bin-name }}"
+          tar -czf "${ARCHIVE_NAME}" -C "${BIN_PATH}" "${{ matrix.bin-name }}" "$MCP_PRODUCT_NAME"
           echo "archive-name=${ARCHIVE_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
