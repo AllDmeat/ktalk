@@ -17,8 +17,8 @@ mise use github:AllDmeat/ktalk
 ktalk --help
 ```
 
-This installs the latest release binaries for your platform (macOS, Linux) via mise's
-GitHub backend: `ktalk` and the [`ktalk-mcp`](#mcp-server) server. Add `-g` for a global install; pin a version with `github:AllDmeat/ktalk@1.0.0`.
+This installs the latest release binary for your platform (macOS, Linux) via mise's
+GitHub backend. Add `-g` for a global install; pin a version with `github:AllDmeat/ktalk@1.0.0`.
 
 ### Release binary
 
@@ -116,26 +116,6 @@ request-body file.
 Note: your token's scopes decide what works — read-only keys can `list`/`get` but `403` on
 writes. Run `ktalk api-keys access-info` to see what yours allows.
 
-## MCP server
-
-`ktalk-mcp` gives AI agents read-only access to your recordings and calendar over the
-[Model Context Protocol](https://modelcontextprotocol.io). It is installed with `ktalk` and
-reads the same `KTALK_BASE_URL` and `KTALK_TOKEN`; a personal key is enough. For Claude Code:
-
-```sh
-claude mcp add ktalk -e KTALK_BASE_URL=https://example.ktalk.ru -e KTALK_TOKEN=<key> -- ktalk-mcp
-```
-
-| Tool | What it returns |
-|---|---|
-| `ktalk_list_recordings` | Recordings you can open, newest first (`top`, `skip`, `query`, `initiator`) |
-| `ktalk_get_recording` | One recording by `key` |
-| `ktalk_get_transcript` | A recording's transcript |
-| `ktalk_get_summary` | A recording's summary / protocol |
-| `ktalk_list_participants` | A recording's participants (`skip`, `top`) |
-| `ktalk_list_calendar_events` | Your calendar events from `start` (`end`, `take`) |
-| `ktalk_get_calendar_event` | One calendar event by `id` |
-
 ## Library (bonus)
 
 The same functionality is available as a Swift package, `KTalkSDK` (iOS 18+, macOS 15+), if you'd
@@ -157,6 +137,25 @@ for recording in page.items { print(recording.key ?? "", recording.title ?? "") 
 Every CLI command maps to a `KTalkClient` method (`listRecordings`, `room(name:)`,
 `createWebhook`, …). Failures surface as a typed `KTalkError`. The full method list is in the
 [DocC docs](Sources/KTalkSDK/Documentation.docc) and mirrors the command groups above.
+
+## MCP server
+
+This repository has no MCP server: Kontur.Talk serves an official one in every space, at
+`/api/mcp`. It takes the same personal key as the CLI. For Claude Code:
+
+```sh
+claude mcp add --transport http ktalk https://example.ktalk.ru/api/mcp \
+  --header 'X-Auth-Token: ${KTALK_TOKEN}'
+```
+
+Single quotes keep `${KTALK_TOKEN}` literal, so Claude Code reads the key from the environment at
+start instead of storing it in its config. The server is read-only: meetings, recordings,
+transcripts, summaries, live transcripts and search across recordings. For writes and admin
+operations, use the CLI.
+
+As of 2026-11-22 Kontur.Talk has no public documentation for this server; the setup above was
+checked against a live space. Once the [official docs](https://support.kontur.ru/talk)
+describe it, follow them instead.
 
 ## Agent skill
 
