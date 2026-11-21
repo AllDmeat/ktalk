@@ -17,8 +17,8 @@ mise use github:AllDmeat/ktalk
 ktalk --help
 ```
 
-This installs the latest release binary for your platform (macOS, Linux) via mise's
-GitHub backend. Add `-g` for a global install; pin a version with `github:AllDmeat/ktalk@1.0.0`.
+This installs the latest release binaries for your platform (macOS, Linux) via mise's
+GitHub backend: `ktalk` and the [`ktalk-mcp`](#mcp-server) server. Add `-g` for a global install; pin a version with `github:AllDmeat/ktalk@1.0.0`.
 
 ### Release binary
 
@@ -115,6 +115,26 @@ request-body file.
 
 Note: your token's scopes decide what works — read-only keys can `list`/`get` but `403` on
 writes. Run `ktalk api-keys access-info` to see what yours allows.
+
+## MCP server
+
+`ktalk-mcp` gives AI agents read-only access to your recordings and calendar over the
+[Model Context Protocol](https://modelcontextprotocol.io). It is installed with `ktalk` and
+reads the same `KTALK_BASE_URL` and `KTALK_TOKEN`; a personal key is enough. For Claude Code:
+
+```sh
+claude mcp add ktalk -e KTALK_BASE_URL=https://example.ktalk.ru -e KTALK_TOKEN=<key> -- ktalk-mcp
+```
+
+| Tool | What it returns |
+|---|---|
+| `ktalk_list_recordings` | Recordings you can open, newest first (`top`, `skip`, `query`, `initiator`) |
+| `ktalk_get_recording` | One recording by `key` |
+| `ktalk_get_transcript` | A recording's transcript |
+| `ktalk_get_summary` | A recording's summary / protocol |
+| `ktalk_list_participants` | A recording's participants (`skip`, `top`) |
+| `ktalk_list_calendar_events` | Your calendar events from `start` (`end`, `take`) |
+| `ktalk_get_calendar_event` | One calendar event by `id` |
 
 ## Library (bonus)
 

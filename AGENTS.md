@@ -136,6 +136,8 @@ The SDK is layered — keep the layers separate:
 2. **Facade** — `KTalkClient` and `KTalkClient+<Tag>.swift` extensions: typed errors,
    authentication (`X-Auth-Token`), retries, rate limiting, pagination.
 3. **CLI** — the `ktalk` executable, a thin ArgumentParser wrapper that prints JSON.
+4. **MCP** — the `ktalk-mcp` executable: read-only MCP tools, each a thin call to one facade
+   method. Spec: [`specs/mcp-server.md`](specs/mcp-server.md).
 
 ## Build Quality
 

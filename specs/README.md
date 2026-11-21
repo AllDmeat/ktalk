@@ -15,6 +15,7 @@ sync with the code. See [`AGENTS.md`](../AGENTS.md) for the workflow and hard ru
 
 - [`api-coverage.md`](api-coverage.md) — one operation per command, the two key kinds and
   how recordings are read with a personal key.
+- [`mcp-server.md`](mcp-server.md) — the `ktalk-mcp` server: read-only tools over the facade.
 
 ## Layers
 
