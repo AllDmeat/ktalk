@@ -24,10 +24,6 @@ let package = Package(
             name: "ktalk",
             targets: ["ktalk"]
         ),
-        .executable(
-            name: "ktalk-mcp",
-            targets: ["ktalk-mcp"]
-        ),
     ],
     dependencies: [
         .package(
@@ -49,10 +45,6 @@ let package = Package(
         .package(
             url: "https://github.com/apple/swift-http-types",
             from: "1.3.0"
-        ),
-        .package(
-            url: "https://github.com/modelcontextprotocol/swift-sdk.git",
-            from: "0.12.1"
         ),
     ],
     targets: [
@@ -106,20 +98,11 @@ let package = Package(
             ],
             swiftSettings: strict
         ),
-        .executableTarget(
-            name: "ktalk-mcp",
-            dependencies: [
-                "KTalkSDK",
-                .product(name: "MCP", package: "swift-sdk"),
-            ],
-            swiftSettings: strict
-        ),
         .testTarget(
             name: "KTalkSDKTests",
             dependencies: [
                 "KTalkSDK",
                 "ktalk",
-                "ktalk-mcp",
             ],
             resources: [
                 .copy("Fixtures")
